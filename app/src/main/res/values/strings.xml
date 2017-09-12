@@ -1,0 +1,26 @@
+<resources>
+    <string name="app_name">Math Flash Crash Test Dummy</string>
+    <string name="title_home">Home</string>
+    <string name="title_dashboard">Dashboard</string>
+    <string name="title_notifications">Notifications</string>
+    <string name="button_answer">Answer</string>
+    <string name="text_message">Nothing to see here</string>
+    <string-array name="strings_operations">
+        <item>Plus</item>
+        <item>Minus</item>
+        <item>Multiply</item>
+        <item>Divide</item>
+        <item>All</item>
+    </string-array>
+    <string name="stringPlus">Addition</string>
+    <string name="stringMinus">Subtraction</string>
+    <string name="stringDivision">Division</string>
+    <string name="stringMultiple">Multiple selection</string>
+    <string name="stringMultiplication">Multiplication</string>
+    <string name="menu_user_default">Default user</string>
+    <string name="menu_user_create">Create user</string>
+    <string name="hint_user_name">User name</string>
+    <string name="hint_user_email">Email</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="user_default">Default</string>
+</resources>

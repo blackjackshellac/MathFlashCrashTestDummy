@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Math Flash Crash Test Dummy</string>
+    <string name="title_home">Maison</string>
+    <string name="title_notifications">Notifications</string>
+    <string name="title_dashboard">Le dashboard</string>
+    <string name="button_answer">Reponse</string>
+    <string name="text_message">Rien a voir</string>
+    <string name="stringPlus">Addition</string>
+    <string name="stringMinus">Soutraction</string>
+    <string name="stringDivision">Division</string>
+    <string name="stringMultiple">Sélection multiple</string>
+    <string name="stringMultiplication">Multiplication</string>
+    <string name="menu_user_default">Defaut</string>
+    <string name="menu_user_create">Cree utiliseur</string>
+    <string name="hint_user_name">Nom de l\'utiliseur</string>
+    <string name="hint_user_email">Courriel</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="user_default">Defaut</string>
+</resources>
