@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="com.oneguycoding.mathflashcrashtestdummy.MainActivity">
+
+    <FrameLayout
+        android:id="@+id/content"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <android.support.constraint.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <TextView
+                android:id="@+id/text_message"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:layout_marginLeft="8dp"
+                android:layout_marginRight="8dp"
+                android:layout_marginTop="16dp"
+                android:text="@string/text_message"
+                android:textAppearance="@android:style/TextAppearance.Material.Large"
+                app:layout_constraintBottom_toTopOf="@+id/guideline"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp" />
+
+            <EditText
+                android:id="@+id/number1"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="16dp"
+                android:layout_marginLeft="0dp"
+                android:layout_marginRight="0dp"
+                android:ems="10"
+                android:inputType="number"
+                android:textAlignment="textEnd"
+                android:textStyle="bold"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintLeft_toLeftOf="@+id/guideline3"
+                app:layout_constraintRight_toLeftOf="@+id/guideline2"
+                app:layout_constraintTop_toTopOf="@+id/guideline"
+                android:layout_marginTop="24dp"/>
+
+            <EditText
+                android:id="@+id/number2"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:ems="10"
+                android:inputType="number"
+                android:textAlignment="textEnd"
+                android:textStyle="bold"
+                app:layout_constraintTop_toBottomOf="@+id/number1"
+                android:layout_marginEnd="16dp"
+                android:layout_marginLeft="0dp"
+                app:layout_constraintLeft_toLeftOf="@+id/guideline3"
+                app:layout_constraintRight_toLeftOf="@+id/guideline2"
+                android:layout_marginRight="0dp"
+                app:layout_constraintHorizontal_bias="0.125"/>
+
+            <ImageView
+                android:id="@+id/imageOperation"
+                android:layout_width="32dp"
+                android:layout_height="wrap_content"
+                app:srcCompat="@drawable/ic_action_plus"
+                android:layout_marginEnd="8dp"
+                app:layout_constraintRight_toLeftOf="@+id/guideline3"
+                android:layout_marginRight="8dp"
+                app:layout_constraintTop_toTopOf="@+id/number2"
+                android:layout_marginTop="8dp"/>
+
+            <EditText
+                android:id="@+id/number3"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:ems="10"
+                android:inputType="number"
+                android:textAlignment="textEnd"
+                app:layout_constraintTop_toBottomOf="@+id/number2"
+                android:layout_marginEnd="16dp"
+                android:layout_marginLeft="8dp"
+                app:layout_constraintLeft_toLeftOf="@+id/guideline3"
+                app:layout_constraintRight_toLeftOf="@+id/guideline2"
+                android:layout_marginRight="8dp"
+                app:layout_constraintHorizontal_bias="0.0"/>
+
+            <Button
+                android:id="@+id/sendAnswer"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:onClick="sendAnswer"
+                android:text="@string/button_answer"
+                android:textAlignment="center"
+                android:textAllCaps="false"
+                android:textSize="18sp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginLeft="0dp"
+                app:layout_constraintLeft_toLeftOf="@+id/guideline2"
+                app:layout_constraintRight_toLeftOf="@+id/guideline4"
+                android:layout_marginRight="8dp"
+                app:layout_constraintBaseline_toBaselineOf="@+id/number3"
+                app:layout_constraintHorizontal_bias="0.0"/>
+
+            <android.support.constraint.Guideline
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/guideline"
+                app:layout_constraintGuide_percent=".1"
+                android:orientation="horizontal"
+                />
+
+            <Spinner
+                android:id="@+id/spinner"
+                android:layout_width="0dp"
+                android:layout_height="36dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="16dp"
+                app:layout_constraintRight_toLeftOf="@+id/guideline2"
+                android:layout_marginRight="8dp"
+                android:layout_marginTop="34dp"
+                app:layout_constraintTop_toBottomOf="@+id/number3"
+                android:layout_marginLeft="8dp"
+                app:layout_constraintLeft_toLeftOf="@+id/guideline3"/>
+
+            <ImageView
+                android:id="@+id/image_response"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:layout_marginStart="8dp"
+                app:srcCompat="@drawable/yoshi_star"
+                app:layout_constraintRight_toLeftOf="@+id/guideline4"
+                android:layout_marginRight="8dp"
+                android:layout_marginLeft="8dp"
+                app:layout_constraintLeft_toLeftOf="@+id/guideline2"
+                android:layout_marginBottom="8dp"
+                app:layout_constraintBottom_toTopOf="@+id/sendAnswer"
+                />
+
+            <android.support.constraint.Guideline
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/guideline3"
+                app:layout_constraintGuide_percent="0.2"
+                android:orientation="vertical"/>
+
+            <android.support.constraint.Guideline
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/guideline2"
+                app:layout_constraintGuide_percent="0.61"
+                android:orientation="vertical"/>
+
+            <android.support.constraint.Guideline
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/guideline4"
+                app:layout_constraintGuide_percent=".9"
+                android:orientation="vertical"/>
+        </android.support.constraint.ConstraintLayout>
+
+    </FrameLayout>
+
+</LinearLayout>
