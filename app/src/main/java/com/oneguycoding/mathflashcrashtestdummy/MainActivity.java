@@ -1,6 +1,7 @@
 package com.oneguycoding.mathflashcrashtestdummy;
 
 import android.content.Intent;
+import android.content.res.Resources;
 import android.media.AudioManager;
 import android.media.ToneGenerator;
 import android.os.Bundle;
@@ -17,6 +18,8 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -28,13 +31,14 @@ public class MainActivity extends AppCompatActivity {
 	public static final int RESULT_USERDATA = 101;
 
 	private static final ToneGenerator tg = new ToneGenerator(AudioManager.STREAM_NOTIFICATION, 100);
-	private TextView mTextMessage;
+
     private NumberOperation numberOperation;
 	private OperationsClass ops = new OperationsClass();
     private LongPair  numberPair;
 	private TextView num1, num2, num3;
 	private TextView message;
     private ImageView response;
+
 	private final Map<String,UserData> userMap = new HashMap<String,UserData>();
 	private UserData userData;
 	private String curUser;
@@ -50,16 +54,6 @@ public class MainActivity extends AppCompatActivity {
 			userData.setName(curUser);
 			userMap.put(curUser, userData);
 		}
-
-		Spinner spinner = (Spinner) findViewById(R.id.spinner);
-		// Create an ArrayAdapter using the string array and a default spinner layout
-		ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
-				R.array.strings_operations, android.R.layout.simple_spinner_item);
-		// Specify the layout to use when the list of choices appears
-		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-		// Apply the adapter to the spinner
-		spinner.setAdapter(adapter);
-		spinner.setOnItemSelectedListener(new SpinnerOperationsActivity());
 
 		num1 = (TextView) findViewById(R.id.number1);
 		num2 = (TextView) findViewById(R.id.number2);
@@ -84,8 +78,6 @@ public class MainActivity extends AppCompatActivity {
 
 		});
 
-		setupNumbers();
-
 		// OnClickListener for the operation image (+, -, x, /)
 		((ImageView) findViewById(R.id.imageOperation)).setOnClickListener(
 				new View.OnClickListener() {
@@ -96,6 +88,9 @@ public class MainActivity extends AppCompatActivity {
 					}
 				}
 		);
+
+		setupNumbers();
+
 	}
 
 	@Override
@@ -129,20 +124,20 @@ public class MainActivity extends AppCompatActivity {
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 
+		String name = null;
 		switch(item.getItemId()) {
-			case R.id.default_user:
-				//your action
-				break;
 			case R.id.create_user:
 				createUser();
 				break;
+			case R.id.default_user:
+				name = (String) getText(R.string.user_default);
+				break;
 			default:
-				String name = item.getTitle().toString();
-				if (userMap.containsKey(name)) {
-					curUser = name;
-					userData = userMap.get(name);
-				}
-				return super.onOptionsItemSelected(item);
+				name = item.getTitle().toString();
+				break;
+		}
+		if (name != null) {
+			setupUser(name);
 		}
 
 		return true;
@@ -175,14 +170,26 @@ public class MainActivity extends AppCompatActivity {
 	    num3.requestFocus();
     }
 
-    protected void setupNumbers() {
+	protected void setupUser(String name) {
+		if (name.isEmpty()) {
+			return;
+		}
+		if (userMap.containsKey(name)) {
+			curUser = name;
+			userData = userMap.get(name);
+			setupNumbers();
+			message.setText(getResources().getString(R.string.hello_name, name));
+		}
+	}
+
+	protected void setupNumbers() {
 	    // TODO for now just get the top operation from the list
 	    Operation op = ops.getNextOp();
 
 	    setupOperation(op);
 
 	    userData = (UserData) userMap.get(curUser);
-	    this.numberOperation = userData.operationData.getOp(op);
+	    numberOperation = userData.operationData.getOp(op);
 
         numberPair = numberOperation.randomize();
 
@@ -229,16 +236,17 @@ public class MainActivity extends AppCompatActivity {
 				break;
 			case RESULT_USERDATA:
 				if (resultCode == RESULT_OK) {
-					userData = (UserData) intent.getSerializableExtra(EXTRA_USERDATA);
-					String name = userData.getName();
+					UserData ud = (UserData) intent.getSerializableExtra(EXTRA_USERDATA);
+					String name = ud.getName();
 					if (!name.isEmpty()) {
 						if (userMap.containsKey(name)) {
 							userMap.remove(name);
 						}
-						userMap.put(userData.getName(), userData);
-						curUser = userData.getName();
+						userMap.put(name, ud);
+						//Gson gson = new Gson();
+						//String json = gson.toJson(userMap);
+						setupUser(name);
 					}
-					setupNumbers();
 				}
 				break;
 			default:
