@@ -17,4 +17,5 @@
     <string name="hint_user_email">Courriel</string>
     <string name="action_cancel">Cancel</string>
     <string name="user_default">Defaut</string>
+    <string name="hello_name">Bonjour %1$s!</string>
 </resources>
