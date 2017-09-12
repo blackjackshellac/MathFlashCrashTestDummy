@@ -5,6 +5,7 @@ import android.content.res.Resources;
 import android.media.AudioManager;
 import android.media.ToneGenerator;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -39,9 +40,13 @@ public class MainActivity extends AppCompatActivity {
 	private TextView message;
     private ImageView response;
 
-	private final Map<String,UserData> userMap = new HashMap<String,UserData>();
+	private final Map<String,UserData> userMap;
 	private UserData userData;
 	private String curUser;
+
+	public MainActivity() {
+		userMap = new HashMap<String,UserData>();
+	}
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -79,14 +84,14 @@ public class MainActivity extends AppCompatActivity {
 		});
 
 		// OnClickListener for the operation image (+, -, x, /)
-		((ImageView) findViewById(R.id.imageOperation)).setOnClickListener(
-				new View.OnClickListener() {
-					@Override
-					public void onClick(View view) {
-						// open operationSelector view
-						selectOperation(view);
-					}
+		findViewById(R.id.imageOperation).setOnClickListener(
+			new View.OnClickListener() {
+				@Override
+				public void onClick(View view) {
+					// open operationSelector view
+					selectOperation(view);
 				}
+			}
 		);
 
 		setupNumbers();
@@ -188,13 +193,13 @@ public class MainActivity extends AppCompatActivity {
 
 	    setupOperation(op);
 
-	    userData = (UserData) userMap.get(curUser);
+	    userData = userMap.get(curUser);
 	    numberOperation = userData.operationData.getOp(op);
 
         numberPair = numberOperation.randomize();
 
-        num1.setText(numberPair.l1.toString());
-        num2.setText(numberPair.l2.toString());
+        num1.setText(getResources().getString(R.string.msg_number_long, numberPair.l1));
+        num2.setText(getResources().getString(R.string.msg_number_long, numberPair.l2));
 
 	    setupFocus();
 
@@ -276,12 +281,12 @@ public class MainActivity extends AppCompatActivity {
         if (b) {
             response.setImageResource(R.drawable.mushroom_good);
             setupNumbers();
+	        message.setText(getResources().getString(R.string.msg_correct, nanswer));
         } else {
 	        try {
-		        message.setText(String.format("%d is incorrect", nanswer));
+		        message.setText(getResources().getString(R.string.msg_incorrect, nanswer));
                 response.setImageResource(R.drawable.mushroom_wrong);
 		        setupFocus();
-		        num3.setText("");
 		        tg.startTone(ToneGenerator.TONE_SUP_ERROR);
 		        Thread.sleep(1000);
 		        tg.stopTone();
