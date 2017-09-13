@@ -41,6 +41,10 @@ public class NumberOperation implements Serializable {
         return nums;
     }
 
+    public LongPair nums() {
+        return nums;
+    }
+
     boolean isAnswer(long answer) {
         return answer == ans;
     }

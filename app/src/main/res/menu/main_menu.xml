@@ -2,6 +2,9 @@
 <menu xmlns:app="http://schemas.android.com/apk/res-auto"
       xmlns:android="http://schemas.android.com/apk/res/android">
     <item
+        android:id="@+id/reset_user"
+        android:title="@string/menu_reset_user"/>
+    <item
         android:id="@+id/create_user"
         android:title="@string/menu_user_create"></item>
     <group

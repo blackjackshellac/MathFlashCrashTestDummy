@@ -27,4 +27,5 @@
     <string name="msg_correct">%1$d is correct!</string>
     <string name="msg_incorrect">%1$d is incorrect!</string>
     <string name="msg_number_long">%1$d</string>
+    <string name="menu_reset_user">Reset</string>
 </resources>

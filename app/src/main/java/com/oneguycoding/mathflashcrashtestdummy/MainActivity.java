@@ -15,6 +15,7 @@ import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -39,10 +40,12 @@ public class MainActivity extends AppCompatActivity {
 	private TextView num1, num2, num3;
 	private TextView message;
     private ImageView response;
+	private ProgressBar progressBar;
 
 	private final Map<String,UserData> userMap;
 	private UserData userData;
 	private String curUser;
+	private UserResults userResults;
 
 	public MainActivity() {
 		userMap = new HashMap<String,UserData>();
@@ -94,7 +97,12 @@ public class MainActivity extends AppCompatActivity {
 			}
 		);
 
+		userResults = new UserResults();
+
 		setupNumbers();
+
+		progressBar = (ProgressBar) findViewById(R.id.progressBar);
+		progressBar.setMax(50);
 
 	}
 
@@ -131,6 +139,9 @@ public class MainActivity extends AppCompatActivity {
 
 		String name = null;
 		switch(item.getItemId()) {
+			case R.id.reset_user:
+				resetUser();
+				break;
 			case R.id.create_user:
 				createUser();
 				break;
@@ -204,6 +215,11 @@ public class MainActivity extends AppCompatActivity {
 	    setupFocus();
 
 	    message.setText("");
+    }
+
+    public void resetUser() {
+	    progressBar.setProgress(0);
+	    userResults.reset();
     }
 
     public void createUser() {
@@ -282,8 +298,12 @@ public class MainActivity extends AppCompatActivity {
             response.setImageResource(R.drawable.mushroom_good);
             setupNumbers();
 	        message.setText(getResources().getString(R.string.msg_correct, nanswer));
+
+	        userResults.correct();
+	        progressBar.setProgress(userResults.getnCorrect());
         } else {
 	        try {
+		        userResults.wrong(numberOperation.op, numberOperation.nums());
 		        message.setText(getResources().getString(R.string.msg_incorrect, nanswer));
                 response.setImageResource(R.drawable.mushroom_wrong);
 		        setupFocus();
