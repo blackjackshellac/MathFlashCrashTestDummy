@@ -28,4 +28,7 @@
     <string name="msg_incorrect">%1$d is incorrect!</string>
     <string name="msg_number_long">%1$d</string>
     <string name="menu_reset_user">Reset</string>
+    <string name="descrip_smiling_star">Smiling star</string>
+    <string name="hint_top_max">Top max (%1$d)</string>
+    <string name="hint_bot_max">Bottom max (%1$d)</string>
 </resources>

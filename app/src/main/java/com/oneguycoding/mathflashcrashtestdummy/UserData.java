@@ -12,8 +12,12 @@ public class UserData implements Serializable {
 	public final OperationData operationData;
 
 	UserData() {
-		name = new String();
-		email = new String();
+		this("","");
+	}
+
+	UserData(String name, String email) {
+		this.name = name;
+		this.email = email;
 		operationData = new OperationData();
 	}
 

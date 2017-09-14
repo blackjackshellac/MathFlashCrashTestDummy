@@ -1,11 +1,11 @@
 package com.oneguycoding.mathflashcrashtestdummy;
 
+import android.content.Context;
 import android.content.Intent;
-import android.content.res.Resources;
+import android.content.pm.ApplicationInfo;
 import android.media.AudioManager;
 import android.media.ToneGenerator;
 import android.os.Bundle;
-import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -13,18 +13,19 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
-import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
-import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.lang.reflect.Type;
 
 public class MainActivity extends AppCompatActivity {
 	public static final String EXTRA_OPS = "ops";
@@ -42,13 +43,14 @@ public class MainActivity extends AppCompatActivity {
     private ImageView response;
 	private ProgressBar progressBar;
 
-	private final Map<String,UserData> userMap;
-	private UserData userData;
-	private String curUser;
+	private UserDataMap userDataMap;
+	//private UserData userData;
+	//private String curUser;
 	private UserResults userResults;
+	private String jsonFilename;
 
 	public MainActivity() {
-		userMap = new HashMap<String,UserData>();
+		jsonFilename = "MathFlashCrashTestDummy.json";
 	}
 
 	@Override
@@ -56,11 +58,22 @@ public class MainActivity extends AppCompatActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 
-		if (userMap.isEmpty()) {
-			curUser = (String) getText(R.string.user_default);
-			userData = new UserData();
-			userData.setName(curUser);
-			userMap.put(curUser, userData);
+		if (userDataMap == null) {
+			userDataMap = new UserDataMap((String) getText(R.string.user_default));
+		}
+		if (userDataMap.isEmpty()) {
+			UserDataMap udm = UserDataMap.loadJson(this, jsonFilename);
+			if (udm == null) {
+				File file = new File(getFilesDir(), jsonFilename);
+				if (file != null) {
+					file.delete();
+				}
+				// first time invocation
+				userDataMap.createNewUser((String) getText(R.string.user_default), "");
+				userDataMap.saveJson(this, jsonFilename);
+			} else {
+				userDataMap = udm;
+			}
 		}
 
 		num1 = (TextView) findViewById(R.id.number1);
@@ -100,6 +113,7 @@ public class MainActivity extends AppCompatActivity {
 		userResults = new UserResults();
 
 		setupNumbers();
+		setupUser(userDataMap.getCurUser());
 
 		progressBar = (ProgressBar) findViewById(R.id.progressBar);
 		progressBar.setMax(50);
@@ -115,7 +129,7 @@ public class MainActivity extends AppCompatActivity {
 
 	@Override
 	public boolean onPrepareOptionsMenu(Menu menu) {
-		for (String name : userMap.keySet()) {
+		for (String name : userDataMap.users()) {
 			if (name.equals(getText(R.string.user_default))) {
 				continue;
 			}
@@ -190,21 +204,21 @@ public class MainActivity extends AppCompatActivity {
 		if (name.isEmpty()) {
 			return;
 		}
-		if (userMap.containsKey(name)) {
-			curUser = name;
-			userData = userMap.get(name);
+		if (userDataMap.hasUser(name)) {
+			//userData = userDataMap.getUserData(name);
+			userDataMap.setCurUser(name);
 			setupNumbers();
 			message.setText(getResources().getString(R.string.hello_name, name));
 		}
 	}
 
 	protected void setupNumbers() {
-	    // TODO for now just get the top operation from the list
+	    // TODO for now just getUserData the top operation from the list
 	    Operation op = ops.getNextOp();
 
 	    setupOperation(op);
 
-	    userData = userMap.get(curUser);
+		UserData userData = userDataMap.getUserData();
 	    numberOperation = userData.operationData.getOp(op);
 
         numberPair = numberOperation.randomize();
@@ -225,7 +239,7 @@ public class MainActivity extends AppCompatActivity {
     public void createUser() {
 	    Intent intent = new Intent(this, CreateUserActivity.class);
 
-	    userData = new UserData();
+	    UserData userData = new UserData();
 
 	    try {
 		    intent.putExtra(EXTRA_USERDATA, userData);
@@ -260,13 +274,31 @@ public class MainActivity extends AppCompatActivity {
 					UserData ud = (UserData) intent.getSerializableExtra(EXTRA_USERDATA);
 					String name = ud.getName();
 					if (!name.isEmpty()) {
-						if (userMap.containsKey(name)) {
-							userMap.remove(name);
+						userDataMap.addUserData(ud);
+						userDataMap.saveJson(this, this.jsonFilename);
+
+						/*
+						Gson gson = new Gson();
+						Type type = new TypeToken<UserDataMap>(){}.getType();
+						String json = gson.toJson(userDataMap);
+						UserDataMap uMap = gson.fromJson(json, type);
+
+						//File file = new File(this.getFilesDir(), jsonFilename);
+						try {
+							ApplicationInfo info = this.getApplicationInfo();
+							System.out.printf("%s\n", info.toString());
+
+							FileOutputStream outputStream = openFileOutput(jsonFilename, Context.MODE_PRIVATE);
+							outputStream.write(json.getBytes());
+							outputStream.close();
+
+;
+						} catch (Exception e) {
+							e.printStackTrace();
 						}
-						userMap.put(name, ud);
-						//Gson gson = new Gson();
-						//String json = gson.toJson(userMap);
-						setupUser(name);
+						*/
+
+						setupUser(userDataMap.getCurUser());
 					}
 				}
 				break;

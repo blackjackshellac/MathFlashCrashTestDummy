@@ -6,7 +6,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.EditText;
+import android.widget.TextView;
 
 public class CreateUserActivity extends AppCompatActivity {
 
@@ -22,6 +24,13 @@ public class CreateUserActivity extends AppCompatActivity {
 
 		ActionBar ab = getSupportActionBar();
 		ab.setTitle(R.string.menu_user_create);
+
+		NumberOperation nop = userData.operationData.getOp(Operation.PLUS);
+
+		TextView hinter = (TextView) findViewById(R.id.numTopMax);
+		hinter.setHint(getString(R.string.hint_top_max, nop.lp1.l2));
+		hinter = (TextView) findViewById(R.id.numBotMax);
+		hinter.setHint((getString(R.string.hint_bot_max, nop.lp2.l2)));
 
 	}
 
