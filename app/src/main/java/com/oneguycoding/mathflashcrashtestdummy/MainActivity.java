@@ -5,6 +5,7 @@ import android.content.IntentSender;
 import android.media.AudioManager;
 import android.media.ToneGenerator;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -21,7 +22,11 @@ import android.widget.TextView;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.drive.Drive;
+import com.google.android.gms.drive.DriveApi;
+import com.google.android.gms.drive.DriveFolder;
+import com.google.android.gms.drive.MetadataChangeSet;
 
 import java.io.File;
 
@@ -50,7 +55,38 @@ public class MainActivity extends AppCompatActivity implements
 	private UserResults userResults;
 	private String jsonFilename;
 	private GoogleApiClient mGoogleApiClient;
+	final private ResultCallback<DriveApi.DriveContentsResult> driveContentsCallback =
+			new ResultCallback<DriveApi.DriveContentsResult>() {
+				@Override
+				public void onResult(DriveApi.DriveContentsResult result) {
+					if (!result.getStatus().isSuccess()) {
+						Log.d("onResult", "Error while trying to create new file contents");
+						return;
+					}
 
+					MetadataChangeSet changeSet = new MetadataChangeSet.Builder()
+							.setTitle("appconfig.txt")
+							.setMimeType("text/plain")
+							.build();
+					Drive.DriveApi.getAppFolder(mGoogleApiClient)
+							.createFile(mGoogleApiClient, changeSet, result.getDriveContents())
+							.setResultCallback(fileCallback);
+				}
+			};
+	// [END drive_contents_callback]
+
+	final private ResultCallback<DriveFolder.DriveFileResult> fileCallback = new
+			ResultCallback<DriveFolder.DriveFileResult>() {
+				@Override
+				public void onResult(DriveFolder.DriveFileResult result) {
+					if (!result.getStatus().isSuccess()) {
+						Log.d("onResult", "Error while trying to create the file");
+						return;
+					}
+					Log.i("onResult", "Created a file in App Folder: "
+							+ result.getDriveFile().getDriveId());
+				}
+			};
 	public MainActivity() {
 		jsonFilename = "MathFlashCrashTestDummy.json";
 	}
@@ -76,7 +112,10 @@ public class MainActivity extends AppCompatActivity implements
 
 	@Override
 	public void onConnected(@Nullable Bundle bundle) {
-
+		//super.onConnected(bundle);
+		// create new contents resource
+		Drive.DriveApi.newDriveContents(mGoogleApiClient)
+				.setResultCallback(driveContentsCallback);
 	}
 
 	@Override
@@ -99,6 +138,9 @@ public class MainActivity extends AppCompatActivity implements
 			userDataMap = new UserDataMap((String) getText(R.string.user_default));
 		}
 		if (userDataMap.isEmpty()) {
+			/*
+			 * TODO Set udm to null to delete the existing jsonFilename file
+			 */
 			UserDataMap udm = UserDataMap.loadJson(this, jsonFilename);
 			if (udm == null) {
 				File file = new File(getFilesDir(), jsonFilename);
@@ -293,7 +335,10 @@ public class MainActivity extends AppCompatActivity implements
 		b.putSerializable(EXTRA_OPS, ops);
 		intent.putExtras(b);
 		*/
-		intent.putExtra(EXTRA_OPS, ops);
+		Bundle b = new Bundle();
+		b.putSerializable(EXTRA_USERDATA, userDataMap);
+		b.putSerializable(EXTRA_OPS, ops);
+		intent.putExtras(b);
 		startActivityForResult(intent, RESULT_OPS);
 	}
 

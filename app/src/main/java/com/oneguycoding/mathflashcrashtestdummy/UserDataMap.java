@@ -14,6 +14,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.Serializable;
 import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Set;
@@ -22,7 +23,7 @@ import java.util.Set;
  * Created by steeve on 13/09/17.
  */
 
-public class UserDataMap {
+public class UserDataMap implements Serializable {
 	@SerializedName("VERSION_USERDATAMAP")
 	public static final String VERSION_USERDATAMAP = "20170914";
 	@SerializedName("curUser")

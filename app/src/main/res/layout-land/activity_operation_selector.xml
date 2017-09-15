@@ -14,21 +14,21 @@
         android:ems="10"
         android:hint="@string/hint_top_max"
         android:inputType="number"
-        android:layout_marginLeft="8dp"
-        app:layout_constraintLeft_toLeftOf="@+id/guideline6"
         android:layout_marginTop="16dp"
-        app:layout_constraintTop_toBottomOf="@+id/editText3"/>
+        app:layout_constraintTop_toBottomOf="@+id/editText3"
+        android:layout_marginLeft="8dp"
+        app:layout_constraintLeft_toLeftOf="@+id/guideline5"/>
 
     <EditText
         android:id="@+id/numBotMax"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="8dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginLeft="-63dp"
+        android:layout_marginTop="13dp"
         android:ems="10"
         android:hint="@string/hint_bot_max"
         android:inputType="number"
-        app:layout_constraintLeft_toLeftOf="@+id/guideline6"
+        app:layout_constraintLeft_toLeftOf="@+id/guideline5"
         app:layout_constraintTop_toBottomOf="@+id/numTopMax"/>
 
     <EditText
@@ -43,9 +43,9 @@
         android:singleLine="true"
         android:text="Arithmetic operations"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="@+id/guideline6"
+        app:layout_constraintLeft_toLeftOf="@+id/guideline5"
         app:layout_constraintTop_toTopOf="@+id/guideline10"
-        app:layout_constraintVertical_bias="0.428"/>
+        app:layout_constraintVertical_bias="0.879"/>
 
     <CheckBox
         android:id="@+id/checkMultiple"
@@ -88,11 +88,12 @@
         android:onClick="onCheckboxClicked"/>
 
     <android.support.constraint.Guideline
+        android:id="@+id/guideline5"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/guideline5"
         android:orientation="vertical"
-        app:layout_constraintGuide_percent="0.95"/>
+        android:visibility="visible"
+        app:layout_constraintGuide_percent="0.5"/>
 
     <android.support.constraint.Guideline
         android:layout_width="wrap_content"
@@ -133,5 +134,19 @@
         android:id="@+id/guideline10"
         android:orientation="horizontal"
         app:layout_constraintGuide_percent="0.44"/>
+
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="9dp"
+        android:layout_height="328dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:srcCompat="?android:attr/dividerVertical"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginTop="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginBottom="8dp"
+        tools:layout_editor_absoluteX="356dp"
+        app:layout_constraintVertical_bias="0.666"/>
 
 </android.support.constraint.ConstraintLayout>
