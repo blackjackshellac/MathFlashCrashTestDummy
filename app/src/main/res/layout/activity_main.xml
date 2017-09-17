@@ -26,7 +26,7 @@
             android:textAlignment="center"
             android:textAppearance="@android:style/TextAppearance.Material.Large"
             app:layout_constraintBottom_toTopOf="@+id/guideline"
-            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintHorizontal_bias="1.0"
             app:layout_constraintLeft_toLeftOf="@+id/guideline3"
             app:layout_constraintRight_toLeftOf="@+id/guideline4"
             app:layout_constraintTop_toTopOf="parent"/>
@@ -172,6 +172,40 @@
             app:layout_constraintLeft_toLeftOf="@+id/guideline2"
             app:layout_constraintRight_toLeftOf="@+id/guideline4"
             app:layout_constraintTop_toBottomOf="@+id/sendAnswer"/>
+
+        <android.support.constraint.Guideline
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/guideline11"
+            app:layout_constraintGuide_begin="268dp"
+            android:orientation="horizontal"
+            tools:layout_editor_absoluteY="349dp"
+            tools:layout_editor_absoluteX="0dp"/>
+
+        <TextView
+            android:id="@+id/text_progress"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="0dp"
+            android:layout_marginRight="0dp"
+            android:layout_marginTop="8dp"
+            android:visibility="visible"
+            app:layout_constraintLeft_toLeftOf="@+id/guideline3"
+            app:layout_constraintRight_toLeftOf="@+id/guideline4"
+            app:layout_constraintTop_toTopOf="@+id/guideline11"/>
+
+        <!--
+        <include
+            android:id="@+id/main_stars"
+            layout="@layout/grid_stars"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            tools:layout_editor_absoluteY="276dp"
+            android:layout_marginRight="8dp"
+            android:layout_marginLeft="8dp"
+            app:layout_constraintLeft_toLeftOf="@+id/guideline3"
+            app:layout_constraintRight_toRightOf="parent"/>
+            -->
 
     </android.support.constraint.ConstraintLayout>
 

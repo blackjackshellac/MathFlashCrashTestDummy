@@ -8,12 +8,15 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
+import android.widget.ArrayAdapter;
+import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -128,11 +131,13 @@ public class MainActivity extends AppCompatActivity implements
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 
+/*
 		mGoogleApiClient = new GoogleApiClient.Builder(this)
 				.addApi(Drive.API)
 				.addConnectionCallbacks(this)
 				.addOnConnectionFailedListener(this)
 				.build();
+*/
 
 		if (userDataMap == null) {
 			userDataMap = new UserDataMap((String) getText(R.string.user_default));
@@ -189,13 +194,13 @@ public class MainActivity extends AppCompatActivity implements
 			}
 		);
 
-		userResults = new UserResults();
+		userResults = new UserResults(50);
 
 		setupNumbers();
 		setupUser(userDataMap.getCurUser());
 
 		progressBar = (ProgressBar) findViewById(R.id.progressBar);
-		progressBar.setMax(50);
+		progressBar.setMax(userResults.getNum());
 
 	}
 
@@ -312,7 +317,8 @@ public class MainActivity extends AppCompatActivity implements
 
     public void resetUser() {
 	    progressBar.setProgress(0);
-	    userResults.reset();
+	    // TODO get num from userData
+	    userResults.reset(userResults.getNum());
     }
 
     public void createUser() {
@@ -433,5 +439,8 @@ public class MainActivity extends AppCompatActivity implements
 		        // ignore
 	        }
         }
+	    TextView textProgress = (TextView) findViewById(R.id.text_progress);
+	    String progress = getString(R.string.text_progress, userResults.getnCorrect(), userResults.getNumAnswered(), userResults.getPercentage(), userResults.getRemaining());
+	    textProgress.setText(progress);
     }
 }

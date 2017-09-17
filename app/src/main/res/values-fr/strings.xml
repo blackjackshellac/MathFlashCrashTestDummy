@@ -25,4 +25,5 @@
     <string name="descrip_smiling_star">Smiling star</string>
     <string name="hint_top_max">Max en haut (%1$d)</string>
     <string name="hint_bot_max">Max en bas (%1$d)</string>
+    <string name="text_progress">%1$ de %2$d (%3$.0f%%) - %4$d a faire</string>
 </resources>

@@ -12,11 +12,13 @@ import java.util.Stack;
  */
 
 public class UserResults {
-	int nCorrect;
-	int nWrong;
-	Map<Operation, Stack<LongPair>> retryMap;
+	private int num;
+	private int nCorrect;
+	private int nWrong;
+	private Map<Operation, Stack<LongPair>> retryMap;
 
-	UserResults() {
+	UserResults(int num) {
+		this.num = num;
 		nCorrect = 0;
 		nWrong = 0;
 		retryMap = new HashMap<Operation, Stack<LongPair>>();
@@ -53,12 +55,30 @@ public class UserResults {
 		return nCorrect;
 	}
 
-	public void reset() {
+	public void reset(int num) {
+		this.num = num;
 		nWrong = 0;
 		nCorrect = 0;
 		for (Operation op : retryMap.keySet()) {
 			Stack<LongPair> stack = retryMap.get(op);
 			stack.empty();
 		}
+	}
+
+	public int getNum() {
+		return num;
+	}
+
+	public float getPercentage() {
+		int na = getNumAnswered();
+		return ((float)nCorrect / na) * 100;
+	}
+
+	public int getNumAnswered() {
+		return nCorrect+nWrong;
+	}
+
+	public int getRemaining() {
+		return num-getNumAnswered();
 	}
 }
