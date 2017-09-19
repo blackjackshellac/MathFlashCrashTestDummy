@@ -6,10 +6,11 @@ import java.io.Serializable;
  * Created by steeve on 12/09/17.
  */
 
-public class UserData implements Serializable {
+class UserData implements Serializable {
 	private String name;
 	private String email;
-	public final OperationData operationData;
+	final OperationData operationData;
+	final UserResults userResults;
 
 	UserData() {
 		this("","");
@@ -19,6 +20,7 @@ public class UserData implements Serializable {
 		this.name = name;
 		this.email = email;
 		operationData = new OperationData();
+		userResults = new UserResults(0);
 	}
 
 	public String getName() {

@@ -32,4 +32,9 @@
     <string name="hint_top_max">Top max (%1$d)</string>
     <string name="hint_bot_max">Bottom max (%1$d)</string>
     <string name="text_progress">%1$d out of %2$d (%3$.0f%%) - %4$d to go</string>
+    <string name="text_arithmetic_operations">Arithmetic operations</string>
+    <string name="text_top_max">Top maximum</string>
+    <string name="text_bot_max">Bottom maximum</string>
+    <string name="text_menu_delete_user">Delete user</string>
+    <string name="text_menu_modify_user">Modify user</string>
 </resources>

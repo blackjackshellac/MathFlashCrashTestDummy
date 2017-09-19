@@ -1,5 +1,6 @@
 package com.oneguycoding.mathflashcrashtestdummy;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -9,16 +10,23 @@ import java.util.Stack;
 
 /**
  * Created by steeve on 13/09/17.
+ *
  */
 
-public class UserResults {
+public class UserResults implements Serializable {
+	public static final int DEFAULT_NUM = 50;
 	private int num;
 	private int nCorrect;
 	private int nWrong;
 	private Map<Operation, Stack<LongPair>> retryMap;
 
+	/**
+	 * Create new UserResults object
+	 *
+	 * @param num number of operations to test, default is DEFAULT_NUM
+	 */
 	UserResults(int num) {
-		this.num = num;
+		this.num = num <= 0 ? DEFAULT_NUM : num;
 		nCorrect = 0;
 		nWrong = 0;
 		retryMap = new HashMap<Operation, Stack<LongPair>>();

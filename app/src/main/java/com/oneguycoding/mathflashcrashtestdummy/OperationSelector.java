@@ -73,12 +73,16 @@ public class OperationSelector extends AppCompatActivity {
 			}
 		}
 
-		if (topRange != null && bottomRange != null) {
-			TextView hinter = (TextView) findViewById(R.id.numTopMax);
-			hinter.setHint(getString(R.string.hint_top_max, topRange.l2));
-			hinter = (TextView) findViewById(R.id.numBotMax);
-			hinter.setHint((getString(R.string.hint_bot_max, bottomRange.l2)));
+		// none of the operations are checked
+		if (topRange == null || bottomRange == null) {
+			cb = (CheckBox) findViewById(R.id.checkPlus);
+			cb.setChecked(true);
+			topRange = userData.operationData.getOp(Operation.PLUS).getTopRange();
+			bottomRange = userData.operationData.getOp(Operation.PLUS).getBottomRange();
 		}
+
+		AndroidUtil.setEditTextString(this, R.id.numTopMax, topRange.l2.toString());
+		AndroidUtil.setEditTextString(this, R.id.numBotMax, bottomRange.l2.toString());
 	}
 
 	@Override
@@ -137,13 +141,17 @@ public class OperationSelector extends AppCompatActivity {
 			Long max;
 			NumberOperation nop = userData.operationData.getOp(op);
 
-			TextView textView = (TextView) findViewById(R.id.numTopMax);
-			max = Long.parseLong(textView.getText().toString());
-			nop.updateTop(null, max);
+			try {
+				TextView textView = (TextView) findViewById(R.id.numTopMax);
+				max = Long.parseLong(textView.getText().toString());
+				nop.updateTop(null, max);
 
-			textView = (TextView) findViewById(R.id.numBotMax);
-			max = Long.parseLong(textView.getText().toString());
-			nop.updateBottom(null, max);
+				textView = (TextView) findViewById(R.id.numBotMax);
+				max = Long.parseLong(textView.getText().toString());
+				nop.updateBottom(null, max);
+			} catch(NumberFormatException e) {
+				// ignore
+			}
 
 			ops.setOperation(op, checked);
 		}

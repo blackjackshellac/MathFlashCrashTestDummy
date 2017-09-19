@@ -6,11 +6,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.EditText;
-import android.widget.TextView;
 
-public class CreateUserActivity extends AppCompatActivity {
+public class ModifyUserActivity extends AppCompatActivity {
 
 	private UserData userData;
 
@@ -22,8 +19,13 @@ public class CreateUserActivity extends AppCompatActivity {
 		Intent data = getIntent();
 		userData = (UserData) data.getSerializableExtra(MainActivity.EXTRA_USERDATA);
 
+		AndroidUtil.setEditTextString(this, R.id.edit_user_name, userData.getName());
+		AndroidUtil.setEditTextString(this, R.id.edit_user_email, userData.getEmail());
+
 		ActionBar ab = getSupportActionBar();
-		ab.setTitle(R.string.menu_user_create);
+		if (ab != null) {
+			ab.setTitle(R.string.menu_user_create);
+		}
 	}
 
 	@Override
@@ -40,8 +42,8 @@ public class CreateUserActivity extends AppCompatActivity {
 				onBackPressed();
 				return true;
 			case R.id.action_cancel:
-				AndroidUtil.clearEditTextString(this, R.id.edit_user_name);
-				AndroidUtil.clearEditTextString(this, R.id.edit_user_email);
+				AndroidUtil.setEditTextString(this, R.id.edit_user_name, userData.getName());
+				AndroidUtil.setEditTextString(this, R.id.edit_user_email, userData.getEmail());
 				onBackPressed();
 				return true;
 		}

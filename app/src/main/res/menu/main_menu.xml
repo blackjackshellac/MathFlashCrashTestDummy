@@ -2,13 +2,17 @@
 <menu xmlns:app="http://schemas.android.com/apk/res-auto"
       xmlns:android="http://schemas.android.com/apk/res/android">
     <item
-        android:id="@+id/reset_user"
+        android:id="@+id/menu_reset_user"
         android:title="@string/menu_reset_user"/>
     <item
-        android:id="@+id/create_user"
+        android:id="@+id/menu_create_user"
         android:title="@string/menu_user_create"></item>
-    <group
-        />
+    <item
+        android:id="@+id/menu_modify_user"
+        android:title="@string/text_menu_modify_user"/>
+    <item
+        android:id="@+id/menu_delete_user"
+        android:title="@string/text_menu_delete_user"/>
     <item
         android:id="@+id/default_user"
         android:title="@string/menu_user_default"></item>

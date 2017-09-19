@@ -12,7 +12,7 @@
     <string name="stringMultiple">Sélection multiple</string>
     <string name="stringMultiplication">Multiplication</string>
     <string name="menu_user_default">Defaut</string>
-    <string name="menu_user_create">Cree utiliseur</string>
+    <string name="menu_user_create">Cree l\'utiliseur</string>
     <string name="hint_user_name">Nom de l\'utiliseur</string>
     <string name="hint_user_email">Courriel</string>
     <string name="action_cancel">Cancel</string>
@@ -26,4 +26,9 @@
     <string name="hint_top_max">Max en haut (%1$d)</string>
     <string name="hint_bot_max">Max en bas (%1$d)</string>
     <string name="text_progress">%1$ de %2$d (%3$.0f%%) - %4$d a faire</string>
+    <string name="text_arithmetic_operations">Arithmetic operations</string>
+    <string name="text_top_max">Top maximum</string>
+    <string name="text_bot_max">Bottom maximum</string>
+    <string name="text_menu_delete_user">Delete user</string>
+    <string name="text_menu_modify_user">Modify user</string>
 </resources>

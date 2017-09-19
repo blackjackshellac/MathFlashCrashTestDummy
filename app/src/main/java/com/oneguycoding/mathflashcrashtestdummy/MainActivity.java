@@ -1,52 +1,43 @@
 package com.oneguycoding.mathflashcrashtestdummy;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentSender;
 import android.media.AudioManager;
 import android.media.ToneGenerator;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
-import android.widget.ArrayAdapter;
-import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
 
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GooglePlayServicesUtil;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.ResultCallback;
-import com.google.android.gms.drive.Drive;
-import com.google.android.gms.drive.DriveApi;
-import com.google.android.gms.drive.DriveFolder;
-import com.google.android.gms.drive.MetadataChangeSet;
+//import com.google.android.gms.common.ConnectionResult;
+//import com.google.android.gms.common.GooglePlayServicesUtil;
+//import com.google.android.gms.common.api.GoogleApiClient;
+//import com.google.android.gms.drive.Drive;
 
 import java.io.File;
 
-public class MainActivity extends AppCompatActivity implements
+public class MainActivity extends AppCompatActivity /* implements
 		GoogleApiClient.ConnectionCallbacks,
-		GoogleApiClient.OnConnectionFailedListener {
+		GoogleApiClient.OnConnectionFailedListener */ {
 	public static final String EXTRA_OPS = "ops";
 	public static final String EXTRA_USERDATA = "userdata";
 	public static final int RESULT_OPS = 100;
 	public static final int RESULT_USERDATA = 101;
-	public static final int RESOLVE_CONNECTION_REQUEST_CODE = 102;
+	//public static final int RESOLVE_CONNECTION_REQUEST_CODE = 102;
 
 	private static final ToneGenerator tg = new ToneGenerator(AudioManager.STREAM_NOTIFICATION, 100);
 
     private NumberOperation numberOperation;
 	private OperationsClass ops = new OperationsClass();
-    private LongPair  numberPair;
 	private TextView num1, num2, num3;
 	private TextView message;
     private ImageView response;
@@ -55,8 +46,9 @@ public class MainActivity extends AppCompatActivity implements
 	private UserDataMap userDataMap;
 	//private UserData userData;
 	//private String curUser;
-	private UserResults userResults;
+	//private UserResults userResults;
 	private String jsonFilename;
+/*
 	private GoogleApiClient mGoogleApiClient;
 	final private ResultCallback<DriveApi.DriveContentsResult> driveContentsCallback =
 			new ResultCallback<DriveApi.DriveContentsResult>() {
@@ -90,6 +82,7 @@ public class MainActivity extends AppCompatActivity implements
 							+ result.getDriveFile().getDriveId());
 				}
 			};
+*/
 	public MainActivity() {
 		jsonFilename = "MathFlashCrashTestDummy.json";
 	}
@@ -99,6 +92,8 @@ public class MainActivity extends AppCompatActivity implements
 		super.onStart();
 		//mGoogleApiClient.connect();
 	}
+
+/*
 
 	@Override
 	public void onConnectionFailed(ConnectionResult connectionResult) {
@@ -125,6 +120,7 @@ public class MainActivity extends AppCompatActivity implements
 	public void onConnectionSuspended(int i) {
 
 	}
+*/
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -146,12 +142,15 @@ public class MainActivity extends AppCompatActivity implements
 			/*
 			 * TODO Set udm to null to delete the existing jsonFilename file
 			 */
+			File file = new File(getFilesDir(), jsonFilename);
+			if (file.exists()) {
+				boolean r = false; //file.delete();
+				if (!r) {
+					AndroidUtil.showToast(this, String.format("File %s not deleted", jsonFilename));
+				}
+			}
 			UserDataMap udm = UserDataMap.loadJson(this, jsonFilename);
 			if (udm == null) {
-				File file = new File(getFilesDir(), jsonFilename);
-				if (file != null) {
-					file.delete();
-				}
 				// first time invocation
 				userDataMap.createNewUser((String) getText(R.string.user_default), "");
 				userDataMap.saveJson(this, jsonFilename);
@@ -189,18 +188,15 @@ public class MainActivity extends AppCompatActivity implements
 				@Override
 				public void onClick(View view) {
 					// open operationSelector view
-					selectOperation(view);
+					selectOperation();
 				}
 			}
 		);
 
-		userResults = new UserResults(50);
-
 		setupNumbers();
 		setupUser(userDataMap.getCurUser());
 
-		progressBar = (ProgressBar) findViewById(R.id.progressBar);
-		progressBar.setMax(userResults.getNum());
+
 
 	}
 
@@ -237,21 +233,36 @@ public class MainActivity extends AppCompatActivity implements
 
 		String name = null;
 		switch(item.getItemId()) {
-			case R.id.reset_user:
+			case R.id.menu_delete_user:
+				deleteUser();
+				break;
+			case R.id.menu_reset_user:
 				resetUser();
 				break;
-			case R.id.create_user:
-				createUser();
+			case R.id.menu_modify_user:
+				name = userDataMap.getCurUser();
+				if (!name.equals(getText(R.string.user_default))) {
+					modifyUser(name, false);
+				}
+				break;
+			case R.id.menu_create_user:
+				name = userDataMap.getCurUser();
+				modifyUser(name, true);
 				break;
 			case R.id.default_user:
 				name = (String) getText(R.string.user_default);
+				if (!name.equals(userDataMap.getCurUser())) {
+					setupUser(name);
+					selectOperation();
+				}
 				break;
 			default:
 				name = item.getTitle().toString();
+				if (!name.equals(userDataMap.getCurUser())) {
+					setupUser(name);
+					selectOperation();
+				}
 				break;
-		}
-		if (name != null) {
-			setupUser(name);
 		}
 
 		return true;
@@ -285,14 +296,20 @@ public class MainActivity extends AppCompatActivity implements
     }
 
 	protected void setupUser(String name) {
-		if (name.isEmpty()) {
+		if (name.isEmpty())     {
 			return;
 		}
+		progressBar = (ProgressBar) findViewById(R.id.progressBar);
 		if (userDataMap.hasUser(name)) {
 			//userData = userDataMap.getUserData(name);
 			userDataMap.setCurUser(name);
 			setupNumbers();
 			message.setText(getResources().getString(R.string.hello_name, name));
+
+			UserData userData = userDataMap.getUserData();
+			progressBar.setMax(userData.userResults.getNum());
+		} else {
+			throw new RuntimeException(String.format("UserDataMap does not contain user %s", name));
 		}
 	}
 
@@ -305,7 +322,7 @@ public class MainActivity extends AppCompatActivity implements
 		UserData userData = userDataMap.getUserData();
 	    numberOperation = userData.operationData.getOp(op);
 
-        numberPair = numberOperation.randomize();
+		LongPair numberPair = numberOperation.randomize();
 
         num1.setText(getResources().getString(R.string.msg_number_long, numberPair.l1));
         num2.setText(getResources().getString(R.string.msg_number_long, numberPair.l2));
@@ -317,14 +334,60 @@ public class MainActivity extends AppCompatActivity implements
 
     public void resetUser() {
 	    progressBar.setProgress(0);
-	    // TODO get num from userData
+	    UserResults userResults = userDataMap.getUserData().userResults;
 	    userResults.reset(userResults.getNum());
     }
 
-    public void createUser() {
-	    Intent intent = new Intent(this, CreateUserActivity.class);
+	private void deleteUser() {
+		String name = userDataMap.getCurUser();
+		if (name.equals(getText(R.string.user_default))) {
+			return;
+		}
 
-	    UserData userData = new UserData();
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+		builder.setTitle("Confirm");
+		builder.setMessage("Are you sure?");
+
+		builder.setPositiveButton("YES", new DialogInterface.OnClickListener() {
+
+			public void onClick(DialogInterface dialog, int which) {
+
+				// Do nothing, but close the dialog
+				dialog.dismiss();
+			}
+		});
+
+		builder.setNegativeButton("NO", new DialogInterface.OnClickListener() {
+
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+
+				// Do nothing
+				dialog.dismiss();
+			}
+		});
+
+		AlertDialog alert = builder.create();
+		alert.show();
+
+	}
+
+	public void modifyUser(String user, boolean create) {
+	    Intent intent = new Intent(this, ModifyUserActivity.class);
+
+	    UserData userData;
+		if (create) {
+			userData = new UserData();
+		} else {
+			if (userDataMap.hasUser(user)) {
+				userDataMap.setCurUser(user);
+				userData = userDataMap.getUserData();
+			} else {
+				AndroidUtil.showToast(this, "User doesn't exist: "+user);
+				return;
+			}
+		}
 
 	    try {
 		    intent.putExtra(EXTRA_USERDATA, userData);
@@ -334,7 +397,7 @@ public class MainActivity extends AppCompatActivity implements
 	    }
     }
 
-	public void selectOperation(View view) {
+	public void selectOperation() {
 		Intent intent = new Intent(this, OperationSelector.class);
 		/*
 		Bundle b = new Bundle();
@@ -351,11 +414,13 @@ public class MainActivity extends AppCompatActivity implements
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
 		switch(requestCode) {
+/*
 			case RESOLVE_CONNECTION_REQUEST_CODE:
 				if (resultCode == RESULT_OK) {
 					mGoogleApiClient.connect();
 				}
 				break;
+*/
 			case RESULT_OPS:
 				if (resultCode == RESULT_OK) {
 					ops = (OperationsClass) intent.getSerializableExtra(EXTRA_OPS);
@@ -364,10 +429,10 @@ public class MainActivity extends AppCompatActivity implements
 				break;
 			case RESULT_USERDATA:
 				if (resultCode == RESULT_OK) {
-					UserData ud = (UserData) intent.getSerializableExtra(EXTRA_USERDATA);
-					String name = ud.getName();
+					UserData userData = (UserData) intent.getSerializableExtra(EXTRA_USERDATA);
+					String name = userData.getName();
 					if (!name.isEmpty()) {
-						userDataMap.addUserData(ud);
+						userDataMap.addUserData(userData);
 						userDataMap.saveJson(this, this.jsonFilename);
 
 						/*
@@ -418,8 +483,10 @@ public class MainActivity extends AppCompatActivity implements
 		    return;
 	    }
 
+	    //UserData userData = userDataMap.getUserData();
         boolean b = numberOperation.isAnswer(nanswer);
-        if (b) {
+	    UserResults userResults = userDataMap.getUserData().userResults;
+	    if (b) {
             response.setImageResource(R.drawable.mushroom_good);
             setupNumbers();
 	        message.setText(getResources().getString(R.string.msg_correct, nanswer));

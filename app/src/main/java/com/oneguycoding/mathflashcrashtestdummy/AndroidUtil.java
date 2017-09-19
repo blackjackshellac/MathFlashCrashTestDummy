@@ -15,13 +15,14 @@ public class AndroidUtil {
 		return editText.getText().toString();
 	}
 
-	public static void clearEditTextString(Activity activity, int id) {
+	public static void setEditTextString(Activity activity, int id, String text) {
 		EditText editText = (EditText) activity.findViewById(id);
-		editText.setText("");
+		editText.setText(text);
 	}
 
 	public static void showToast(Activity activity, String s) {
 		Toast toast = Toast.makeText(activity, s, Toast.LENGTH_LONG);
 		toast.show();
 	}
+
 }
