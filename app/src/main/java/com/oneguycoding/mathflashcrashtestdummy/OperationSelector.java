@@ -9,8 +9,6 @@ import android.widget.CheckBox;
 import android.widget.TextView;
 
 public class OperationSelector extends AppCompatActivity {
-
-	private OperationsClass ops;
 	private UserDataMap userDataMap;
 	private UserData userData;
 
@@ -21,7 +19,6 @@ public class OperationSelector extends AppCompatActivity {
 
 		Intent intent = getIntent();
 		Bundle b = intent.getExtras();
-		ops = (OperationsClass) b.getSerializable(MainActivity.EXTRA_OPS);
 		userDataMap = (UserDataMap) b.getSerializable(MainActivity.EXTRA_USERDATA);
 		userData = userDataMap.getUserData();
 
@@ -40,6 +37,7 @@ public class OperationSelector extends AppCompatActivity {
 		int id;
 
 		CheckBox cb = (CheckBox) findViewById(R.id.checkMultiple);
+		OperationsClass ops = userData.ops;
 		cb.setChecked(ops.isAllowMultiple());
 
 		LongPair topRange = null;
@@ -101,7 +99,6 @@ public class OperationSelector extends AppCompatActivity {
 		Intent intent = new Intent();
 
 		Bundle b = new Bundle();
-		b.putSerializable(MainActivity.EXTRA_OPS, ops);
 		b.putSerializable(MainActivity.EXTRA_USERDATA, userDataMap);
 		intent.putExtras(b);
 
@@ -117,6 +114,7 @@ public class OperationSelector extends AppCompatActivity {
 		// Is the view now checked?
 		boolean checked = ((CheckBox) view).isChecked();
 
+		OperationsClass ops = userData.ops;
 		Operation op = null;
 		// Check which checkbox was clicked
 		switch(view.getId()) {

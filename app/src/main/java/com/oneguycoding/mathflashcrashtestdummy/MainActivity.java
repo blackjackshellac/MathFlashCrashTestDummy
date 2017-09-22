@@ -37,7 +37,7 @@ public class MainActivity extends AppCompatActivity /* implements
 	private static final ToneGenerator tg = new ToneGenerator(AudioManager.STREAM_NOTIFICATION, 100);
 
     private NumberOperation numberOperation;
-	private OperationsClass ops = new OperationsClass();
+	//private OperationsClass ops = new OperationsClass();
 	private TextView num1, num2, num3;
 	private TextView message;
     private ImageView response;
@@ -135,28 +135,23 @@ public class MainActivity extends AppCompatActivity /* implements
 				.build();
 */
 
-		if (userDataMap == null) {
-			userDataMap = new UserDataMap((String) getText(R.string.user_default));
+		/*
+		 * TODO Set udm to null to delete the existing jsonFilename file
+		 */
+		File file = new File(getFilesDir(), jsonFilename);
+		if (file.exists()) {
+			boolean r = false; //file.delete();
+			if (!r) {
+				AndroidUtil.showToast(this, String.format("File %s not deleted", jsonFilename));
+			}
 		}
-		if (userDataMap.isEmpty()) {
-			/*
-			 * TODO Set udm to null to delete the existing jsonFilename file
-			 */
-			File file = new File(getFilesDir(), jsonFilename);
-			if (file.exists()) {
-				boolean r = false; //file.delete();
-				if (!r) {
-					AndroidUtil.showToast(this, String.format("File %s not deleted", jsonFilename));
-				}
-			}
-			UserDataMap udm = UserDataMap.loadJson(this, jsonFilename);
-			if (udm == null) {
-				// first time invocation
-				userDataMap.createNewUser((String) getText(R.string.user_default), "");
-				userDataMap.saveJson(this, jsonFilename);
-			} else {
-				userDataMap = udm;
-			}
+		UserDataMap udm = UserDataMap.loadJson(this, jsonFilename);
+		if (udm == null) {
+			// first time invocation
+			userDataMap = new UserDataMap((String) getText(R.string.user_default));
+			userDataMap.saveJson(this, jsonFilename);
+		} else {
+			userDataMap = udm;
 		}
 
 		num1 = (TextView) findViewById(R.id.number1);
@@ -315,11 +310,11 @@ public class MainActivity extends AppCompatActivity /* implements
 
 	protected void setupNumbers() {
 	    // TODO for now just getUserData the top operation from the list
-	    Operation op = ops.getNextOp();
+		UserData userData = userDataMap.getUserData();
+	    Operation op = userData.ops.getNextOp();
 
 	    setupOperation(op);
 
-		UserData userData = userDataMap.getUserData();
 	    numberOperation = userData.operationData.getOp(op);
 
 		LongPair numberPair = numberOperation.randomize();
@@ -339,31 +334,29 @@ public class MainActivity extends AppCompatActivity /* implements
     }
 
 	private void deleteUser() {
-		String name = userDataMap.getCurUser();
+		// make final to allow OnClickListeners access
+		final String name = userDataMap.getCurUser();
 		if (name.equals(getText(R.string.user_default))) {
 			return;
 		}
 
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
-		builder.setTitle("Confirm");
-		builder.setMessage("Are you sure?");
+		builder.setTitle(getText(R.string.title_delete_user));
+		builder.setMessage(getString(R.string.text_delete_user_prompt, name));
 
-		builder.setPositiveButton("YES", new DialogInterface.OnClickListener() {
+		builder.setPositiveButton(getText(R.string.yes), new DialogInterface.OnClickListener() {
 
 			public void onClick(DialogInterface dialog, int which) {
-
-				// Do nothing, but close the dialog
+				userDataMap.deleteUser(name);
 				dialog.dismiss();
 			}
 		});
 
-		builder.setNegativeButton("NO", new DialogInterface.OnClickListener() {
+		builder.setNegativeButton(getText(R.string.no), new DialogInterface.OnClickListener() {
 
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
-
-				// Do nothing
 				dialog.dismiss();
 			}
 		});
@@ -406,7 +399,6 @@ public class MainActivity extends AppCompatActivity /* implements
 		*/
 		Bundle b = new Bundle();
 		b.putSerializable(EXTRA_USERDATA, userDataMap);
-		b.putSerializable(EXTRA_OPS, ops);
 		intent.putExtras(b);
 		startActivityForResult(intent, RESULT_OPS);
 	}
@@ -423,7 +415,8 @@ public class MainActivity extends AppCompatActivity /* implements
 */
 			case RESULT_OPS:
 				if (resultCode == RESULT_OK) {
-					ops = (OperationsClass) intent.getSerializableExtra(EXTRA_OPS);
+					Bundle b = intent.getExtras();
+					userDataMap = (UserDataMap) b.getSerializable(EXTRA_USERDATA);
 					setupNumbers();
 				}
 				break;

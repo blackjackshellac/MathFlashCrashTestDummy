@@ -11,6 +11,7 @@ class UserData implements Serializable {
 	private String email;
 	final OperationData operationData;
 	final UserResults userResults;
+	final OperationsClass ops;
 
 	UserData() {
 		this("","");
@@ -21,6 +22,7 @@ class UserData implements Serializable {
 		this.email = email;
 		operationData = new OperationData();
 		userResults = new UserResults(0);
+		ops = new OperationsClass();
 	}
 
 	public String getName() {

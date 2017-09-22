@@ -31,4 +31,8 @@
     <string name="text_bot_max">Bottom maximum</string>
     <string name="text_menu_delete_user">Delete user</string>
     <string name="text_menu_modify_user">Modify user</string>
+    <string name="title_delete_user">Delete user</string>
+    <string name="text_delete_user_prompt">Delete user %1$s?</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
 </resources>

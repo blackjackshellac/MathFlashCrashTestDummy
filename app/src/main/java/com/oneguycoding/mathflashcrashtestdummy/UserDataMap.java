@@ -24,20 +24,19 @@ import java.util.Set;
  */
 
 public class UserDataMap implements Serializable {
-	@SerializedName("VERSION_USERDATAMAP")
+//	@SerializedName("VERSION_USERDATAMAP")
 	public static final String VERSION_USERDATAMAP = "20170914";
-	@SerializedName("curUser")
+//	@SerializedName("curUser")
 	private String curUser;
-	@SerializedName("userDataMap")
+//	@SerializedName("userDataMap")
 	private final HashMap<String,UserData> userDataMap;
+	private final String defaultUser;
 
-	UserDataMap() {
+	UserDataMap(String name) {
 		userDataMap = new HashMap<String,UserData>();
-	}
-
-	UserDataMap(String curUser) {
-		this();
-		this.setCurUser(curUser);
+		defaultUser = new String(name);
+		UserData userData = new UserData(defaultUser, "");
+		addUserData(userData);
 	}
 
 	public String getCurUser() {
@@ -50,8 +49,13 @@ public class UserDataMap implements Serializable {
 	 * @param name user to set as current user
 	 *
 	 */
-	public void setCurUser(String name) {
-		this.curUser = name;
+	public UserData setCurUser(String name) {
+		if (this.hasUser(name)) {
+			this.curUser = name;
+			return getUserData();
+		}
+		throw new RuntimeException(String.format("Unknown user: %s", name));
+
 	}
 
 	public UserData getUserData() {
@@ -59,24 +63,16 @@ public class UserDataMap implements Serializable {
 	}
 
 	/**
-	 * Create a new userData object and set current user to new user.  Nothing is done if the user already exists in the map
-	 * @param user username to create
+	 * Add new userData object for given user, replace if it already exists and set curUser to the new user
+	 * @param userData
 	 */
-	public void createNewUser(String user, String email) {
-		if (!userDataMap.containsKey(user)) {
-			setCurUser(user);
-			userDataMap.put(user, new UserData(user, email));
-		}
-
-	}
-
 	public void addUserData(UserData userData) {
 		String name = userData.getName();
 		if (name.isEmpty()) {
 			return;
 		}
-		setCurUser(name);
-		userDataMap.put(curUser, userData);
+		userDataMap.put(name, userData);
+		curUser = name;
 	}
 
 	/**
@@ -148,5 +144,17 @@ public class UserDataMap implements Serializable {
 
 	public boolean isEmpty() {
 		return userDataMap.isEmpty();
+	}
+
+	public UserData deleteUser(String name) {
+		if (name.equals(defaultUser)) {
+			throw new RuntimeException(String.format("Attempting to delete defaultUser: %s", defaultUser));
+		}
+		if (hasUser(name) && hasUser(defaultUser)) {
+			userDataMap.remove(name);
+			setCurUser(defaultUser);
+			return getUserData();
+		}
+		throw new RuntimeException(String.format("userDataMap is missing name (%s) or defaultUser (%s)", name, defaultUser));
 	}
 }
