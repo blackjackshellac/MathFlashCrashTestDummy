@@ -135,12 +135,9 @@ public class MainActivity extends AppCompatActivity /* implements
 				.build();
 */
 
-		/*
-		 * TODO Set udm to null to delete the existing jsonFilename file
-		 */
 		File file = new File(getFilesDir(), jsonFilename);
 		if (file.exists()) {
-			boolean r = false; //file.delete();
+			boolean r = true; // file.delete(); // false; //file.delete();
 			if (!r) {
 				AndroidUtil.showToast(this, String.format("File %s not deleted", jsonFilename));
 			}
@@ -349,6 +346,7 @@ public class MainActivity extends AppCompatActivity /* implements
 
 			public void onClick(DialogInterface dialog, int which) {
 				userDataMap.deleteUser(name);
+				// TODO have to delete 'name' from R.menu.main_menu
 				dialog.dismiss();
 			}
 		});
