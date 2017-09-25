@@ -25,14 +25,6 @@ public class OperationSelector extends AppCompatActivity {
 		setupOperations();
 	}
 
-	LongPair getMaxima(Operation op, LongPair maxima) {
-		if (maxima == null) {
-			NumberOperation opd = userData.operationData.getOp(op);
-			maxima = opd.getBottomRange();
-		}
-		return maxima;
-	}
-
 	void setupOperations() {
 		int id;
 
@@ -63,10 +55,10 @@ public class OperationSelector extends AppCompatActivity {
 			cb.setChecked(checked);
 			if (checked) {
 				if (topRange == null) {
-					topRange = userData.operationData.getOp(op).getTopRange();
+					topRange = userData.ops.getOp(op).getTopRange();
 				}
 				if (bottomRange == null) {
-					bottomRange = userData.operationData.getOp(op).getBottomRange();
+					bottomRange = userData.ops.getOp(op).getBottomRange();
 				}
 			}
 		}
@@ -75,8 +67,8 @@ public class OperationSelector extends AppCompatActivity {
 		if (topRange == null || bottomRange == null) {
 			cb = (CheckBox) findViewById(R.id.checkPlus);
 			cb.setChecked(true);
-			topRange = userData.operationData.getOp(Operation.PLUS).getTopRange();
-			bottomRange = userData.operationData.getOp(Operation.PLUS).getBottomRange();
+			topRange = userData.ops.getOp(Operation.PLUS).getTopRange();
+			bottomRange = userData.ops.getOp(Operation.PLUS).getBottomRange();
 		}
 
 		AndroidUtil.setEditTextString(this, R.id.numTopMax, topRange.l2.toString());
@@ -94,8 +86,32 @@ public class OperationSelector extends AppCompatActivity {
 		return super.onOptionsItemSelected(item);
 	}
 
+	private void updateRanges() {
+		TextView textView;
+		Long max;
+		OperationsClass ops = userData.ops;
+		try {
+			textView = (TextView) findViewById(R.id.numTopMax);
+			max = Long.parseLong(textView.getText().toString());
+			ops.updateTop(null, max);
+		} catch(NumberFormatException e) {
+			// ignore
+		}
+
+		try {
+			textView = (TextView) findViewById(R.id.numBotMax);
+			max = Long.parseLong(textView.getText().toString());
+			ops.updateBottom(null, max);
+		} catch(NumberFormatException e) {
+			// ignore
+		}
+	}
+
 	@Override
 	public void onBackPressed() {
+
+		updateRanges();
+
 		Intent intent = new Intent();
 
 		Bundle b = new Bundle();
@@ -112,12 +128,17 @@ public class OperationSelector extends AppCompatActivity {
 
 	public void onCheckboxClicked(View view) {
 		// Is the view now checked?
-		boolean checked = ((CheckBox) view).isChecked();
+		//boolean allowMultiple = ((CheckBox) view).isChecked();
 
 		OperationsClass ops = userData.ops;
 		Operation op = null;
 		// Check which checkbox was clicked
-		switch(view.getId()) {
+
+		CheckBox cb = (CheckBox) view;
+		int id = cb.getId();
+		boolean checked = cb.isChecked();
+
+		switch(id) {
 			case R.id.checkMultiple:
 				ops.setAllowMultiple(checked);
 				break;
@@ -136,21 +157,6 @@ public class OperationSelector extends AppCompatActivity {
 		}
 
 		if (op != null) {
-			Long max;
-			NumberOperation nop = userData.operationData.getOp(op);
-
-			try {
-				TextView textView = (TextView) findViewById(R.id.numTopMax);
-				max = Long.parseLong(textView.getText().toString());
-				nop.updateTop(null, max);
-
-				textView = (TextView) findViewById(R.id.numBotMax);
-				max = Long.parseLong(textView.getText().toString());
-				nop.updateBottom(null, max);
-			} catch(NumberFormatException e) {
-				// ignore
-			}
-
 			ops.setOperation(op, checked);
 		}
 		setupOperations();

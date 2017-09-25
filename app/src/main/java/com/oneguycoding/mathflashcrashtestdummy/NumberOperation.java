@@ -7,8 +7,8 @@ import java.io.Serializable;
  */
 
 public class NumberOperation implements Serializable {
-    private static final LongPair TOP_RANGE = new LongPair(0, 12);
-    private static final LongPair BOTTOM_RANGE = new LongPair(0, 12);
+    public static final LongPair TOP_RANGE = new LongPair(0, 12);
+    public static final LongPair BOTTOM_RANGE = new LongPair(0, 12);
 
     public final Operation op;
 

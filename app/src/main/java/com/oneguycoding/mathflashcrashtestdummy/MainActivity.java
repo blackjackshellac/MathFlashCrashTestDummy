@@ -245,13 +245,12 @@ public class MainActivity extends AppCompatActivity /* implements
 				name = (String) getText(R.string.user_default);
 				if (!name.equals(userDataMap.getCurUser())) {
 					setupUser(name);
-					selectOperation();
 				}
 				break;
 			default:
 				name = item.getTitle().toString();
 				if (!name.equals(userDataMap.getCurUser())) {
-					setupUser(name);
+					userDataMap.setCurUser(name);
 					selectOperation();
 				}
 				break;
@@ -308,11 +307,9 @@ public class MainActivity extends AppCompatActivity /* implements
 	protected void setupNumbers() {
 	    // TODO for now just getUserData the top operation from the list
 		UserData userData = userDataMap.getUserData();
-	    Operation op = userData.ops.getNextOp();
+	    numberOperation = userData.ops.getNextOp();
 
-	    setupOperation(op);
-
-	    numberOperation = userData.operationData.getOp(op);
+	    setupOperation(numberOperation.op);
 
 		LongPair numberPair = numberOperation.randomize();
 
@@ -415,7 +412,7 @@ public class MainActivity extends AppCompatActivity /* implements
 				if (resultCode == RESULT_OK) {
 					Bundle b = intent.getExtras();
 					userDataMap = (UserDataMap) b.getSerializable(EXTRA_USERDATA);
-					setupNumbers();
+					//setupNumbers();
 				}
 				break;
 			case RESULT_USERDATA:
@@ -424,7 +421,6 @@ public class MainActivity extends AppCompatActivity /* implements
 					String name = userData.getName();
 					if (!name.isEmpty()) {
 						userDataMap.addUserData(userData);
-						userDataMap.saveJson(this, this.jsonFilename);
 
 						/*
 						Gson gson = new Gson();
@@ -447,7 +443,6 @@ public class MainActivity extends AppCompatActivity /* implements
 						}
 						*/
 
-						setupUser(userDataMap.getCurUser());
 					}
 				}
 				break;
@@ -455,6 +450,9 @@ public class MainActivity extends AppCompatActivity /* implements
 				// shouldn't happen
 				throw new RuntimeException("Unexpected activity result");
 		}
+		userDataMap.saveJson(this, this.jsonFilename);
+		setupNumbers();
+		setupUser(userDataMap.getCurUser());
 	}
 
     public void sendAnswer(View view) {

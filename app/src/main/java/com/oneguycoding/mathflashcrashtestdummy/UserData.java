@@ -9,7 +9,6 @@ import java.io.Serializable;
 class UserData implements Serializable {
 	private String name;
 	private String email;
-	final OperationData operationData;
 	final UserResults userResults;
 	final OperationsClass ops;
 
@@ -20,7 +19,6 @@ class UserData implements Serializable {
 	UserData(String name, String email) {
 		this.name = name;
 		this.email = email;
-		operationData = new OperationData();
 		userResults = new UserResults(0);
 		ops = new OperationsClass();
 	}
