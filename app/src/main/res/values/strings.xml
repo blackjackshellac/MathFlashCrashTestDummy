@@ -5,13 +5,6 @@
     <string name="title_notifications">Notifications</string>
     <string name="button_answer">Answer</string>
     <string name="text_message">Nothing to see here</string>
-    <string-array name="strings_operations">
-        <item>Plus</item>
-        <item>Minus</item>
-        <item>Multiply</item>
-        <item>Divide</item>
-        <item>All</item>
-    </string-array>
     <string name="stringPlus">Addition</string>
     <string name="stringMinus">Subtraction</string>
     <string name="stringDivision">Division</string>
@@ -41,4 +34,5 @@
     <string name="text_delete_user_prompt">Delete user %1$s?</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
+    <string name="test_max_num">Number of tests</string>
 </resources>

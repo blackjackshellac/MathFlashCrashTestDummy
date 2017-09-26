@@ -26,7 +26,7 @@ public class UserResults implements Serializable {
 	 * @param num number of operations to test, default is DEFAULT_NUM
 	 */
 	UserResults(int num) {
-		this.num = num <= 0 ? DEFAULT_NUM : num;
+		setNum(num);
 		nCorrect = 0;
 		nWrong = 0;
 		retryMap = new HashMap<Operation, Stack<LongPair>>();
@@ -63,8 +63,19 @@ public class UserResults implements Serializable {
 		return nCorrect;
 	}
 
+	private void setNum(int num) {
+		this.num = num <=0 ? DEFAULT_NUM : num;
+	}
+
+	/**
+	 * Reset results with the given number of trials, and the retryMap for all ops
+	 *
+	 * @param num - if num > 0 reset its value, otherwise keep the current value
+	 */
 	public void reset(int num) {
-		this.num = num;
+		if (num > 0) {
+			setNum(num);
+		}
 		nWrong = 0;
 		nCorrect = 0;
 		for (Operation op : retryMap.keySet()) {
@@ -88,5 +99,9 @@ public class UserResults implements Serializable {
 
 	public int getRemaining() {
 		return num-getNumAnswered();
+	}
+
+	public boolean testDone() {
+		return getNumAnswered() >= num;
 	}
 }

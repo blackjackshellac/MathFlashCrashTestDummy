@@ -46,7 +46,7 @@ public class MainActivity extends AppCompatActivity /* implements
 	private UserDataMap userDataMap;
 	//private UserData userData;
 	//private String curUser;
-	//private UserResults userResults;
+	//private UserResults results;
 	private String jsonFilename;
 /*
 	private GoogleApiClient mGoogleApiClient;
@@ -298,7 +298,7 @@ public class MainActivity extends AppCompatActivity /* implements
 			message.setText(getResources().getString(R.string.hello_name, name));
 
 			UserData userData = userDataMap.getUserData();
-			progressBar.setMax(userData.userResults.getNum());
+			progressBar.setMax(userData.results.getNum());
 		} else {
 			throw new RuntimeException(String.format("UserDataMap does not contain user %s", name));
 		}
@@ -323,7 +323,7 @@ public class MainActivity extends AppCompatActivity /* implements
 
     public void resetUser() {
 	    progressBar.setProgress(0);
-	    UserResults userResults = userDataMap.getUserData().userResults;
+	    UserResults userResults = userDataMap.getUserData().results;
 	    userResults.reset(userResults.getNum());
     }
 
@@ -474,7 +474,7 @@ public class MainActivity extends AppCompatActivity /* implements
 
 	    //UserData userData = userDataMap.getUserData();
         boolean b = numberOperation.isAnswer(nanswer);
-	    UserResults userResults = userDataMap.getUserData().userResults;
+	    UserResults userResults = userDataMap.getUserData().results;
 	    if (b) {
             response.setImageResource(R.drawable.mushroom_good);
             setupNumbers();
@@ -498,5 +498,11 @@ public class MainActivity extends AppCompatActivity /* implements
 	    TextView textProgress = (TextView) findViewById(R.id.text_progress);
 	    String progress = getString(R.string.text_progress, userResults.getnCorrect(), userResults.getNumAnswered(), userResults.getPercentage(), userResults.getRemaining());
 	    textProgress.setText(progress);
+
+	    if (userResults.testDone()) {
+		    userResults.reset(0);
+		    progressBar.setProgress(0);
+		    progressBar.setMax(userResults.getNum());
+	    }
     }
 }

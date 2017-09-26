@@ -11,6 +11,7 @@ import android.widget.TextView;
 public class OperationSelector extends AppCompatActivity {
 	private UserDataMap userDataMap;
 	private UserData userData;
+	private UserResults results;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -21,6 +22,7 @@ public class OperationSelector extends AppCompatActivity {
 		Bundle b = intent.getExtras();
 		userDataMap = (UserDataMap) b.getSerializable(MainActivity.EXTRA_USERDATA);
 		userData = userDataMap.getUserData();
+		results = userData.results;
 
 		setupOperations();
 	}
@@ -73,6 +75,7 @@ public class OperationSelector extends AppCompatActivity {
 
 		AndroidUtil.setEditTextString(this, R.id.numTopMax, topRange.l2.toString());
 		AndroidUtil.setEditTextString(this, R.id.numBotMax, bottomRange.l2.toString());
+		AndroidUtil.setEditTextString(this, R.id.numTestMax, Integer.toString(results.getNum()));
 	}
 
 	@Override
@@ -103,6 +106,16 @@ public class OperationSelector extends AppCompatActivity {
 			max = Long.parseLong(textView.getText().toString());
 			ops.updateBottom(null, max);
 		} catch(NumberFormatException e) {
+			// ignore
+		}
+
+		try {
+			textView = (TextView) findViewById(R.id.numTestMax);
+			int num = Integer.parseInt(textView.getText().toString());
+			if (results.getNum() != num && num >= 0) {
+				results.reset(num);
+			}
+		} catch (NumberFormatException e) {
 			// ignore
 		}
 	}

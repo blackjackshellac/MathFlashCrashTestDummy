@@ -157,4 +157,25 @@
         app:layout_constraintTop_toBottomOf="@+id/textView"
         app:layout_constraintHorizontal_bias="0.0"/>
 
+    <TextView
+        android:id="@+id/textView6"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginRight="8dp"
+        android:layout_marginTop="32dp"
+        android:text="@string/test_max_num"
+        android:textAlignment="textEnd"
+        app:layout_constraintRight_toLeftOf="@+id/numTestMax"
+        app:layout_constraintTop_toBottomOf="@+id/textView3"/>
+
+    <EditText
+        android:id="@+id/numTestMax"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:inputType="number"
+        app:layout_constraintBaseline_toBaselineOf="@+id/textView6"
+        app:layout_constraintRight_toLeftOf="@+id/guideline5"
+        android:layout_marginRight="8dp"/>
+
 </android.support.constraint.ConstraintLayout>

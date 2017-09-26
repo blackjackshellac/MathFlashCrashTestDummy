@@ -9,7 +9,7 @@ import java.io.Serializable;
 class UserData implements Serializable {
 	private String name;
 	private String email;
-	final UserResults userResults;
+	final UserResults results;
 	final OperationsClass ops;
 
 	UserData() {
@@ -19,7 +19,7 @@ class UserData implements Serializable {
 	UserData(String name, String email) {
 		this.name = name;
 		this.email = email;
-		userResults = new UserResults(0);
+		results = new UserResults(0);
 		ops = new OperationsClass();
 	}
 
