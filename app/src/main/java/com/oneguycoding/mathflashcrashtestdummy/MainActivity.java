@@ -511,7 +511,7 @@ public class MainActivity extends AppCompatActivity /* implements
 		    userResults.reset(0);
 		    progressBar.setProgress(0);
 		    progressBar.setMax(userResults.getNum());
-		    message.setText(progress);
+		    message.setText(getString(R.string.text_bravo, userDataMap.getCurUser()));
 
 		    AndroidUtil.showToast(this, progress, 5);
 

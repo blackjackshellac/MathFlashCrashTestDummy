@@ -36,4 +36,5 @@
     <string name="yes">Yes</string>
     <string name="no">No</string>
     <string name="test_max_num">Number of tests</string>
+    <string name="text_bravo">Bravo %1$s!</string>
 </resources>
