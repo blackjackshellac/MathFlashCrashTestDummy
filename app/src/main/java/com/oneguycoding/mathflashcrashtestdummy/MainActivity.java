@@ -185,7 +185,7 @@ public class MainActivity extends AppCompatActivity /* implements
 			}
 		);
 
-		setupNumbers();
+		//setupNumbers();
 		setupUser(userDataMap.getCurUser());
 
 
@@ -312,6 +312,9 @@ public class MainActivity extends AppCompatActivity /* implements
 	    setupOperation(numberOperation.op);
 
 		LongPair numberPair = numberOperation.randomize();
+		while (userData.results.limitZerosAndOnes(numberPair)) {
+			numberPair = numberOperation.randomize();
+		}
 
         num1.setText(getResources().getString(R.string.msg_number_long, numberPair.l1));
         num2.setText(getResources().getString(R.string.msg_number_long, numberPair.l2));
@@ -451,7 +454,7 @@ public class MainActivity extends AppCompatActivity /* implements
 				throw new RuntimeException("Unexpected activity result");
 		}
 		userDataMap.saveJson(this, this.jsonFilename);
-		setupNumbers();
+		//setupNumbers();
 		setupUser(userDataMap.getCurUser());
 	}
 
@@ -496,13 +499,25 @@ public class MainActivity extends AppCompatActivity /* implements
 	        }
         }
 	    TextView textProgress = (TextView) findViewById(R.id.text_progress);
-	    String progress = getString(R.string.text_progress, userResults.getnCorrect(), userResults.getNumAnswered(), userResults.getPercentage(), userResults.getRemaining());
-	    textProgress.setText(progress);
+		String progress;
 
 	    if (userResults.testDone()) {
+
+		    AndroidUtil.hideKeyboard(this);
+
+		    progress = getString(R.string.text_progress_done, userDataMap.getCurUser(), userResults.getnCorrect(), userResults.getNumAnswered(), userResults.getPercentage());
+		    textProgress.setText(progress);
+
 		    userResults.reset(0);
 		    progressBar.setProgress(0);
 		    progressBar.setMax(userResults.getNum());
+		    message.setText(progress);
+
+		    AndroidUtil.showToast(this, progress, 5);
+
+	    } else {
+		    progress = getString(R.string.text_progress, userResults.getnCorrect(), userResults.getNumAnswered(), userResults.getPercentage(), userResults.getRemaining());
+		    textProgress.setText(progress);
 	    }
     }
 }
