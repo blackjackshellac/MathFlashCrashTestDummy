@@ -28,7 +28,7 @@ import java.io.File;
 public class MainActivity extends AppCompatActivity /* implements
 		GoogleApiClient.ConnectionCallbacks,
 		GoogleApiClient.OnConnectionFailedListener */ {
-	public static final String EXTRA_OPS = "ops";
+	//public static final String EXTRA_OPS = "ops";
 	public static final String EXTRA_USERDATA = "userdata";
 	public static final int RESULT_OPS = 100;
 	public static final int RESULT_USERDATA = 101;
@@ -47,46 +47,44 @@ public class MainActivity extends AppCompatActivity /* implements
 	//private UserData userData;
 	//private String curUser;
 	//private UserResults results;
-	private String jsonFilename;
-/*
-	private GoogleApiClient mGoogleApiClient;
-	final private ResultCallback<DriveApi.DriveContentsResult> driveContentsCallback =
-			new ResultCallback<DriveApi.DriveContentsResult>() {
-				@Override
-				public void onResult(DriveApi.DriveContentsResult result) {
-					if (!result.getStatus().isSuccess()) {
-						Log.d("onResult", "Error while trying to create new file contents");
-						return;
+	public static final String jsonFilename = "MathFlashCrashTestDummy.json";
+	private Menu menu;
+
+	/*
+		private GoogleApiClient mGoogleApiClient;
+		final private ResultCallback<DriveApi.DriveContentsResult> driveContentsCallback =
+				new ResultCallback<DriveApi.DriveContentsResult>() {
+					@Override
+					public void onResult(DriveApi.DriveContentsResult result) {
+						if (!result.getStatus().isSuccess()) {
+							Log.d("onResult", "Error while trying to create new file contents");
+							return;
+						}
+
+						MetadataChangeSet changeSet = new MetadataChangeSet.Builder()
+								.setTitle("appconfig.txt")
+								.setMimeType("text/plain")
+								.build();
+						Drive.DriveApi.getAppFolder(mGoogleApiClient)
+								.createFile(mGoogleApiClient, changeSet, result.getDriveContents())
+								.setResultCallback(fileCallback);
 					}
+				};
+		// [END drive_contents_callback]
 
-					MetadataChangeSet changeSet = new MetadataChangeSet.Builder()
-							.setTitle("appconfig.txt")
-							.setMimeType("text/plain")
-							.build();
-					Drive.DriveApi.getAppFolder(mGoogleApiClient)
-							.createFile(mGoogleApiClient, changeSet, result.getDriveContents())
-							.setResultCallback(fileCallback);
-				}
-			};
-	// [END drive_contents_callback]
-
-	final private ResultCallback<DriveFolder.DriveFileResult> fileCallback = new
-			ResultCallback<DriveFolder.DriveFileResult>() {
-				@Override
-				public void onResult(DriveFolder.DriveFileResult result) {
-					if (!result.getStatus().isSuccess()) {
-						Log.d("onResult", "Error while trying to create the file");
-						return;
+		final private ResultCallback<DriveFolder.DriveFileResult> fileCallback = new
+				ResultCallback<DriveFolder.DriveFileResult>() {
+					@Override
+					public void onResult(DriveFolder.DriveFileResult result) {
+						if (!result.getStatus().isSuccess()) {
+							Log.d("onResult", "Error while trying to create the file");
+							return;
+						}
+						Log.i("onResult", "Created a file in App Folder: "
+								+ result.getDriveFile().getDriveId());
 					}
-					Log.i("onResult", "Created a file in App Folder: "
-							+ result.getDriveFile().getDriveId());
-				}
-			};
-*/
-	public MainActivity() {
-		jsonFilename = "MathFlashCrashTestDummy.json";
-	}
-
+				};
+	*/
 	@Override
 	protected void onStart() {
 		super.onStart();
@@ -196,7 +194,19 @@ public class MainActivity extends AppCompatActivity /* implements
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the main_menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.main_menu, menu);
+		this.menu = menu;
 		return true;
+	}
+
+	public MenuItem findMenuItemByName(Menu menu, String name) {
+		boolean found = false;
+		for (int i = 0; i < menu.size(); i++) {
+			MenuItem item = menu.getItem(i);
+			if (item.getTitle().toString().equals(name)) {
+				return item;
+			}
+		}
+		return null;
 	}
 
 	@Override
@@ -205,15 +215,8 @@ public class MainActivity extends AppCompatActivity /* implements
 			if (name.equals(getText(R.string.user_default))) {
 				continue;
 			}
-			boolean found = false;
-			for (int i = 0; i < menu.size(); i++) {
-				MenuItem item = menu.getItem(i);
-				if (item.getTitle().toString().equals(name)) {
-					found = true;
-					break;
-				}
-			}
-			if (!found) {
+			MenuItem item = findMenuItemByName(menu, name);
+			if (item == null) {
 				menu.add(name);
 			}
 		}
@@ -226,7 +229,7 @@ public class MainActivity extends AppCompatActivity /* implements
 		String name = null;
 		switch(item.getItemId()) {
 			case R.id.menu_delete_user:
-				deleteUser();
+				deleteUser(item);
 				break;
 			case R.id.menu_reset_user:
 				resetUser();
@@ -330,9 +333,11 @@ public class MainActivity extends AppCompatActivity /* implements
 	    userResults.reset(userResults.getNum());
     }
 
-	private void deleteUser() {
+	private void deleteUser(MenuItem item) {
 		// make final to allow OnClickListeners access
 		final String name = userDataMap.getCurUser();
+		final MainActivity activity = this;
+
 		if (name.equals(getText(R.string.user_default))) {
 			return;
 		}
@@ -345,8 +350,13 @@ public class MainActivity extends AppCompatActivity /* implements
 		builder.setPositiveButton(getText(R.string.yes), new DialogInterface.OnClickListener() {
 
 			public void onClick(DialogInterface dialog, int which) {
-				userDataMap.deleteUser(name);
 				// TODO have to delete 'name' from R.menu.main_menu
+				userDataMap.deleteUser(name);
+				MenuItem mitem = activity.findMenuItemByName(menu, name);
+				menu.removeItem(mitem.getItemId());
+				activity.invalidateOptionsMenu();
+				setupUser(activity.userDataMap.getCurUser());
+				userDataMap.saveJson(activity, MainActivity.jsonFilename);
 				dialog.dismiss();
 			}
 		});
