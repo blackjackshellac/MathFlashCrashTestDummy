@@ -1,8 +1,11 @@
 package com.oneguycoding.mathflashcrashtestdummy;
 
 import android.app.AlertDialog;
+import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.media.AudioManager;
 import android.media.ToneGenerator;
 import android.os.Bundle;
@@ -24,6 +27,7 @@ import android.widget.TextView;
 //import com.google.android.gms.drive.Drive;
 
 import java.io.File;
+import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity /* implements
 		GoogleApiClient.ConnectionCallbacks,
@@ -49,7 +53,10 @@ public class MainActivity extends AppCompatActivity /* implements
 	//private UserResults results;
 	public static final String jsonFilename = "MathFlashCrashTestDummy.json";
 	private Menu menu;
+	private PerformanceStatsHelper perfStatsHelper;
+	private SQLiteDatabase perfStatsDb;
 
+	public MainActivity() {	}
 	/*
 		private GoogleApiClient mGoogleApiClient;
 		final private ResultCallback<DriveApi.DriveContentsResult> driveContentsCallback =
@@ -186,8 +193,8 @@ public class MainActivity extends AppCompatActivity /* implements
 		//setupNumbers();
 		setupUser(userDataMap.getCurUser());
 
-
-
+		perfStatsHelper = new PerformanceStatsHelper(this);
+		perfStatsDb = perfStatsHelper.getWritableDatabase();
 	}
 
 	@Override
@@ -518,7 +525,15 @@ public class MainActivity extends AppCompatActivity /* implements
 		    progress = getString(R.string.text_progress_done, userDataMap.getCurUser(), userResults.getnCorrect(), userResults.getNumAnswered(), userResults.getPercentage());
 		    textProgress.setText(progress);
 
+		    userResults.saveStats(perfStatsDb, numberOperation.op, userDataMap.getCurUser());
+		    // TODO just testing UserResults.loadStats()
+		    ArrayList<UserResults.SqlResult> results = UserResults.loadStats(perfStatsDb, numberOperation.op, userDataMap.getCurUser());
+		    if (results == null) {
+			    Log.d("SQL", "failed to load results for user "+userDataMap.getCurUser());
+		    }
+
 		    userResults.reset(0);
+
 		    progressBar.setProgress(0);
 		    progressBar.setMax(userResults.getNum());
 		    message.setText(getString(R.string.text_bravo, userDataMap.getCurUser()));
@@ -529,5 +544,11 @@ public class MainActivity extends AppCompatActivity /* implements
 		    progress = getString(R.string.text_progress, userResults.getnCorrect(), userResults.getNumAnswered(), userResults.getPercentage(), userResults.getRemaining());
 		    textProgress.setText(progress);
 	    }
+    }
+
+    @Override
+    public void onDestroy() {
+	    perfStatsDb.close();
+	    super.onDestroy();
     }
 }

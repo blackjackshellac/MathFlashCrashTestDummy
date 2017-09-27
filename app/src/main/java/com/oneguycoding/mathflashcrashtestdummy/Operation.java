@@ -1,7 +1,10 @@
 package com.oneguycoding.mathflashcrashtestdummy;
 
 import android.util.Log;
+import android.util.StringBuilderPrinter;
 
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.Random;
 
 /**
@@ -13,6 +16,19 @@ public enum Operation {
     MINUS,
     MULTIPLY,
     DIVIDE;
+
+    private static final HashMap<Operation,Character> chars;
+	public static final String CHARS_LIST;
+
+	static {
+        chars = new HashMap<>();
+        chars.put(PLUS, '+');
+        chars.put(MINUS, '-');
+        chars.put(MULTIPLY, '*');
+        chars.put(DIVIDE, '/');
+
+	    CHARS_LIST = Operation.chars_list();
+    }
 
     public long doit(LongPair nums) {
         long num1 = nums.l1;
@@ -76,5 +92,18 @@ public enum Operation {
                 break;
         }
         return new LongPair(n1, n2);
+    }
+
+    private static String chars_list() {
+        StringBuilder sb = new StringBuilder();
+        for (Character val : chars.values()) {
+            sb.append(String.format("'%s',", val.toString()));
+        }
+        sb.deleteCharAt(sb.length()-1);
+        return sb.toString();
+    }
+
+    public String toChar() {
+        return chars.get(this).toString();
     }
 }

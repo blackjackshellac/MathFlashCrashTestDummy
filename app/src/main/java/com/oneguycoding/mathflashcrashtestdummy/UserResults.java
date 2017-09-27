@@ -1,8 +1,14 @@
 package com.oneguycoding.mathflashcrashtestdummy;
 
+import android.content.ContentValues;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 import android.util.SparseIntArray;
 
 import java.io.Serializable;
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Stack;
@@ -86,6 +92,10 @@ public class UserResults implements Serializable {
 		return nCorrect;
 	}
 
+	public int getnWrong() {
+		return nWrong;
+	}
+
 	private void setNum(int num) {
 		this.num = num <=0 ? DEFAULT_NUM : num;
 	}
@@ -160,5 +170,76 @@ public class UserResults implements Serializable {
 			}
 		}
 		return false;
+	}
+
+	public static class SqlResult {
+		public final long id;
+		public final long runtime;
+		public final long duration;
+		public final int  num;
+		public final int correct;
+		public final String name;
+
+		SqlResult(Cursor cursor) {
+			id =  cursor.getLong(cursor.getColumnIndexOrThrow(PerformanceStatsSchema.StatsSchema.COL_NAME_ID));
+			runtime = cursor.getLong(cursor.getColumnIndexOrThrow(PerformanceStatsSchema.StatsSchema.COL_NAME_RUNTIME));
+			duration = cursor.getLong(cursor.getColumnIndexOrThrow(PerformanceStatsSchema.StatsSchema.COL_NAME_DURATION));
+			num = cursor.getInt(cursor.getColumnIndexOrThrow(PerformanceStatsSchema.StatsSchema.COL_NAME_NUM));
+			correct = cursor.getInt(cursor.getColumnIndexOrThrow(PerformanceStatsSchema.StatsSchema.COL_NAME_CORRECT));
+			name = cursor.getString(cursor.getColumnIndexOrThrow(PerformanceStatsSchema.StatsSchema.COL_NAME_NAME));
+			Log.d("SQL", String.format("id,name,num,correct=%d,%s,%d,%d", id, name, num, correct));
+		}
+
+	}
+
+	public static ArrayList<SqlResult> loadStats(SQLiteDatabase perfStatsDb, Operation op, String name) {
+		// Define a projection that specifies which columns from the database
+		// you will actually use after this query.
+		String[] projection = {
+				PerformanceStatsSchema.StatsSchema.COL_NAME_ID,
+				PerformanceStatsSchema.StatsSchema.COL_NAME_RUNTIME,
+				PerformanceStatsSchema.StatsSchema.COL_NAME_DURATION,
+				PerformanceStatsSchema.StatsSchema.COL_NAME_NAME,
+				PerformanceStatsSchema.StatsSchema.COL_NAME_NUM,
+				PerformanceStatsSchema.StatsSchema.COL_NAME_CORRECT
+		};
+
+		// Filter results WHERE "title" = 'My Title'
+		String selection = PerformanceStatsSchema.StatsSchema.COL_NAME_NAME + " = ?";
+		String[] selectionArgs = { name };
+
+		// How you want the results sorted in the resulting Cursor
+		String sortOrder =
+				PerformanceStatsSchema.StatsSchema.COL_NAME_RUNTIME + " ASC";
+
+		Cursor cursor = perfStatsDb.query(
+				PerformanceStatsSchema.StatsSchema.TABLE_NAME,                     // The table to query
+				projection,                               // The columns to return
+				selection,                                // The columns for the WHERE clause
+				selectionArgs,                            // The values for the WHERE clause
+				null,                                     // don't group the rows
+				null,                                     // don't filter by row groups
+				sortOrder                                 // The sort order
+		);
+
+		ArrayList<SqlResult> results = new ArrayList<SqlResult>();
+		while (cursor.moveToNext()) {
+			SqlResult result = new SqlResult(cursor);
+			results.add(result);
+		}
+		return results;
+	}
+
+	public void saveStats(SQLiteDatabase perfStatsDb, Operation op, String name) {
+		ContentValues values = new ContentValues();
+		values.put(PerformanceStatsSchema.StatsSchema.COL_NAME_NAME, name);
+		values.put(PerformanceStatsSchema.StatsSchema.COL_NAME_OPERATION, op.toChar());
+		values.put(PerformanceStatsSchema.StatsSchema.COL_NAME_RUNTIME, System.currentTimeMillis()/1000L);
+		values.put(PerformanceStatsSchema.StatsSchema.COL_NAME_DURATION, 0);
+		values.put(PerformanceStatsSchema.StatsSchema.COL_NAME_NUM, this.getNum());
+		values.put(PerformanceStatsSchema.StatsSchema.COL_NAME_CORRECT, this.getnCorrect());
+		values.put(PerformanceStatsSchema.StatsSchema.COL_NAME_WRONG, this.getnWrong());
+		long newRowId = perfStatsDb.insert(PerformanceStatsSchema.StatsSchema.TABLE_NAME, null, values);
+		Log.d("SQL", "newRowId="+newRowId);
 	}
 }
