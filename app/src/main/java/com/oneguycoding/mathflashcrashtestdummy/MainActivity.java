@@ -11,6 +11,7 @@ import android.media.ToneGenerator;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.util.StringBuilderPrinter;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -27,7 +28,9 @@ import android.widget.TextView;
 //import com.google.android.gms.drive.Drive;
 
 import java.io.File;
+import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Iterator;
 
 public class MainActivity extends AppCompatActivity /* implements
 		GoogleApiClient.ConnectionCallbacks,
@@ -171,7 +174,11 @@ public class MainActivity extends AppCompatActivity /* implements
 			public boolean onKey(View view, int keyCode, KeyEvent keyEvent) {
 				if(  keyCode == EditorInfo.IME_ACTION_SEND ||
 						(keyEvent.getKeyCode() == KeyEvent.KEYCODE_ENTER && keyEvent.getAction() == KeyEvent.ACTION_DOWN)) {
-					sendAnswer(findViewById(R.id.sendAnswer));
+					try {
+						sendAnswer(findViewById(R.id.sendAnswer));
+					} catch(Exception e) {
+						Log.d("ERROR", "Exception from sendAnswer", e);
+					}
 					return true;
 				}
 				return false;
@@ -481,7 +488,7 @@ public class MainActivity extends AppCompatActivity /* implements
 		setupUser(userDataMap.getCurUser());
 	}
 
-    public void sendAnswer(View view) {
+    public void sendAnswer(View view) throws Exception {
         TextView tvans = (TextView) findViewById(R.id.number3);
 	    String txt = tvans.getText().toString().replaceAll("\\s+", "");
         long nanswer;
@@ -496,6 +503,15 @@ public class MainActivity extends AppCompatActivity /* implements
 		    Log.d("ERROR", "Failed to parse txt: "+txt);
 		    setupFocus();
 		    return;
+	    }
+
+	    if (BuildConfig.DEBUG) {
+		    if (Long.parseLong(num1.getText().toString()) != numberOperation.nums().l1) {
+			    throw new Exception("num1 is out of whack!");
+		    }
+		    if (Long.parseLong(num2.getText().toString()) != numberOperation.nums().l2) {
+			    throw new Exception("num2 is out of whack!");
+		    }
 	    }
 
 	    //UserData userData = userDataMap.getUserData();
@@ -528,15 +544,28 @@ public class MainActivity extends AppCompatActivity /* implements
 
 		    AndroidUtil.hideKeyboard(this);
 
-		    progress = getString(R.string.text_progress_done, userDataMap.getCurUser(), userResults.getnCorrect(), userResults.getNumAnswered(), userResults.getPercentage());
-		    textProgress.setText(progress);
-
 		    userResults.saveStats(perfStatsDb, numberOperation.op, userDataMap.getCurUser());
 		    // TODO just testing UserResults.loadStats()
 		    ArrayList<UserResults.SqlResult> results = UserResults.loadStats(perfStatsDb, numberOperation.op, userDataMap.getCurUser());
 		    if (results == null) {
 			    Log.d("SQL", "failed to load results for user "+userDataMap.getCurUser());
 		    }
+
+		    progress = getString(R.string.text_progress_done, userDataMap.getCurUser(), userResults.getnCorrect(), userResults.getNumAnswered(), userResults.getPercentage());
+		    //textProgress.setText(progress);
+
+		    // TODO record duration and average duration
+		    StringBuilder sb = new StringBuilder(progress);
+		    float total = 0.0f;
+		    Iterator<UserResults.SqlResult> it = results.iterator();
+		    while (it.hasNext()) {
+			    UserResults.SqlResult entry = it.next();
+			    total += entry.percentage_correct;
+			    sb.append(AndroidUtil.stringFormatter("%s:[%d],%d,%d,%.2f\n", DateFormat.getDateTimeInstance().format(entry.runtime*1000L), entry.duration-entry.runtime, entry.correct, entry.num, entry.percentage_correct));
+		    }
+		    float ave = total / results.size();
+		    sb.append("\n").append(AndroidUtil.stringFormatter("Ave=%.2f", ave)).append("\n");
+		    textProgress.setText(sb.toString());
 
 		    userResults.reset(0);
 
