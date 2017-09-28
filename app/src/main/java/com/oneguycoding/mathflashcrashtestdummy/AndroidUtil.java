@@ -1,10 +1,13 @@
 package com.oneguycoding.mathflashcrashtestdummy;
 
 import android.app.Activity;
+import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.Toast;
+
+import java.util.IllegalFormatConversionException;
 
 /**
  * Created by steeve on 12/09/17.
@@ -40,5 +43,18 @@ public class AndroidUtil {
 			view = new View(activity);
 		}
 		imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+	}
+
+	public static String stringFormatter(String format, Object... arguments) {
+		try {
+			return String.format(format, arguments);
+		} catch (IllegalFormatConversionException e) {
+			Log.e("AndroidUtil", "Failed to convert string: ", e);
+			throw e;
+		}
+	}
+
+	public static long now_secs() {
+		return System.currentTimeMillis()/1000L;
 	}
 }

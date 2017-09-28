@@ -112,7 +112,12 @@ public class OperationSelector extends AppCompatActivity {
 		try {
 			textView = (TextView) findViewById(R.id.numTestMax);
 			int num = Integer.parseInt(textView.getText().toString());
-			if (results.getNum() != num && num >= 0) {
+			if (num < 10) {
+				AndroidUtil.showToast(this, getString(R.string.text_num_too_small, num));
+				num = 10;
+				textView.setText(""+num);
+			}
+			if (results.getNum() != num) {
 				results.reset(num);
 			}
 		} catch (NumberFormatException e) {

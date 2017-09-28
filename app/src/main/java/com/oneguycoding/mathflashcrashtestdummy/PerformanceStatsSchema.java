@@ -4,19 +4,9 @@ import android.provider.BaseColumns;
 
 /**
  * Created by steeve on 27/09/17.
- *
- *
- CREATE TABLE "perf_stats" (
- `name`	TEXT NOT NULL,
- `op`	TEXT CHECK(op in ( '+' , '-' , '*' , '/' )),
- `runtime`	INTEGER,
- `num`	INTEGER,
- `correct`	INTEGER,
- `wrong`	INTEGER,
- `id`	INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE
- )
+ * <br/>
+ *  Reference: https://developer.android.com/training/basics/data-storage/databases.html
  */
-
 public class PerformanceStatsSchema {
 	// prevent instantiation
 	private PerformanceStatsSchema() {}
@@ -35,16 +25,15 @@ public class PerformanceStatsSchema {
 	}
 
 	public static String SQL_CREATE_TABLE = String.format(
-			"CREATE TABLE \"%s\" (\n" +
-			" `%s`\tTEXT NOT NULL,\n" +
-			" `%s`\tTEXT %s,\n" +
-			" `%s`\tINTEGER,\n" +   // runtime
-			" `%s`\tINTEGER,\n" +   // duration
-			" `%s`\tINTEGER,\n" +
-			" `%s`\tINTEGER,\n" +
-			" `%s`\tINTEGER,\n" +
-			" `%s`\tINTEGER,\n" +
-			" `%s`\tINTEGER PRIMARY KEY AUTOINCREMENT UNIQUE\n" +
+			"CREATE TABLE \"%s\" (\n" + // table name
+			" `%s`\tTEXT NOT NULL,\n" + // user name
+			" `%s`\tTEXT %s,\n" +       // operation with check_op
+			" `%s`\tINTEGER,\n" +       // runtime
+			" `%s`\tINTEGER,\n" +       // duration
+			" `%s`\tINTEGER,\n" +       // num
+			" `%s`\tINTEGER,\n" +       // correct
+			" `%s`\tINTEGER,\n" +       // wrong
+			" `%s`\tINTEGER PRIMARY KEY AUTOINCREMENT UNIQUE\n" +   // id
 			" )",
 				StatsSchema.TABLE_NAME,
 				StatsSchema.COL_NAME_NAME,
@@ -56,5 +45,5 @@ public class PerformanceStatsSchema {
 				StatsSchema.COL_NAME_WRONG,
 				StatsSchema.COL_NAME_ID);
 
-	public static String SQL_DELETE_TABLE = "DROP TABLE IF EXISTS " + StatsSchema.TABLE_NAME;
+	public static String SQL_DROP_TABLE = "DROP TABLE IF EXISTS " + StatsSchema.TABLE_NAME;
 }

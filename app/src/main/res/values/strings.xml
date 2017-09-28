@@ -37,4 +37,5 @@
     <string name="no">No</string>
     <string name="test_max_num">Number of tests</string>
     <string name="text_bravo">Bravo %1$s!</string>
+    <string name="text_num_too_small">Minimum number is %1$d, resetting</string>
 </resources>

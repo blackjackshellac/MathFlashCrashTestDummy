@@ -8,11 +8,13 @@ import android.util.Log;
 
 /**
  * Created by steeve on 27/09/17.
+ *  <br/>
+ *  Reference: https://developer.android.com/training/basics/data-storage/databases.html
  */
 
 public class PerformanceStatsHelper extends SQLiteOpenHelper {
-	private static final int DATABASE_VERSION = 1;
-	private static final String DATABASE_NAME = "MathFlashCrashTestDummy.db";
+	private static final int DATABASE_VERSION = 2;
+	public static final String DATABASE_NAME = "MathFlashCrashTestDummy.db";
 
 	public PerformanceStatsHelper(Context context) {
 		super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -31,10 +33,11 @@ public class PerformanceStatsHelper extends SQLiteOpenHelper {
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 		try {
-			db.execSQL(PerformanceStatsSchema.SQL_DELETE_TABLE);
+			db.execSQL(PerformanceStatsSchema.SQL_DROP_TABLE);
 			onCreate(db);
 		} catch (Exception e) {
 			Log.d("SQL", "Failed to upgrade database ", e);
 		}
 	}
+
 }

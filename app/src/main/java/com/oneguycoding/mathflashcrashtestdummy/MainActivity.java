@@ -193,8 +193,14 @@ public class MainActivity extends AppCompatActivity /* implements
 		//setupNumbers();
 		setupUser(userDataMap.getCurUser());
 
+		// reset database here
+		//Log.d("SQL", "deleting database table: "+PerformanceStatsSchema.SQL_DROP_TABLE);
+		//perfStatsDb.execSQL(PerformanceStatsSchema.SQL_DROP_TABLE);
+		//this.deleteDatabase(PerformanceStatsHelper.DATABASE_NAME);
+
 		perfStatsHelper = new PerformanceStatsHelper(this);
 		perfStatsDb = perfStatsHelper.getWritableDatabase();
+
 	}
 
 	@Override
