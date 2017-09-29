@@ -39,11 +39,12 @@ public class MainActivity extends AppCompatActivity /* implements
 	public static final String EXTRA_USERDATA = "userdata";
 	public static final int RESULT_OPS = 100;
 	public static final int RESULT_USERDATA = 101;
+	private static final int RESULT_STATS = 102;
 	//public static final int RESOLVE_CONNECTION_REQUEST_CODE = 102;
 
 	private static final ToneGenerator tg = new ToneGenerator(AudioManager.STREAM_NOTIFICATION, 100);
 
-    private NumberOperation numberOperation;
+	private NumberOperation numberOperation;
 	//private OperationsClass ops = new OperationsClass();
 	private TextView num1, num2, num3;
 	private TextView message;
@@ -431,8 +432,22 @@ public class MainActivity extends AppCompatActivity /* implements
 		startActivityForResult(intent, RESULT_OPS);
 	}
 
+	public void showStats() {
+		Intent intent = new Intent(this, StatsActivity.class);
+		/*
+		Bundle b = new Bundle();
+		b.putSerializable(EXTRA_OPS, ops);
+		intent.putExtras(b);
+		*/
+		Bundle b = new Bundle();
+		b.putSerializable(EXTRA_USERDATA, userDataMap);
+		intent.putExtras(b);
+		startActivityForResult(intent, RESULT_STATS);
+	}
+
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
+		boolean saveJson = false;
 		switch(requestCode) {
 /*
 			case RESOLVE_CONNECTION_REQUEST_CODE:
@@ -441,10 +456,19 @@ public class MainActivity extends AppCompatActivity /* implements
 				}
 				break;
 */
+			case RESULT_STATS:
+				if (resultCode == RESULT_OK) {
+					Bundle b = intent.getExtras();
+					//userDataMap = (UserDataMap) b.getSerializable(EXTRA_USERDATA);
+					UserResults userResults = userDataMap.getUserData().results;
+					userResults.reset(0);
+				}
+				break;
 			case RESULT_OPS:
 				if (resultCode == RESULT_OK) {
 					Bundle b = intent.getExtras();
 					userDataMap = (UserDataMap) b.getSerializable(EXTRA_USERDATA);
+					saveJson = true;
 					//setupNumbers();
 				}
 				break;
@@ -454,28 +478,7 @@ public class MainActivity extends AppCompatActivity /* implements
 					String name = userData.getName();
 					if (!name.isEmpty()) {
 						userDataMap.addUserData(userData);
-
-						/*
-						Gson gson = new Gson();
-						Type type = new TypeToken<UserDataMap>(){}.getType();
-						String json = gson.toJson(userDataMap);
-						UserDataMap uMap = gson.fromJson(json, type);
-
-						//File file = new File(this.getFilesDir(), jsonFilename);
-						try {
-							ApplicationInfo info = this.getApplicationInfo();
-							System.out.printf("%s\n", info.toString());
-
-							FileOutputStream outputStream = openFileOutput(jsonFilename, Context.MODE_PRIVATE);
-							outputStream.write(json.getBytes());
-							outputStream.close();
-
-;
-						} catch (Exception e) {
-							e.printStackTrace();
-						}
-						*/
-
+						saveJson = true;
 					}
 				}
 				break;
@@ -483,7 +486,9 @@ public class MainActivity extends AppCompatActivity /* implements
 				// shouldn't happen
 				throw new RuntimeException("Unexpected activity result");
 		}
-		userDataMap.saveJson(this, this.jsonFilename);
+		if (saveJson) {
+			userDataMap.saveJson(this, this.jsonFilename);
+		}
 		//setupNumbers();
 		setupUser(userDataMap.getCurUser());
 	}
@@ -545,29 +550,32 @@ public class MainActivity extends AppCompatActivity /* implements
 		    AndroidUtil.hideKeyboard(this);
 
 		    userResults.saveStats(perfStatsDb, numberOperation.op, userDataMap.getCurUser());
-		    // TODO just testing UserResults.loadStats()
-		    ArrayList<UserResults.SqlResult> results = UserResults.loadStats(perfStatsDb, numberOperation.op, userDataMap.getCurUser());
-		    if (results == null) {
+
+		    ArrayList<UserResults.SqlResult> stats = UserResults.loadStats(perfStatsDb, numberOperation.op, userDataMap.getCurUser());
+		    if (stats == null) {
 			    Log.d("SQL", "failed to load results for user "+userDataMap.getCurUser());
 		    }
+		    userResults.setStats(stats);
 
 		    progress = getString(R.string.text_progress_done, userDataMap.getCurUser(), userResults.getnCorrect(), userResults.getNumAnswered(), userResults.getPercentage());
 		    //textProgress.setText(progress);
+/*
 
-		    // TODO record duration and average duration
 		    StringBuilder sb = new StringBuilder(progress);
 		    float total = 0.0f;
-		    Iterator<UserResults.SqlResult> it = results.iterator();
+		    Iterator<UserResults.SqlResult> it = stats.iterator();
 		    while (it.hasNext()) {
 			    UserResults.SqlResult entry = it.next();
 			    total += entry.percentage_correct;
 			    sb.append(AndroidUtil.stringFormatter("%s:[%d],%d,%d,%.2f\n", DateFormat.getDateTimeInstance().format(entry.runtime*1000L), entry.duration-entry.runtime, entry.correct, entry.num, entry.percentage_correct));
 		    }
-		    float ave = total / results.size();
+		    float ave = total / stats.size();
 		    sb.append("\n").append(AndroidUtil.stringFormatter("Ave=%.2f", ave)).append("\n");
 		    textProgress.setText(sb.toString());
+*/
+		    showStats();
 
-		    userResults.reset(0);
+		    //userResults.reset(0);
 
 		    progressBar.setProgress(0);
 		    progressBar.setMax(userResults.getNum());

@@ -8,6 +8,7 @@ import android.util.SparseIntArray;
 
 import java.io.Serializable;
 import java.lang.reflect.Array;
+import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -44,6 +45,8 @@ public class UserResults implements Serializable {
 		MAX_PERCENTAGE.put(11, 2);
 	}
 
+	private ArrayList<SqlResult> stats;
+
 	/**
 	 * Create new UserResults object
 	 *
@@ -53,6 +56,7 @@ public class UserResults implements Serializable {
 		setNum(num);
 		resetCounters();
 		retryMap = new HashMap<Operation, Stack<LongPair>>();
+		stats = new ArrayList<SqlResult>();
 	}
 
 	private void startTimer() {
@@ -202,7 +206,15 @@ public class UserResults implements Serializable {
 		return false;
 	}
 
-	public static class SqlResult {
+	public void setStats(ArrayList<SqlResult> stats) {
+		this.stats = stats;
+	}
+
+	public ArrayList<SqlResult> getStats() {
+		return this.stats;
+	}
+
+	public static class SqlResult implements Serializable {
 		public final long id;
 		public final long runtime;
 		public final long duration;
@@ -224,6 +236,89 @@ public class UserResults implements Serializable {
 			Log.d("SQL", AndroidUtil.stringFormatter("id,name,num,correct,percent=%d,%s,%d,%d,%.2f", id, name, num, correct, percentage_correct));
 		}
 
+		/**
+		 * 0) id<br>
+		 * 1) runtime<br>
+		 * 2) duration<br>
+		 * @param i
+		 * @return
+		 */
+		String getCol(int i) {
+			switch(i) {
+				case 0: // runtime
+					return getRuntime();
+				case 1: // num
+					return getNum();
+				case 2: // correct
+					return getCorrect();
+				case 3:
+					return getPercentage_correct();
+				case 4: // id
+					return getId();
+				case 5: // name
+					return getName();
+				case 6: // duration in seconds
+					return getDuration();
+				default:
+					Log.e("SQL", "Unknown column index in SqlResult.getCol()");
+			}
+			return "";
+		}
+
+		public String getId() {
+			return ""+id;
+		}
+
+		public String getRuntime() {
+			return getDate(runtime);
+		}
+
+		public String getDuration() {
+			return ""+duration;
+		}
+
+		public String getNum() {
+			return ""+num;
+		}
+
+		public String getCorrect() {
+			return ""+correct;
+		}
+
+		public String getPercentage_correct() {
+			return AndroidUtil.stringFormatter("%.2f", percentage_correct);
+		}
+
+		public String getName() {
+			return name;
+		}
+
+		public static String getDate(long rt_secs) {
+			return DateFormat.getDateTimeInstance().format(rt_secs*1000L);
+		}
+	}
+
+	public static ArrayList<String> getStatsAverages(ArrayList<SqlResult> stats) {
+		long aveNum = 0;
+		long aveCorrect = 0;
+		float avePercentCorrect = 0f;
+		for (int i = 0; i < stats.size(); i++) {
+			SqlResult stat = stats.get(i);
+			aveNum += stat.num;
+			aveCorrect += stat.correct;
+			avePercentCorrect += stat.percentage_correct;
+		}
+		aveNum /= stats.size();
+		aveCorrect /= stats.size();
+		avePercentCorrect /= stats.size();
+
+
+		ArrayList<String> averages = new ArrayList<String>();
+		averages.add(SqlResult.getDate(System.currentTimeMillis()/1000L));
+		averages.add(""+aveNum);
+		averages.add(""+aveCorrect);
+		averages.add(AndroidUtil.stringFormatter("%.2f", avePercentCorrect));
+		return averages;
 	}
 
 	public static ArrayList<SqlResult> loadStats(SQLiteDatabase perfStatsDb, Operation op, String name) {
@@ -262,7 +357,9 @@ public class UserResults implements Serializable {
 		while (cursor.moveToNext()) {
 			SqlResult result = new SqlResult(cursor);
 			results.add(result);
+
 		}
+
 		cursor.close();
 
 		return results;
