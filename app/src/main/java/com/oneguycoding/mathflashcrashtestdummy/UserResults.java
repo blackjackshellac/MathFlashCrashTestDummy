@@ -237,11 +237,16 @@ public class UserResults implements Serializable {
 		}
 
 		/**
-		 * 0) id<br>
-		 * 1) runtime<br>
-		 * 2) duration<br>
-		 * @param i
-		 * @return
+		 * <br>0 - runtime</br>
+		 * <br>1 - num</br>
+		 * <br>2 - correct</br>
+		 * <br>3 - percent</br>
+		 * <br>4 - id</br>
+		 * <br>5 - name</br>
+		 * <br>6 - duration (secs)</br>
+		 *
+		 * @param i index to retrieve
+		 * @return value of column as string for given index or empty string if unknown
 		 */
 		String getCol(int i) {
 			switch(i) {
@@ -273,8 +278,12 @@ public class UserResults implements Serializable {
 			return getDate(runtime);
 		}
 
+		public long getSecs() {
+			return duration-runtime;
+		}
+
 		public String getDuration() {
-			return ""+duration;
+			return ""+getSecs();
 		}
 
 		public String getNum() {
@@ -296,28 +305,40 @@ public class UserResults implements Serializable {
 		public static String getDate(long rt_secs) {
 			return DateFormat.getDateTimeInstance().format(rt_secs*1000L);
 		}
+
+		public String[] getCols(int[] indeces) {
+			String[] columns = new String[indeces.length];
+			for (int i=0; i < indeces.length; i++) {
+				columns[i] = getCol(indeces[i]);
+			}
+			return columns;
+		}
 	}
 
-	public static ArrayList<String> getStatsAverages(ArrayList<SqlResult> stats) {
+	public static String[] getStatsAverages(ArrayList<SqlResult> stats) {
+		String[] averages = new String[5];
 		long aveNum = 0;
 		long aveCorrect = 0;
+		long aveDuration = 0;
 		float avePercentCorrect = 0f;
 		for (int i = 0; i < stats.size(); i++) {
 			SqlResult stat = stats.get(i);
 			aveNum += stat.num;
 			aveCorrect += stat.correct;
+			aveDuration += stat.getSecs();
 			avePercentCorrect += stat.percentage_correct;
 		}
 		aveNum /= stats.size();
 		aveCorrect /= stats.size();
 		avePercentCorrect /= stats.size();
+		aveDuration /= stats.size();
 
+		averages[0]=SqlResult.getDate(System.currentTimeMillis()/1000L);
+		averages[1]=""+aveNum;
+		averages[2]=""+aveCorrect;
+		averages[3]=""+aveDuration;
+		averages[4]=AndroidUtil.stringFormatter("%.2f", avePercentCorrect);
 
-		ArrayList<String> averages = new ArrayList<String>();
-		averages.add(SqlResult.getDate(System.currentTimeMillis()/1000L));
-		averages.add(""+aveNum);
-		averages.add(""+aveCorrect);
-		averages.add(AndroidUtil.stringFormatter("%.2f", avePercentCorrect));
 		return averages;
 	}
 

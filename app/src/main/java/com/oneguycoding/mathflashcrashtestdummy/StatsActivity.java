@@ -1,12 +1,10 @@
 package com.oneguycoding.mathflashcrashtestdummy;
 
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.text.Layout;
 import android.view.Gravity;
-import android.view.View;
-import android.view.ViewGroup;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -24,6 +22,8 @@ public class StatsActivity extends AppCompatActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_stats);
 
+		this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+
 		Intent intent = getIntent();
 		Bundle b = intent.getExtras();
 		userDataMap = (UserDataMap) b.getSerializable(MainActivity.EXTRA_USERDATA);
@@ -34,66 +34,47 @@ public class StatsActivity extends AppCompatActivity {
 		TableRow statsRowHeader = (TableRow) findViewById(R.id.statsRowHeader);
 		int rows = statsRowHeader.getChildCount();
 		for (int i = 0; i < rows; i++) {
-			TextView child = (TextView) statsRowHeader.getChildAt(i);
-			child.setGravity(Gravity.CENTER_VERTICAL | Gravity.CENTER_HORIZONTAL);
+			TextView tv = (TextView) statsRowHeader.getChildAt(i);
+			tv.setGravity(Gravity.CENTER_VERTICAL | (i==0 ? Gravity.LEFT : Gravity.RIGHT));
 		}
 
 		ArrayList<UserResults.SqlResult> stats = results.getStats();
 		if (stats != null) {
+			int[] indices={0,1,2,6,3};
+
 			Iterator<UserResults.SqlResult> it = stats.iterator();
 			while (it.hasNext()) {
-				TableRow tr = new TableRow(this);
-				TableRow.LayoutParams lp = new TableRow.LayoutParams(TableRow.LayoutParams.MATCH_PARENT, TableRow.LayoutParams.MATCH_PARENT);
-
-				tr.setLayoutParams(lp);
-
 				UserResults.SqlResult result = it.next();
-				for (int i = 0; i < 4; i++) {
-					TableRow.LayoutParams tvlp;
-					tvlp = new TableRow.LayoutParams(TableRow.LayoutParams.WRAP_CONTENT, TableRow.LayoutParams.WRAP_CONTENT, 1f);
-
-					TextView tv = new TextView(this);
-					tv.setLayoutParams(tvlp);
-					tv.setText(result.getCol(i));
-					tv.setGravity(Gravity.CENTER_VERTICAL | (i==0 ? Gravity.LEFT : Gravity.RIGHT));
-					tr.addView(tv, i);
-				}
-				statsTable.addView(tr);
+				String[] columns = result.getCols(indices);
+				statsTable.addView(addRowStats(columns));
 			}
-			TableRow tr = new TableRow(this);
-			TableRow.LayoutParams lp = new TableRow.LayoutParams(TableRow.LayoutParams.MATCH_PARENT, TableRow.LayoutParams.MATCH_PARENT);
 
-			tr.setLayoutParams(lp);
-			for (int i = 0; i < 4; i++) {
-				TableRow.LayoutParams tvlp;
-				tvlp = new TableRow.LayoutParams(TableRow.LayoutParams.WRAP_CONTENT, TableRow.LayoutParams.WRAP_CONTENT, 1f);
+			String[] subheader={"Averages","","",""};
+			statsTable.addView(addRowStats(subheader));
 
-				TextView tv = new TextView(this);
-				tv.setLayoutParams(tvlp);
-				tv.setText("");
-				tv.setGravity(Gravity.CENTER_VERTICAL | (i==0 ? Gravity.LEFT : Gravity.RIGHT));
-				tr.addView(tv, i);
-			}
-			statsTable.addView(tr);
-
-			tr = new TableRow(this);
-			lp = new TableRow.LayoutParams(TableRow.LayoutParams.MATCH_PARENT, TableRow.LayoutParams.MATCH_PARENT);
-
-			tr.setLayoutParams(lp);
-			ArrayList<String> averages = UserResults.getStatsAverages(stats);
-			for (int i = 0; i < 4; i++) {
-				TableRow.LayoutParams tvlp;
-				tvlp = new TableRow.LayoutParams(TableRow.LayoutParams.WRAP_CONTENT, TableRow.LayoutParams.WRAP_CONTENT, 1f);
-
-				TextView tv = new TextView(this);
-				tv.setLayoutParams(tvlp);
-				tv.setText(averages.get(i));
-				tv.setGravity(Gravity.CENTER_VERTICAL | (i==0 ? Gravity.LEFT : Gravity.RIGHT));
-				tr.addView(tv, i);
-			}
-			statsTable.addView(tr);
-
+			String[] averages = UserResults.getStatsAverages(stats);
+			statsTable.addView(addRowStats(averages));
 		}
+
+	}
+
+	public TableRow addRowStats(String [] values) {
+		TableRow tr = new TableRow(this);
+		TableRow.LayoutParams lp = new TableRow.LayoutParams(TableRow.LayoutParams.MATCH_PARENT, TableRow.LayoutParams.MATCH_PARENT);
+		for (int i = 0; i < values.length; i++) {
+			TableRow.LayoutParams tvlp;
+			tvlp = new TableRow.LayoutParams(TableRow.LayoutParams.WRAP_CONTENT, TableRow.LayoutParams.WRAP_CONTENT, 1f);
+
+			TextView tv = new TextView(this);
+			tv.setLayoutParams(tvlp);
+			tv.setText(values[i]);
+			tv.setGravity(Gravity.CENTER_VERTICAL | (i==0 ? Gravity.LEFT : Gravity.RIGHT));
+			tr.addView(tv, i);
+		}
+
+		tr.setLayoutParams(lp);
+
+		return tr;
 	}
 
 	@Override
