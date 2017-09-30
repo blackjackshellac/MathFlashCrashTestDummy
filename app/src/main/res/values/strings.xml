@@ -20,7 +20,7 @@
     <string name="msg_correct">%1$d is correct!</string>
     <string name="msg_incorrect">%1$d is incorrect!</string>
     <string name="msg_number_long">%1$d</string>
-    <string name="menu_reset_user">Reset</string>
+    <string name="menu_reset_user">Reset user</string>
     <string name="descrip_smiling_star">Smiling star</string>
     <string name="hint_top_max">Top max (%1$d)</string>
     <string name="hint_bot_max">Bottom max (%1$d)</string>
@@ -38,4 +38,7 @@
     <string name="test_max_num">Number of tests</string>
     <string name="text_bravo">Bravo %1$s!</string>
     <string name="text_num_too_small">Minimum number is %1$d, resetting</string>
+    <string name="title_clear_user">Clear user stats</string>
+    <string name="text_clear_user_prompt">Do you want to clear user stats for %1$s?</string>
+    <string name="menu_users">Users ...</string>
 </resources>

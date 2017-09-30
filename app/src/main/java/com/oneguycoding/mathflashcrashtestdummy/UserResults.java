@@ -2,6 +2,7 @@ package com.oneguycoding.mathflashcrashtestdummy;
 
 import android.content.ContentValues;
 import android.database.Cursor;
+import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 import android.util.SparseIntArray;
@@ -211,7 +212,7 @@ public class UserResults implements Serializable {
 	}
 
 	public ArrayList<SqlResult> getStats() {
-		return this.stats;
+		return stats;
 	}
 
 	public static class SqlResult implements Serializable {
@@ -342,9 +343,14 @@ public class UserResults implements Serializable {
 		return averages;
 	}
 
-	public static ArrayList<SqlResult> loadStats(SQLiteDatabase perfStatsDb, Operation op, String name) {
-		// https://developer.android.com/training/basics/data-storage/databases.html
-
+	/**
+	 *
+	 * @param perfStatsDb
+	 * @param op
+	 * @param name
+	 * @return cursor to get SqlResults, be sure to close the cursor when done
+	 */
+	public static Cursor getStatsQueryCursor(SQLiteDatabase perfStatsDb, Operation op, String name) {
 		// Define a projection that specifies which columns from the database
 		// you will actually use after this query.
 		String[] projection = {
@@ -373,6 +379,13 @@ public class UserResults implements Serializable {
 				null,                                     // don't filter by row groups
 				sortOrder                                 // The sort order
 		);
+		return cursor;
+	}
+
+	public static ArrayList<SqlResult> loadStats(SQLiteDatabase perfStatsDb, Operation op, String name) {
+		// https://developer.android.com/training/basics/data-storage/databases.html
+
+		Cursor cursor = getStatsQueryCursor(perfStatsDb, op, name);
 
 		ArrayList<SqlResult> results = new ArrayList<SqlResult>();
 		while (cursor.moveToNext()) {
@@ -401,5 +414,19 @@ public class UserResults implements Serializable {
 		values.put(PerformanceStatsSchema.StatsSchema.COL_NAME_WRONG, this.getnWrong());
 		long newRowId = perfStatsDb.insert(PerformanceStatsSchema.StatsSchema.TABLE_NAME, null, values);
 		Log.d("SQL", "newRowId="+newRowId);
+	}
+
+	public void clearStats(SQLiteDatabase perfStatsDb, String name) {
+		if (stats != null) {
+			stats.clear();
+		}
+		if (perfStatsDb != null) {
+			try {
+				String sql = PerformanceStatsSchema.getSqlDeleteUserResults(name);
+				perfStatsDb.execSQL(sql);
+			} catch (SQLException e) {
+				Log.e("SQL", "Failed to delete user results for " + name, e);
+			}
+		}
 	}
 }

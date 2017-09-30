@@ -7,7 +7,6 @@ import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParseException;
-import com.google.gson.annotations.SerializedName;
 import com.google.gson.reflect.TypeToken;
 
 import java.io.FileInputStream;
@@ -122,6 +121,9 @@ public class UserDataMap implements Serializable {
 	public void saveJson(Activity mainActivity, String jsonFilename) {
 		FileOutputStream outputStream = null;
 		try {
+			// don't save stats saved in userResults
+			getUserData().results.clearStats(null, getCurUser());
+
 			String json = toJson();
 			outputStream = mainActivity.openFileOutput(jsonFilename, Context.MODE_PRIVATE);
 			outputStream.write(json.getBytes());

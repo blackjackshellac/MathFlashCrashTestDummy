@@ -2,6 +2,8 @@ package com.oneguycoding.mathflashcrashtestdummy;
 
 import android.provider.BaseColumns;
 
+import java.util.regex.Pattern;
+
 /**
  * Created by steeve on 27/09/17.
  * <br/>
@@ -24,7 +26,7 @@ public class PerformanceStatsSchema {
 		public static final String CHECK_OP = String.format("CHECK(%s in (%s))", COL_NAME_OPERATION, Operation.CHARS_LIST);
 	}
 
-	public static String SQL_CREATE_TABLE = String.format(
+	public static final String SQL_CREATE_TABLE = String.format(
 			"CREATE TABLE \"%s\" (\n" + // table name
 			" `%s`\tTEXT NOT NULL,\n" + // user name
 			" `%s`\tTEXT %s,\n" +       // operation with check_op
@@ -45,5 +47,11 @@ public class PerformanceStatsSchema {
 				StatsSchema.COL_NAME_WRONG,
 				StatsSchema.COL_NAME_ID);
 
-	public static String SQL_DROP_TABLE = "DROP TABLE IF EXISTS " + StatsSchema.TABLE_NAME;
+	public static final String SQL_DROP_TABLE = "DROP TABLE IF EXISTS " + StatsSchema.TABLE_NAME;
+	// DELETE FROM perf_stats WHERE name LIKE %s
+	public static final String SQL_DELETE_USER_RESULTS = "DELETE FROM "+StatsSchema.TABLE_NAME+" WHERE "+StatsSchema.COL_NAME_NAME+" LIKE '%s'";
+
+	public static String getSqlDeleteUserResults(String name) {
+		return AndroidUtil.stringFormatter(SQL_DELETE_USER_RESULTS, name);
+	}
 }

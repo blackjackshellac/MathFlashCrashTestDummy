@@ -6,6 +6,7 @@ import android.util.StringBuilderPrinter;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * Created by steeve on 07/09/17.
@@ -63,7 +64,8 @@ public enum Operation {
     }
 
     public long rand_range(LongPair lp) {
-        return lp.l1 + (long)(Math.random() * lp.l2);
+	    //return lp.l1 + (long)(Math.random() * lp.l2);
+        return ThreadLocalRandom.current().nextLong(lp.l1, lp.l2 + 1);
     }
 
     public LongPair randomize(LongPair lp1, LongPair lp2) {

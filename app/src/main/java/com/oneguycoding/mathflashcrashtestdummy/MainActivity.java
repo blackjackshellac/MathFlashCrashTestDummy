@@ -10,6 +10,7 @@ import android.media.AudioManager;
 import android.media.ToneGenerator;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.PopupMenu;
 import android.util.Log;
 import android.util.StringBuilderPrinter;
 import android.view.KeyEvent;
@@ -230,8 +231,8 @@ public class MainActivity extends AppCompatActivity /* implements
 		return null;
 	}
 
-	@Override
-	public boolean onPrepareOptionsMenu(Menu menu) {
+	public boolean onPreparePopupMenu(PopupMenu popupMenu) {
+		Menu menu = popupMenu.getMenu();
 		for (String name : userDataMap.users()) {
 			if (name.equals(getText(R.string.user_default))) {
 				continue;
@@ -271,12 +272,28 @@ public class MainActivity extends AppCompatActivity /* implements
 					setupUser(name);
 				}
 				break;
+			case R.id.menu_popup_users:
+				View menuItemView = findViewById(R.id.menu_popup_users); // SAME ID AS MENU ID
+				PopupMenu popupMenu = new PopupMenu(this, menuItemView);
+				popupMenu.inflate(R.menu.popup_users_menu);
+				// ...
+				popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+					public boolean onMenuItemClick(MenuItem item) {
+						//AndroidUtil.showToast(MainActivity.this, "You clicked: "+item.getTitle());
+						String name = item.getTitle().toString();
+						if (!name.equals(userDataMap.getCurUser())) {
+							userDataMap.setCurUser(name);
+							selectOperation();
+						}
+						return true;
+					}
+				});
+
+				onPreparePopupMenu(popupMenu);
+
+				popupMenu.show();
+				break;
 			default:
-				name = item.getTitle().toString();
-				if (!name.equals(userDataMap.getCurUser())) {
-					userDataMap.setCurUser(name);
-					selectOperation();
-				}
 				break;
 		}
 
@@ -350,18 +367,52 @@ public class MainActivity extends AppCompatActivity /* implements
 
     public void resetUser() {
 	    progressBar.setProgress(0);
-	    UserResults userResults = userDataMap.getUserData().results;
+	    final UserResults userResults = userDataMap.getUserData().results;
 	    userResults.reset(userResults.getNum());
+
+	    final String name = userDataMap.getCurUser();
+	    if (name.equals(getText(R.string.user_default))) {
+		    return;
+	    }
+	    final MainActivity activity = this;
+
+	    AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+	    builder.setTitle(getText(R.string.title_clear_user));
+	    builder.setMessage(getString(R.string.text_clear_user_prompt, name));
+
+	    builder.setPositiveButton(getText(R.string.yes), new DialogInterface.OnClickListener() {
+
+		    public void onClick(DialogInterface dialog, int which) {
+			    userResults.clearStats(perfStatsDb, name);
+
+			    setupUser(activity.userDataMap.getCurUser());
+			    userDataMap.saveJson(activity, MainActivity.jsonFilename);
+
+			    dialog.dismiss();
+		    }
+	    });
+
+	    builder.setNegativeButton(getText(R.string.no), new DialogInterface.OnClickListener() {
+
+		    @Override
+		    public void onClick(DialogInterface dialog, int which) {
+			    dialog.dismiss();
+		    }
+	    });
+
+	    AlertDialog alert = builder.create();
+	    alert.show();
+
     }
 
 	private void deleteUser(MenuItem item) {
 		// make final to allow OnClickListeners access
 		final String name = userDataMap.getCurUser();
-		final MainActivity activity = this;
-
 		if (name.equals(getText(R.string.user_default))) {
 			return;
 		}
+		final MainActivity activity = this;
 
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
