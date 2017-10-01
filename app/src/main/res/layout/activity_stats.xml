@@ -51,14 +51,6 @@
                     android:textAlignment="center"/>
 
                 <TextView
-                    android:id="@+id/statsRowHeaderNum"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Num"
-                    android:textAlignment="center"/>
-
-                <TextView
                     android:id="@+id/statsRowHeaderCorrect"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -67,11 +59,19 @@
                     android:textAlignment="center"/>
 
                 <TextView
+                    android:id="@+id/statsRowHeaderNum"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Num"
+                    android:textAlignment="center"/>
+
+                <TextView
                     android:id="@+id/statsRowHeaderSecs"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Secs"
+                    android:text="Rate"
                     android:textAlignment="center"/>
 
                 <TextView

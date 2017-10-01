@@ -1,7 +1,6 @@
 package com.oneguycoding.mathflashcrashtestdummy;
 
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Gravity;
@@ -13,6 +12,15 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 public class StatsActivity extends AppCompatActivity {
+
+	private static final UserResults.SqlResult.SqlColumn[] RESULT_COLUMNS ={
+			UserResults.SqlResult.SqlColumn.RUNTIME,
+			UserResults.SqlResult.SqlColumn.CORRECT,
+			UserResults.SqlResult.SqlColumn.NUM,
+			UserResults.SqlResult.SqlColumn.RATE,
+			UserResults.SqlResult.SqlColumn.PERCENT
+	};
+
 	private UserDataMap userDataMap;
 	private UserData userData;
 	private UserResults results;
@@ -41,13 +49,11 @@ public class StatsActivity extends AppCompatActivity {
 
 		ArrayList<UserResults.SqlResult> stats = results.getStats();
 		if (stats != null) {
-			int[] indices={0,1,2,6,3};
-
 			Iterator<UserResults.SqlResult> it = stats.iterator();
 			while (it.hasNext()) {
 				UserResults.SqlResult result = it.next();
-				String[] columns = result.getCols(indices);
-				statsTable.addView(addRowStats(columns));
+				String[] values = result.getCols(RESULT_COLUMNS);
+				statsTable.addView(addRowStats(values));
 			}
 
 			String[] subheader={"Averages","","",""};

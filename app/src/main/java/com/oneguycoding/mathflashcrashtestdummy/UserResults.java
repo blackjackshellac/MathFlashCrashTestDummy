@@ -262,6 +262,16 @@ public class UserResults implements Serializable {
 			Log.d("SQL", AndroidUtil.stringFormatter("id,name,num,correct,percent=%d,%s,%d,%d,%.2f", id, name, num, correct, percentage_correct));
 		}
 
+		public enum SqlColumn {
+			RUNTIME,
+			NUM,
+			CORRECT,
+			PERCENT,
+			ID,
+			NAME,
+			DURATION,
+			RATE;
+		}
 		/**
 		 * <br>0 - runtime</br>
 		 * <br>1 - num</br>
@@ -271,25 +281,27 @@ public class UserResults implements Serializable {
 		 * <br>5 - name</br>
 		 * <br>6 - duration (secs)</br>
 		 *
-		 * @param i index to retrieve
+		 * @param c index to retrieve
 		 * @return value of column as string for given index or empty string if unknown
 		 */
-		String getCol(int i) {
-			switch(i) {
-				case 0: // runtime
+		String getCol(SqlColumn c) {
+			switch(c) {
+				case RUNTIME: // runtime
 					return getRuntime();
-				case 1: // num
+				case NUM: // num
 					return getNum();
-				case 2: // correct
+				case CORRECT: // correct
 					return getCorrect();
-				case 3:
+				case PERCENT:
 					return getPercentage_correct();
-				case 4: // id
+				case ID: // id
 					return getId();
-				case 5: // name
+				case NAME: // name
 					return getName();
-				case 6: // duration in seconds
+				case DURATION: // duration in seconds
 					return getDuration();
+				case RATE: // num per second
+					return getRate();
 				default:
 					Log.e("SQL", "Unknown column index in SqlResult.getCol()");
 			}
@@ -328,16 +340,21 @@ public class UserResults implements Serializable {
 			return name;
 		}
 
+		public String getRate() {
+			long d = getSecs();
+			return AndroidUtil.stringFormatter("%.1f", ((float)num/(d == 0 ? 1 : d)));
+		}
+
 		public static String getDate(long rt_secs) {
 			return DateFormat.getDateTimeInstance().format(rt_secs*1000L);
 		}
 
-		public String[] getCols(int[] indeces) {
-			String[] columns = new String[indeces.length];
-			for (int i=0; i < indeces.length; i++) {
-				columns[i] = getCol(indeces[i]);
+		public String[] getCols(SqlColumn[] columns) {
+			String[] values = new String[columns.length];
+			for (int i=0; i < columns.length; i++) {
+				values[i] = getCol(columns[i]);
 			}
-			return columns;
+			return values;
 		}
 	}
 
