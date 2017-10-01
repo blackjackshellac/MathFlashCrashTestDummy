@@ -1,10 +1,8 @@
 package com.oneguycoding.mathflashcrashtestdummy;
 
 import android.app.AlertDialog;
-import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.media.AudioManager;
 import android.media.ToneGenerator;
@@ -12,7 +10,6 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.PopupMenu;
 import android.util.Log;
-import android.util.StringBuilderPrinter;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -29,9 +26,7 @@ import android.widget.TextView;
 //import com.google.android.gms.drive.Drive;
 
 import java.io.File;
-import java.text.DateFormat;
 import java.util.ArrayList;
-import java.util.Iterator;
 
 public class MainActivity extends AppCompatActivity /* implements
 		GoogleApiClient.ConnectionCallbacks,
@@ -352,9 +347,15 @@ public class MainActivity extends AppCompatActivity /* implements
 
 	    setupOperation(numberOperation.op);
 
+		int loops = 0;
+		int maxLoops = 10;
 		LongPair numberPair = numberOperation.randomize();
-		while (userData.results.limitZerosAndOnes(numberPair)) {
+		while (userData.results.limitOperationNumbers(numberOperation.op, numberPair)) {
 			numberPair = numberOperation.randomize();
+			loops += 1;
+			if (loops >= maxLoops) {
+				break;
+			}
 		}
 
         num1.setText(getResources().getString(R.string.msg_number_long, numberPair.l1));

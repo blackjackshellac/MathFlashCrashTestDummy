@@ -14,4 +14,8 @@ public class LongPair implements Serializable {
         this.l1 = l1;
         this.l2 = l2;
     }
+
+    public String toString() {
+        return AndroidUtil.stringFormatter("[%d,%d]", l1, l2);
+    }
 }

@@ -8,7 +8,6 @@ import android.util.Log;
 import android.util.SparseIntArray;
 
 import java.io.Serializable;
-import java.lang.reflect.Array;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -29,15 +28,15 @@ public class UserResults implements Serializable {
 	private long duration;
 	private Map<Operation, Stack<LongPair>> retryMap;
 
-	private static final SparseIntArray limitMap;
+	private static final SparseIntArray limitCounts;
 	private static final SparseIntArray MAX_PERCENTAGE;
 
 	static {
-		limitMap = new SparseIntArray();
-		limitMap.put(0, 0);
-		limitMap.put(1, 0);
-		limitMap.put(10, 0);
-		limitMap.put(11, 0);
+		limitCounts = new SparseIntArray();
+		limitCounts.put(0, 0);
+		limitCounts.put(1, 0);
+		limitCounts.put(10, 0);
+		limitCounts.put(11, 0);
 
 		MAX_PERCENTAGE = new SparseIntArray();
 		MAX_PERCENTAGE.put(0, 2);
@@ -68,8 +67,8 @@ public class UserResults implements Serializable {
 	private void resetCounters() {
 		nCorrect = 0;
 		nWrong = 0;
-		for (int ikey=0; ikey < 4; ikey++) {
-			limitMap.put(limitMap.keyAt(ikey), 0);
+		for (int ikey = 0; ikey < 4; ikey++) {
+			limitCounts.put(limitCounts.keyAt(ikey), 0);
 		}
 		startTimer();
 	}
@@ -113,7 +112,7 @@ public class UserResults implements Serializable {
 	}
 
 	private void setNum(int num) {
-		this.num = num <=0 ? DEFAULT_NUM : num;
+		this.num = num <= 0 ? DEFAULT_NUM : num;
 	}
 
 	/**
@@ -142,6 +141,7 @@ public class UserResults implements Serializable {
 
 	/**
 	 * Calculate the percentage given the number answered and the number correct
+	 *
 	 * @param num_answered
 	 * @param nCorrect
 	 * @return
@@ -161,36 +161,47 @@ public class UserResults implements Serializable {
 	}
 
 	public int getNumAnswered() {
-		return nCorrect+nWrong;
+		return nCorrect + nWrong;
 	}
 
 	public int getRemaining() {
-		return num-getNumAnswered();
+		return num - getNumAnswered();
 	}
 
 	public boolean testDone() {
 		return getNumAnswered() >= num;
 	}
 
-	private boolean isLimited(int n, int maxPercentage) {
-		float percent = (float) (n*100.0/num);
+	private float limitPercent(int cnt) {
+		if (cnt > num) {
+			Log.e("Limit", "count greater than num!");
+			return 100.0f;
+		}
+		return (float) (cnt*100.0f / num);
+	}
+
+	private boolean isLimited(float percent, int maxPercentage) {
 		return percent >= maxPercentage;
 	}
 
 	private boolean limitValue(int n, LongPair numberPair) {
 		if (numberPair.l1 == n || numberPair.l2 == n) {
-			int max = MAX_PERCENTAGE.get(n);
-			int val = limitMap.get(n);
-			if (isLimited(val, max)) {
+			int maxPercent = MAX_PERCENTAGE.get(n);
+			int cnt = limitCounts.get(n);
+			// increment limit counter
+			limitCounts.put(n, cnt + 1);
+			float percent = limitPercent(cnt);
+			boolean limited = isLimited(percent, maxPercent);
+			Log.d("Limit", AndroidUtil.stringFormatter("%d (%s): %d of %d (%.1f%%), limit is %d%%", n, (limited ? "true" : "false"), cnt, num, percent, maxPercent));
+			if (isLimited(percent, maxPercent)) {
 				return true;
 			}
-			limitMap.put(n, val+1);
 		}
 		return false;
 	}
 
 	public boolean limitZerosAndOnes(LongPair numberPair) {
-		for (int i=0; i <= 1; i++) {
+		for (int i = 0; i <= 1; i++) {
 			if (limitValue(i, numberPair)) {
 				return true;
 			}
@@ -198,14 +209,28 @@ public class UserResults implements Serializable {
 		return false;
 	}
 
-	public boolean limitElevensAndTens(LongPair numberPair) {
-		for (int i=10; i <= 11; i++) {
+	public boolean limitTensAndElevens(LongPair numberPair) {
+		for (int i = 10; i <= 11; i++) {
 			if (limitValue(i, numberPair)) {
 				return true;
 			}
 		}
 		return false;
 	}
+
+	public boolean limitOperationNumbers(Operation op, LongPair numberPair) {
+		if (op == Operation.MULTIPLY || op == Operation.DIVIDE) {
+			if (limitTensAndElevens(numberPair)) {
+				return true;
+			}
+		}
+		if (limitZerosAndOnes(numberPair)) {
+			return true;
+		}
+		return false;
+	}
+
+
 
 	public void setStats(ArrayList<SqlResult> stats) {
 		this.stats = stats;
@@ -428,5 +453,6 @@ public class UserResults implements Serializable {
 				Log.e("SQL", "Failed to delete user results for " + name, e);
 			}
 		}
+
 	}
 }
