@@ -26,13 +26,13 @@ import android.widget.TextView;
 //import com.google.android.gms.drive.Drive;
 
 import java.io.File;
-import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity /* implements
 		GoogleApiClient.ConnectionCallbacks,
 		GoogleApiClient.OnConnectionFailedListener */ {
 	//public static final String EXTRA_OPS = "ops";
 	public static final String EXTRA_USERDATA = "userdata";
+	static final String EXTRA_OPERATION = "operation";
 	public static final int RESULT_OPS = 100;
 	public static final int RESULT_USERDATA = 101;
 	private static final int RESULT_STATS = 102;
@@ -496,6 +496,7 @@ public class MainActivity extends AppCompatActivity /* implements
 		*/
 		Bundle b = new Bundle();
 		b.putSerializable(EXTRA_USERDATA, userDataMap);
+		b.putSerializable(EXTRA_OPERATION, numberOperation.op);
 		intent.putExtras(b);
 		startActivityForResult(intent, RESULT_STATS);
 	}
@@ -609,11 +610,14 @@ public class MainActivity extends AppCompatActivity /* implements
 
 		    userResults.saveStats(perfStatsDb, numberOperation.op, userDataMap.getCurUser());
 
-		    ArrayList<UserResults.SqlResult> stats = UserResults.loadStats(perfStatsDb, numberOperation.op, userDataMap.getCurUser());
+/*
+		    Cursor cursor = UserResults.getStatsQueryCursor(perfStatsDb, numberOperation.op, userDataMap.getCurUser());
+		    ArrayList<UserResults.SqlResult> stats = UserResults.loadStats(cursor);
 		    if (stats == null) {
 			    Log.d("SQL", "failed to load results for user "+userDataMap.getCurUser());
 		    }
 		    userResults.setStats(stats);
+*/
 
 		    progress = getString(R.string.text_progress_done, userDataMap.getCurUser(), userResults.getnCorrect(), userResults.getNumAnswered(), userResults.getPercentage());
 		    //textProgress.setText(progress);

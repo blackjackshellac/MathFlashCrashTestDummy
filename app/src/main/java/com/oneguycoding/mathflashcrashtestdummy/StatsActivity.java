@@ -1,6 +1,8 @@
 package com.oneguycoding.mathflashcrashtestdummy;
 
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Gravity;
@@ -20,8 +22,6 @@ public class StatsActivity extends AppCompatActivity {
 			UserResults.SqlResult.SqlColumn.PERCENT
 	};
 
-	private UserDataMap userDataMap;
-
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -32,11 +32,9 @@ public class StatsActivity extends AppCompatActivity {
 
 		Intent intent = getIntent();
 		Bundle b = intent.getExtras();
-		userDataMap = (UserDataMap) b.getSerializable(MainActivity.EXTRA_USERDATA);
+		UserDataMap userDataMap = (UserDataMap) b.getSerializable(MainActivity.EXTRA_USERDATA);
 		if (userDataMap == null) throw new IllegalArgumentException("UserDataMap should never be null here");
-
-		UserData userData = userDataMap.getUserData();
-		UserResults results = userData.results;
+		Operation op = (Operation) b.getSerializable(MainActivity.EXTRA_OPERATION);
 
 		TableLayout statsTable = (TableLayout) findViewById(R.id.statsTable);
 		TableRow statsRowHeader = (TableRow) findViewById(R.id.statsRowHeader);
@@ -46,20 +44,26 @@ public class StatsActivity extends AppCompatActivity {
 			tv.setGravity(Gravity.CENTER_VERTICAL | (i==0 ? Gravity.START : Gravity.END));
 		}
 
-		ArrayList<UserResults.SqlResult> stats = results.getStats();
-		if (stats != null) {
-			for (UserResults.SqlResult result : stats) {
-				String[] values = result.getCols(RESULT_COLUMNS);
-				statsTable.addView(addRowStats(values));
-			}
+		// save stats for averaging later
+		ArrayList<UserResults.SqlResult> stats = new ArrayList<>();
 
-			String[] subheader={"Averages","","",""};
-			statsTable.addView(addRowStats(subheader));
-
-			String[] averages = UserResults.getStatsAverages(stats);
-			statsTable.addView(addRowStats(averages));
+		PerformanceStatsHelper perfStatsHelper = new PerformanceStatsHelper(this);
+		SQLiteDatabase perfStatsDb = perfStatsHelper.getReadableDatabase();
+		Cursor cursor = UserResults.getStatsQueryCursor(perfStatsDb, op, userDataMap.getCurUser());
+		while (cursor.moveToNext()) {
+			UserResults.SqlResult result = new UserResults.SqlResult(cursor);
+			stats.add(result);
+			String[] values = result.getCols(RESULT_COLUMNS);
+			statsTable.addView(addRowStats(values));
 		}
+		cursor.close();
 
+		String[] subheader={"Averages","","",""};
+		statsTable.addView(addRowStats(subheader));
+
+		// calculate averages on the fly
+		String[] averages = UserResults.getStatsAverages(stats);
+		statsTable.addView(addRowStats(averages));
 	}
 
 	public TableRow addRowStats(String [] values) {
@@ -85,9 +89,11 @@ public class StatsActivity extends AppCompatActivity {
 	public void onBackPressed() {
 		Intent intent = new Intent();
 
+/*
 		Bundle b = new Bundle();
 		b.putSerializable(MainActivity.EXTRA_USERDATA, userDataMap);
 		intent.putExtras(b);
+*/
 
 		setResult(RESULT_OK, intent);
 

@@ -49,8 +49,6 @@ class UserResults implements Serializable {
 		MAX_PERCENTAGE.put(11, 2);
 	}
 
-	private ArrayList<SqlResult> stats;
-
 	/**
 	 * Create new UserResults object
 	 *
@@ -60,7 +58,6 @@ class UserResults implements Serializable {
 		setNum(num);
 		resetCounters();
 		retryMap = new HashMap<>();
-		stats = new ArrayList<>();
 	}
 
 	private void startTimer() {
@@ -224,16 +221,6 @@ class UserResults implements Serializable {
 		return limitZerosAndOnes(numberPair);
 	}
 
-
-
-	void setStats(ArrayList<SqlResult> stats) {
-		this.stats = stats;
-	}
-
-	ArrayList<SqlResult> getStats() {
-		return stats;
-	}
-
 	static class SqlResult implements Serializable {
 		final long id;
 		final long runtime;
@@ -385,9 +372,9 @@ class UserResults implements Serializable {
 	 * @param op - operation
 	 * @param name - name to filter
 	 *
-	 * @return cursor to get SqlResults, be sure to close the cursor when done
+	 * @return cursor to get SqlResults, <b>be sure to close the cursor when done</b>
 	 */
-	private static Cursor getStatsQueryCursor(SQLiteDatabase perfStatsDb, Operation op, String name) {
+	static Cursor getStatsQueryCursor(SQLiteDatabase perfStatsDb, Operation op, String name) {
 		// Define a projection that specifies which columns from the database
 		// you will actually use after this query.
 		String[] projection = {
@@ -419,16 +406,14 @@ class UserResults implements Serializable {
 		);
 	}
 
-	static ArrayList<SqlResult> loadStats(SQLiteDatabase perfStatsDb, Operation op, String name) {
+	@SuppressWarnings("unused")
+	static ArrayList<SqlResult> loadStats(Cursor cursor) {
 		// https://developer.android.com/training/basics/data-storage/databases.html
-
-		Cursor cursor = getStatsQueryCursor(perfStatsDb, op, name);
 
 		ArrayList<SqlResult> results = new ArrayList<>();
 		while (cursor.moveToNext()) {
 			SqlResult result = new SqlResult(cursor);
 			results.add(result);
-
 		}
 
 		cursor.close();
@@ -454,9 +439,6 @@ class UserResults implements Serializable {
 	}
 
 	void clearStats(SQLiteDatabase perfStatsDb, String name) {
-		if (stats != null) {
-			stats.clear();
-		}
 		if (perfStatsDb != null) {
 			try {
 				String sql = PerformanceStatsSchema.getSqlDeleteUserResults(name);
@@ -465,6 +447,5 @@ class UserResults implements Serializable {
 				Log.e("SQL", "Failed to delete user results for " + name, e);
 			}
 		}
-
 	}
 }
