@@ -2,19 +2,20 @@ package com.oneguycoding.mathflashcrashtestdummy;
 
 import android.util.Log;
 
-import java.util.ArrayList;
 import java.io.Serializable;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
 /**
+ *
+ * Data holder for operations selector. This value is stored in each UserData.
+ *
  * Created by steeve on 11/09/17.
  */
 
-public class OperationsClass implements Serializable {
+class OperationsClass implements Serializable {
 	private LinkedHashMap<Operation, NumberOperation> opNumbers;
 	private boolean allowMultiple;
 	private int curIndex = 0;
@@ -37,20 +38,22 @@ public class OperationsClass implements Serializable {
 		opNumbers.put(op, nop);
 	}
 
+/*
 	public Operation getFirst() {
 		Iterator<Map.Entry<Operation, NumberOperation>> it = opNumbers.entrySet().iterator();
 		return it.hasNext() ? it.next().getKey() : Operation.PLUS;
 	}
+*/
 
-	public boolean isSet(Operation op) {
+	boolean isSet(Operation op) {
 		return opNumbers.containsKey(op);
 	}
 
-	public boolean isAllowMultiple() {
+	boolean isAllowMultiple() {
 		return allowMultiple;
 	}
 
-	public void setAllowMultiple(boolean b) {
+	void setAllowMultiple(boolean b) {
 		allowMultiple = b;
 		if (!allowMultiple) {
 			Set<Operation> ops = getOps();
@@ -71,11 +74,11 @@ public class OperationsClass implements Serializable {
 		}
 	}
 
-	public Set<Operation> getOps() {
+	private Set<Operation> getOps() {
 		return opNumbers.keySet();
 	}
 
-	public void setOperation(Operation op, boolean checked) {
+	void setOperation(Operation op, boolean checked) {
 		if (checked) {
 			add(op, null);
 		} else {
@@ -111,7 +114,7 @@ public class OperationsClass implements Serializable {
 		return i;
 	}
 
-	public NumberOperation getNextOp() {
+	NumberOperation getNextOp() {
 		int i = 0;
 		if (opNumbers.isEmpty()) {
 			Log.d("Operations", "opList shouldn't be empty");
@@ -132,7 +135,7 @@ public class OperationsClass implements Serializable {
 		return opNumbers.get(op);
 	}
 
-	public NumberOperation getOp(Operation op) {
+	NumberOperation getOp(Operation op) {
 		return opNumbers.get(op);
 	}
 
@@ -142,10 +145,9 @@ public class OperationsClass implements Serializable {
 	 * @param min update min or ignore if null
 	 * @param max update max or ignore if null
 	 */
-	public void updateTop(Long min, Long max) {
-		Iterator<Map.Entry<Operation, NumberOperation>> it = opNumbers.entrySet().iterator();
-		while (it.hasNext()) {
-			Map.Entry<Operation, NumberOperation> entry = it.next();
+	void updateTop(Long min, Long max) {
+		Set<Map.Entry<Operation, NumberOperation>> entries = opNumbers.entrySet();
+		for (Map.Entry<Operation, NumberOperation> entry : entries) {
 			NumberOperation nop = entry.getValue();
 			nop.updateTop(min, max);
 		}
@@ -157,10 +159,9 @@ public class OperationsClass implements Serializable {
 	 * @param min update min or ignore if null
 	 * @param max update max or ignore if null
 	 */
-	public void updateBottom(Long min, Long max) {
-		Iterator<Map.Entry<Operation, NumberOperation>> it = opNumbers.entrySet().iterator();
-		while (it.hasNext()) {
-			Map.Entry<Operation, NumberOperation> entry = it.next();
+	void updateBottom(Long min, Long max) {
+		Set<Map.Entry<Operation, NumberOperation>> entries = opNumbers.entrySet();
+		for (Map.Entry<Operation, NumberOperation> entry : entries) {
 			NumberOperation nop = entry.getValue();
 			nop.updateBottom(min, max);
 		}

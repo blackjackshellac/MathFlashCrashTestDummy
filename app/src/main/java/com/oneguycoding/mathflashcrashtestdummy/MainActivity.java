@@ -53,7 +53,6 @@ public class MainActivity extends AppCompatActivity /* implements
 	//private UserResults results;
 	public static final String jsonFilename = "MathFlashCrashTestDummy.json";
 	private Menu menu;
-	private PerformanceStatsHelper perfStatsHelper;
 	private SQLiteDatabase perfStatsDb;
 
 	public MainActivity() {	}
@@ -142,11 +141,17 @@ public class MainActivity extends AppCompatActivity /* implements
 
 		File file = new File(getFilesDir(), jsonFilename);
 		if (file.exists()) {
+			Log.d("DEBUG", "json file exists: "+jsonFilename);
+		}
+
+/*
+		if (file.exists()) {
 			boolean r = true; // file.delete(); // false; //file.delete();
 			if (!r) {
 				AndroidUtil.showToast(this, String.format("File %s not deleted", jsonFilename));
 			}
 		}
+*/
 		UserDataMap udm = UserDataMap.loadJson(this, jsonFilename);
 		if (udm == null) {
 			// first time invocation
@@ -202,7 +207,7 @@ public class MainActivity extends AppCompatActivity /* implements
 		//perfStatsDb.execSQL(PerformanceStatsSchema.SQL_DROP_TABLE);
 		//this.deleteDatabase(PerformanceStatsHelper.DATABASE_NAME);
 
-		perfStatsHelper = new PerformanceStatsHelper(this);
+		PerformanceStatsHelper perfStatsHelper = new PerformanceStatsHelper(this);
 		perfStatsDb = perfStatsHelper.getWritableDatabase();
 
 	}
@@ -216,7 +221,6 @@ public class MainActivity extends AppCompatActivity /* implements
 	}
 
 	public MenuItem findMenuItemByName(Menu menu, String name) {
-		boolean found = false;
 		for (int i = 0; i < menu.size(); i++) {
 			MenuItem item = menu.getItem(i);
 			if (item.getTitle().toString().equals(name)) {
@@ -243,10 +247,10 @@ public class MainActivity extends AppCompatActivity /* implements
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 
-		String name = null;
+		String name;
 		switch(item.getItemId()) {
 			case R.id.menu_delete_user:
-				deleteUser(item);
+				deleteUser();
 				break;
 			case R.id.menu_reset_user:
 				resetUser();
@@ -341,8 +345,8 @@ public class MainActivity extends AppCompatActivity /* implements
 	}
 
 	protected void setupNumbers() {
-	    // TODO for now just getUserData the top operation from the list
 		UserData userData = userDataMap.getUserData();
+		// TODO need a better way to handle multiple ops
 	    numberOperation = userData.ops.getNextOp();
 
 	    setupOperation(numberOperation.op);
@@ -407,7 +411,7 @@ public class MainActivity extends AppCompatActivity /* implements
 
     }
 
-	private void deleteUser(MenuItem item) {
+	private void deleteUser() {
 		// make final to allow OnClickListeners access
 		final String name = userDataMap.getCurUser();
 		if (name.equals(getText(R.string.user_default))) {
@@ -423,7 +427,6 @@ public class MainActivity extends AppCompatActivity /* implements
 		builder.setPositiveButton(getText(R.string.yes), new DialogInterface.OnClickListener() {
 
 			public void onClick(DialogInterface dialog, int which) {
-				// TODO have to delete 'name' from R.menu.main_menu
 				userDataMap.deleteUser(name);
 				MenuItem mitem = activity.findMenuItemByName(menu, name);
 				menu.removeItem(mitem.getItemId());
@@ -510,7 +513,10 @@ public class MainActivity extends AppCompatActivity /* implements
 */
 			case RESULT_STATS:
 				if (resultCode == RESULT_OK) {
-					Bundle b = intent.getExtras();
+					/*
+					Nothing is changed in StatsActivity, we can ignore the bundle
+					 */
+					//Bundle b = intent.getExtras();
 					//userDataMap = (UserDataMap) b.getSerializable(EXTRA_USERDATA);
 					UserResults userResults = userDataMap.getUserData().results;
 					userResults.reset(0);
@@ -539,7 +545,7 @@ public class MainActivity extends AppCompatActivity /* implements
 				throw new RuntimeException("Unexpected activity result");
 		}
 		if (saveJson) {
-			userDataMap.saveJson(this, this.jsonFilename);
+			userDataMap.saveJson(this, jsonFilename);
 		}
 		//setupNumbers();
 		setupUser(userDataMap.getCurUser());

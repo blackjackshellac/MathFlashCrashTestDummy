@@ -10,7 +10,7 @@
     <string name="stringDivision">Division</string>
     <string name="stringMultiple">Multiple selection</string>
     <string name="stringMultiplication">Multiplication</string>
-    <string name="menu_user_default">Default user</string>
+    <string name="menu_user_default">Default</string>
     <string name="menu_user_create">Create user</string>
     <string name="hint_user_name">User name</string>
     <string name="hint_user_email">Email</string>

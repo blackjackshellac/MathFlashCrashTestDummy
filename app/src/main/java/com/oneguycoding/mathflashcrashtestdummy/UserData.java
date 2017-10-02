@@ -3,6 +3,8 @@ package com.oneguycoding.mathflashcrashtestdummy;
 import java.io.Serializable;
 
 /**
+ * Container to store user data
+ *
  * Created by steeve on 12/09/17.
  */
 
@@ -31,11 +33,11 @@ class UserData implements Serializable {
 		this.name = name;
 	}
 
-	public String getEmail() {
+	String getEmail() {
 		return email;
 	}
 
-	public void setEmail(String email) {
+	void setEmail(String email) {
 		this.email = email;
 	}
 }

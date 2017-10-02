@@ -9,7 +9,6 @@ import android.widget.TableRow;
 import android.widget.TextView;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 
 public class StatsActivity extends AppCompatActivity {
 
@@ -22,8 +21,6 @@ public class StatsActivity extends AppCompatActivity {
 	};
 
 	private UserDataMap userDataMap;
-	private UserData userData;
-	private UserResults results;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -36,22 +33,22 @@ public class StatsActivity extends AppCompatActivity {
 		Intent intent = getIntent();
 		Bundle b = intent.getExtras();
 		userDataMap = (UserDataMap) b.getSerializable(MainActivity.EXTRA_USERDATA);
-		userData = userDataMap.getUserData();
-		results = userData.results;
+		if (userDataMap == null) throw new IllegalArgumentException("UserDataMap should never be null here");
+
+		UserData userData = userDataMap.getUserData();
+		UserResults results = userData.results;
 
 		TableLayout statsTable = (TableLayout) findViewById(R.id.statsTable);
 		TableRow statsRowHeader = (TableRow) findViewById(R.id.statsRowHeader);
 		int rows = statsRowHeader.getChildCount();
 		for (int i = 0; i < rows; i++) {
 			TextView tv = (TextView) statsRowHeader.getChildAt(i);
-			tv.setGravity(Gravity.CENTER_VERTICAL | (i==0 ? Gravity.LEFT : Gravity.RIGHT));
+			tv.setGravity(Gravity.CENTER_VERTICAL | (i==0 ? Gravity.START : Gravity.END));
 		}
 
 		ArrayList<UserResults.SqlResult> stats = results.getStats();
 		if (stats != null) {
-			Iterator<UserResults.SqlResult> it = stats.iterator();
-			while (it.hasNext()) {
-				UserResults.SqlResult result = it.next();
+			for (UserResults.SqlResult result : stats) {
 				String[] values = result.getCols(RESULT_COLUMNS);
 				statsTable.addView(addRowStats(values));
 			}
@@ -75,7 +72,7 @@ public class StatsActivity extends AppCompatActivity {
 			TextView tv = new TextView(this);
 			tv.setLayoutParams(tvlp);
 			tv.setText(values[i]);
-			tv.setGravity(Gravity.CENTER_VERTICAL | (i==0 ? Gravity.LEFT : Gravity.RIGHT));
+			tv.setGravity(Gravity.CENTER_VERTICAL | (i==0 ? Gravity.START : Gravity.END));
 			tr.addView(tv, i);
 		}
 
@@ -97,7 +94,6 @@ public class StatsActivity extends AppCompatActivity {
 		finish();
 
 		super.onBackPressed();
-		return;
 	}
 
 

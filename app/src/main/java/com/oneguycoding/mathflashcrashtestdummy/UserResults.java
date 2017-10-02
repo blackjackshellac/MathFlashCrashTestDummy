@@ -15,12 +15,16 @@ import java.util.Map;
 import java.util.Stack;
 
 /**
+ *
+ * Container for storing user results for a single operation
+ *
  * Created by steeve on 13/09/17.
  *
  */
 
-public class UserResults implements Serializable {
-	public static final int DEFAULT_NUM = 50;
+class UserResults implements Serializable {
+	private static final int DEFAULT_NUM = 50;
+
 	private int num;
 	private int nCorrect;
 	private int nWrong;
@@ -55,8 +59,8 @@ public class UserResults implements Serializable {
 	UserResults(int num) {
 		setNum(num);
 		resetCounters();
-		retryMap = new HashMap<Operation, Stack<LongPair>>();
-		stats = new ArrayList<SqlResult>();
+		retryMap = new HashMap<>();
+		stats = new ArrayList<>();
 	}
 
 	private void startTimer() {
@@ -76,38 +80,29 @@ public class UserResults implements Serializable {
 	private void setRetry(Operation op, LongPair nums) {
 		Stack<LongPair> retryStack = retryMap.get(op);
 		if (retryStack == null) {
-			retryStack = new Stack<LongPair>();
+			retryStack = new Stack<>();
 			retryMap.put(op, retryStack);
 		}
 		retryStack.push(nums);
 	}
 
-	public void correct() {
+	void correct() {
 		if (getNumAnswered() == 0) {
 			startTimer();
 		}
 		nCorrect += 1;
 	}
 
-	public void wrong(Operation op, LongPair nums) {
+	void wrong(Operation op, LongPair nums) {
 		nWrong += 1;
 		setRetry(op, nums);
 	}
 
-	public boolean hasNext(Operation op) {
-		return false;
-	}
-
-	public LongPair next(Operation op) {
-		Stack<LongPair> retryStack = retryMap.get(op);
-		return retryStack == null ? null : retryStack.pop();
-	}
-
-	public int getnCorrect() {
+	int getnCorrect() {
 		return nCorrect;
 	}
 
-	public int getnWrong() {
+	private int getnWrong() {
 		return nWrong;
 	}
 
@@ -120,7 +115,7 @@ public class UserResults implements Serializable {
 	 *
 	 * @param num - if num > 0 reset its value, otherwise keep the current value
 	 */
-	public void reset(int num) {
+	void reset(int num) {
 		if (num > 0) {
 			setNum(num);
 		}
@@ -131,22 +126,24 @@ public class UserResults implements Serializable {
 		}
 	}
 
-	public int getNum() {
+	int getNum() {
 		return num;
 	}
 
-	public float getPercentage() {
+	float getPercentage() {
 		return UserResults.getPercentage(num, nCorrect);
 	}
 
 	/**
 	 * Calculate the percentage given the number answered and the number correct
 	 *
-	 * @param num_answered
-	 * @param nCorrect
-	 * @return
+	 * @param num_answered - number answered
+	 * @param nCorrect - number correct
+	 *
+	 * @return percentage as a float
+	 *
 	 */
-	public static float getPercentage(int num_answered, int nCorrect) {
+	private static float getPercentage(int num_answered, int nCorrect) {
 		if (num_answered == 0) {
 			throw new IllegalArgumentException("num_answered should never be zero");
 		}
@@ -160,15 +157,15 @@ public class UserResults implements Serializable {
 		return percentage_correct;
 	}
 
-	public int getNumAnswered() {
+	int getNumAnswered() {
 		return nCorrect + nWrong;
 	}
 
-	public int getRemaining() {
+	int getRemaining() {
 		return num - getNumAnswered();
 	}
 
-	public boolean testDone() {
+	boolean testDone() {
 		return getNumAnswered() >= num;
 	}
 
@@ -177,7 +174,7 @@ public class UserResults implements Serializable {
 			Log.e("Limit", "count greater than num!");
 			return 100.0f;
 		}
-		return (float) (cnt*100.0f / num);
+		return 100.0f*cnt / num;
 	}
 
 	private boolean isLimited(float percent, int maxPercentage) {
@@ -200,7 +197,7 @@ public class UserResults implements Serializable {
 		return false;
 	}
 
-	public boolean limitZerosAndOnes(LongPair numberPair) {
+	private boolean limitZerosAndOnes(LongPair numberPair) {
 		for (int i = 0; i <= 1; i++) {
 			if (limitValue(i, numberPair)) {
 				return true;
@@ -209,7 +206,7 @@ public class UserResults implements Serializable {
 		return false;
 	}
 
-	public boolean limitTensAndElevens(LongPair numberPair) {
+	private boolean limitTensAndElevens(LongPair numberPair) {
 		for (int i = 10; i <= 11; i++) {
 			if (limitValue(i, numberPair)) {
 				return true;
@@ -218,36 +215,33 @@ public class UserResults implements Serializable {
 		return false;
 	}
 
-	public boolean limitOperationNumbers(Operation op, LongPair numberPair) {
+	boolean limitOperationNumbers(Operation op, LongPair numberPair) {
 		if (op == Operation.MULTIPLY || op == Operation.DIVIDE) {
 			if (limitTensAndElevens(numberPair)) {
 				return true;
 			}
 		}
-		if (limitZerosAndOnes(numberPair)) {
-			return true;
-		}
-		return false;
+		return limitZerosAndOnes(numberPair);
 	}
 
 
 
-	public void setStats(ArrayList<SqlResult> stats) {
+	void setStats(ArrayList<SqlResult> stats) {
 		this.stats = stats;
 	}
 
-	public ArrayList<SqlResult> getStats() {
+	ArrayList<SqlResult> getStats() {
 		return stats;
 	}
 
-	public static class SqlResult implements Serializable {
-		public final long id;
-		public final long runtime;
-		public final long duration;
-		public final int  num;
-		public final int correct;
-		public final float percentage_correct;
-		public final String name;
+	static class SqlResult implements Serializable {
+		final long id;
+		final long runtime;
+		final long duration;
+		final int  num;
+		final int correct;
+		final float percentage_correct;
+		final String name;
 
 		SqlResult(Cursor cursor) {
 			id =  cursor.getLong(cursor.getColumnIndexOrThrow(PerformanceStatsSchema.StatsSchema.COL_NAME_ID));
@@ -262,7 +256,7 @@ public class UserResults implements Serializable {
 			Log.d("SQL", AndroidUtil.stringFormatter("id,name,num,correct,percent=%d,%s,%d,%d,%.2f", id, name, num, correct, percentage_correct));
 		}
 
-		public enum SqlColumn {
+		enum SqlColumn {
 			RUNTIME,
 			NUM,
 			CORRECT,
@@ -270,7 +264,7 @@ public class UserResults implements Serializable {
 			ID,
 			NAME,
 			DURATION,
-			RATE;
+			RATE
 		}
 		/**
 		 * <br>0 - runtime</br>
@@ -312,44 +306,44 @@ public class UserResults implements Serializable {
 			return ""+id;
 		}
 
-		public String getRuntime() {
+		String getRuntime() {
 			return getDate(runtime);
 		}
 
-		public long getSecs() {
+		long getSecs() {
 			return duration-runtime;
 		}
 
-		public String getDuration() {
+		String getDuration() {
 			return ""+getSecs();
 		}
 
-		public String getNum() {
+		String getNum() {
 			return ""+num;
 		}
 
-		public String getCorrect() {
+		String getCorrect() {
 			return ""+correct;
 		}
 
-		public String getPercentage_correct() {
+		String getPercentage_correct() {
 			return AndroidUtil.stringFormatter("%.2f", percentage_correct);
 		}
 
-		public String getName() {
+		String getName() {
 			return name;
 		}
 
-		public String getRate() {
+		String getRate() {
 			long d = getSecs();
 			return AndroidUtil.stringFormatter("%.1f", ((float)num/(d == 0 ? 1 : d)));
 		}
 
-		public static String getDate(long rt_secs) {
+		static String getDate(long rt_secs) {
 			return DateFormat.getDateTimeInstance().format(rt_secs*1000L);
 		}
 
-		public String[] getCols(SqlColumn[] columns) {
+		String[] getCols(SqlColumn[] columns) {
 			String[] values = new String[columns.length];
 			for (int i=0; i < columns.length; i++) {
 				values[i] = getCol(columns[i]);
@@ -358,7 +352,7 @@ public class UserResults implements Serializable {
 		}
 	}
 
-	public static String[] getStatsAverages(ArrayList<SqlResult> stats) {
+	static String[] getStatsAverages(ArrayList<SqlResult> stats) {
 		String[] averages = new String[5];
 		long aveNum = 0;
 		long aveCorrect = 0;
@@ -387,12 +381,13 @@ public class UserResults implements Serializable {
 
 	/**
 	 *
-	 * @param perfStatsDb
-	 * @param op
-	 * @param name
+	 * @param perfStatsDb - sqlite database handle
+	 * @param op - operation
+	 * @param name - name to filter
+	 *
 	 * @return cursor to get SqlResults, be sure to close the cursor when done
 	 */
-	public static Cursor getStatsQueryCursor(SQLiteDatabase perfStatsDb, Operation op, String name) {
+	private static Cursor getStatsQueryCursor(SQLiteDatabase perfStatsDb, Operation op, String name) {
 		// Define a projection that specifies which columns from the database
 		// you will actually use after this query.
 		String[] projection = {
@@ -405,14 +400,15 @@ public class UserResults implements Serializable {
 		};
 
 		// Filter results
-		String selection = PerformanceStatsSchema.StatsSchema.COL_NAME_NAME + " = ?";
-		String[] selectionArgs = { name };
+		// String selection = PerformanceStatsSchema.StatsSchema.COL_NAME_NAME + " = ?" + " AND " + PerformanceStatsSchema.StatsSchema.COL_NAME_OPERATION + " = ?";
+		String selection = AndroidUtil.stringFormatter("%s = ? AND %s = ?", PerformanceStatsSchema.StatsSchema.COL_NAME_NAME, PerformanceStatsSchema.StatsSchema.COL_NAME_OPERATION);
+		String[] selectionArgs = { name, op.toChar() };
 
 		// How you want the results sorted in the resulting Cursor
 		String sortOrder =
 				PerformanceStatsSchema.StatsSchema.COL_NAME_RUNTIME + " ASC";
 
-		Cursor cursor = perfStatsDb.query(
+		return perfStatsDb.query(
 				PerformanceStatsSchema.StatsSchema.TABLE_NAME,                     // The table to query
 				projection,                               // The columns to return
 				selection,                                // The columns for the WHERE clause
@@ -421,15 +417,14 @@ public class UserResults implements Serializable {
 				null,                                     // don't filter by row groups
 				sortOrder                                 // The sort order
 		);
-		return cursor;
 	}
 
-	public static ArrayList<SqlResult> loadStats(SQLiteDatabase perfStatsDb, Operation op, String name) {
+	static ArrayList<SqlResult> loadStats(SQLiteDatabase perfStatsDb, Operation op, String name) {
 		// https://developer.android.com/training/basics/data-storage/databases.html
 
 		Cursor cursor = getStatsQueryCursor(perfStatsDb, op, name);
 
-		ArrayList<SqlResult> results = new ArrayList<SqlResult>();
+		ArrayList<SqlResult> results = new ArrayList<>();
 		while (cursor.moveToNext()) {
 			SqlResult result = new SqlResult(cursor);
 			results.add(result);
@@ -441,7 +436,7 @@ public class UserResults implements Serializable {
 		return results;
 	}
 
-	public void saveStats(SQLiteDatabase perfStatsDb, Operation op, String name) {
+	void saveStats(SQLiteDatabase perfStatsDb, Operation op, String name) {
 		// https://developer.android.com/training/basics/data-storage/databases.html
 
 		duration = AndroidUtil.now_secs();
@@ -458,7 +453,7 @@ public class UserResults implements Serializable {
 		Log.d("SQL", "newRowId="+newRowId);
 	}
 
-	public void clearStats(SQLiteDatabase perfStatsDb, String name) {
+	void clearStats(SQLiteDatabase perfStatsDb, String name) {
 		if (stats != null) {
 			stats.clear();
 		}

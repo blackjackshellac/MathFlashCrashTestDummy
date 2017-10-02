@@ -10,31 +10,34 @@ import android.widget.Toast;
 import java.util.IllegalFormatConversionException;
 
 /**
+ *
+ * AndroidUtil is just a bunch of helper utilities
+ *
  * Created by steeve on 12/09/17.
  */
 
-public class AndroidUtil {
+class AndroidUtil {
 
-	public static String getEditTextString(Activity activity, int id) {
+	static String getEditTextString(Activity activity, int id) {
 		EditText editText = (EditText) activity.findViewById(id);
 		return editText.getText().toString();
 	}
 
-	public static void setEditTextString(Activity activity, int id, String text) {
+	static void setEditTextString(Activity activity, int id, String text) {
 		EditText editText = (EditText) activity.findViewById(id);
 		editText.setText(text);
 	}
 
-	public static void showToast(Activity activity, String s) {
+	static void showToast(Activity activity, String s) {
 		showToast(activity, s, Toast.LENGTH_LONG);
 	}
 
-	public static void showToast(Activity activity, String s, int duration) {
+	static void showToast(Activity activity, String s, int duration) {
 		Toast toast = Toast.makeText(activity, s, duration);
 		toast.show();
 	}
 
-	public static void hideKeyboard(Activity activity) {
+	static void hideKeyboard(Activity activity) {
 		InputMethodManager imm = (InputMethodManager) activity.getSystemService(Activity.INPUT_METHOD_SERVICE);
 		//Find the currently focused view, so we can grab the correct window token from it.
 		View view = activity.getCurrentFocus();
@@ -45,7 +48,7 @@ public class AndroidUtil {
 		imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
 	}
 
-	public static String stringFormatter(String format, Object... arguments) {
+	static String stringFormatter(String format, Object... arguments) {
 		try {
 			return String.format(format, arguments);
 		} catch (IllegalFormatConversionException e) {
@@ -54,7 +57,7 @@ public class AndroidUtil {
 		}
 	}
 
-	public static long now_secs() {
+	static long now_secs() {
 		return System.currentTimeMillis()/1000L;
 	}
 }

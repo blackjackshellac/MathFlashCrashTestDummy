@@ -7,16 +7,19 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
 /**
+ *
+ * SQLiteOpenHelper class
+ *
  * Created by steeve on 27/09/17.
  *  <br/>
  *  Reference: https://developer.android.com/training/basics/data-storage/databases.html
  */
 
-public class PerformanceStatsHelper extends SQLiteOpenHelper {
+class PerformanceStatsHelper extends SQLiteOpenHelper {
 	private static final int DATABASE_VERSION = 2;
-	public static final String DATABASE_NAME = "MathFlashCrashTestDummy.db";
+	private static final String DATABASE_NAME = "MathFlashCrashTestDummy.db";
 
-	public PerformanceStatsHelper(Context context) {
+	PerformanceStatsHelper(Context context) {
 		super(context, DATABASE_NAME, null, DATABASE_VERSION);
 	}
 

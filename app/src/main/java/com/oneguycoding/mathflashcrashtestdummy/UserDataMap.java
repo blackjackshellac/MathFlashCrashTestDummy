@@ -2,6 +2,7 @@ package com.oneguycoding.mathflashcrashtestdummy;
 
 import android.app.Activity;
 import android.content.Context;
+import android.util.Log;
 
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
@@ -19,12 +20,14 @@ import java.util.HashMap;
 import java.util.Set;
 
 /**
+ * Container to hold all users' UserData as well as the current and default user
+ *
  * Created by steeve on 13/09/17.
  */
 
-public class UserDataMap implements Serializable {
+class UserDataMap implements Serializable {
 //	@SerializedName("VERSION_USERDATAMAP")
-	public static final String VERSION_USERDATAMAP = "20170914";
+	private static final String VERSION_USERDATAMAP = "20170914";
 //	@SerializedName("curUser")
 	private String curUser;
 //	@SerializedName("userDataMap")
@@ -32,13 +35,15 @@ public class UserDataMap implements Serializable {
 	private final String defaultUser;
 
 	UserDataMap(String name) {
-		userDataMap = new HashMap<String,UserData>();
-		defaultUser = new String(name);
+		Log.d("UserDataMap", VERSION_USERDATAMAP);
+
+		userDataMap = new HashMap<>();
+		defaultUser = name;
 		UserData userData = new UserData(defaultUser, "");
 		addUserData(userData);
 	}
 
-	public String getCurUser() {
+	String getCurUser() {
 		return curUser;
 	}
 
@@ -48,7 +53,7 @@ public class UserDataMap implements Serializable {
 	 * @param name user to set as current user
 	 *
 	 */
-	public UserData setCurUser(String name) {
+	UserData setCurUser(String name) {
 		if (this.hasUser(name)) {
 			this.curUser = name;
 			return getUserData();
@@ -57,15 +62,20 @@ public class UserDataMap implements Serializable {
 
 	}
 
-	public UserData getUserData() {
-		return userDataMap.get(curUser);
+	UserData getUserData() throws IllegalArgumentException {
+		UserData userData = userDataMap.get(curUser);
+		if (userData == null) {
+			throw new IllegalArgumentException("userData for curUser should never be null");
+		}
+		return userData;
 	}
 
 	/**
 	 * Add new userData object for given user, replace if it already exists and set curUser to the new user
-	 * @param userData
+	 *
+	 * @param userData - UserData object to insert into map
 	 */
-	public void addUserData(UserData userData) {
+	void addUserData(UserData userData) {
 		String name = userData.getName();
 		if (name.isEmpty()) {
 			return;
@@ -77,16 +87,18 @@ public class UserDataMap implements Serializable {
 	/**
 	 * Load the given json data file and parse to create a UserDataMap
 	 *
-	 * @param activity
-	 * @param jsonFilename
+	 * @param activity - activity
+	 * @param jsonFilename - json file name to load
 	 *
 	 * @return UserDataMap object if file is found, null otherwise
 	 */
-	public static UserDataMap loadJson(Activity activity, String jsonFilename) {
+	static UserDataMap loadJson(Activity activity, String jsonFilename) {
 		try {
 			FileInputStream inputStream = activity.openFileInput(jsonFilename);
-			byte[] data = new byte[(int) inputStream.available()];
-			inputStream.read(data);
+			byte[] data = new byte[inputStream.available()];
+			if (inputStream.read(data) == -1) {
+				Log.d("JSON", "No more data to read");
+			}
 			inputStream.close();
 
 			String json = new String(data, "UTF-8");
@@ -99,13 +111,12 @@ public class UserDataMap implements Serializable {
 			}
 			return udm;
 		} catch (FileNotFoundException e) {
-			return null;
+			Log.e("JSON", "json not found file="+jsonFilename);
 		} catch (IOException e) {
-			e.printStackTrace();
+			Log.e("JSON", "IO error loading file="+jsonFilename, e);
 		} catch (JsonParseException e) {
-			e.printStackTrace();
+			Log.e("JSON", "JSON parse error loading file="+jsonFilename, e);
 		}
-
 		return null;
 	}
 
@@ -118,8 +129,8 @@ public class UserDataMap implements Serializable {
 		return gson.toJson(this, UserDataMap.class);
 	}
 
-	public void saveJson(Activity mainActivity, String jsonFilename) {
-		FileOutputStream outputStream = null;
+	void saveJson(Activity mainActivity, String jsonFilename) {
+		FileOutputStream outputStream;
 		try {
 			// don't save stats saved in userResults
 			getUserData().results.clearStats(null, getCurUser());
@@ -129,26 +140,22 @@ public class UserDataMap implements Serializable {
 			outputStream.write(json.getBytes());
 			outputStream.close();
 		} catch (FileNotFoundException e) {
-			e.printStackTrace();
+			Log.e("JSON", "File not found: "+jsonFilename, e);
 		} catch (IOException e) {
-			e.printStackTrace();
+			Log.e("JSON", "IO exception reading file: "+jsonFilename, e);
 		}
 	}
 
 
-	public Set<String> users() {
+	Set<String> users() {
 		return userDataMap.keySet();
 	}
 
-	public boolean hasUser(String name) {
+	boolean hasUser(String name) {
 		return userDataMap.containsKey(name);
 	}
 
-	public boolean isEmpty() {
-		return userDataMap.isEmpty();
-	}
-
-	public UserData deleteUser(String name) {
+	UserData deleteUser(String name) {
 		if (name.equals(defaultUser)) {
 			throw new RuntimeException(String.format("Attempting to delete defaultUser: %s", defaultUser));
 		}

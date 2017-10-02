@@ -3,12 +3,22 @@ package com.oneguycoding.mathflashcrashtestdummy;
 import java.io.Serializable;
 
 /**
+ *
+ * A simple container class for passing pairs of longs
+ *
  * Created by steeve on 07/09/17.
  */
 
-public class LongPair implements Serializable {
-    public final Long l1;
-    public final Long l2;
+class LongPair implements Serializable {
+    final Long l1;
+    final Long l2;
+
+	/**
+	 * Copy constructor
+	 */
+	LongPair(LongPair pair) {
+		this(pair.l1, pair.l2);
+	}
 
     LongPair(long l1, long l2) {
         this.l1 = l1;

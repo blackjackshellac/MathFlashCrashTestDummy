@@ -63,7 +63,7 @@ public class ModifyUserActivity extends AppCompatActivity {
 		finish();
 
 		super.onBackPressed();
-		return;
+
 	}
 
 

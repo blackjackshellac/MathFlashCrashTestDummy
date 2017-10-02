@@ -21,6 +21,7 @@ public class OperationSelector extends AppCompatActivity {
 		Intent intent = getIntent();
 		Bundle b = intent.getExtras();
 		userDataMap = (UserDataMap) b.getSerializable(MainActivity.EXTRA_USERDATA);
+		if (userDataMap == null) throw new AssertionError();
 		userData = userDataMap.getUserData();
 		results = userData.results;
 
@@ -141,7 +142,6 @@ public class OperationSelector extends AppCompatActivity {
 		finish();
 
 		super.onBackPressed();
-		return;
 	}
 
 	public void onCheckboxClicked(View view) {
