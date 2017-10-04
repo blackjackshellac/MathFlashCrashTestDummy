@@ -7,7 +7,7 @@ android {
         applicationId "com.oneguycoding.mathflashcrashtestdummy"
         minSdkVersion 21
         targetSdkVersion 25
-        versionCode 20171004
+        versionCode 201710041
         versionName '1.00.02'
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
