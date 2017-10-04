@@ -11,15 +11,17 @@ import android.widget.TableRow;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.Set;
 
 public class StatsActivity extends AppCompatActivity {
 
 	private static final UserResults.SqlResult.SqlColumn[] RESULT_COLUMNS ={
 			UserResults.SqlResult.SqlColumn.RUNTIME,
+			UserResults.SqlResult.SqlColumn.OPERATION,
 			UserResults.SqlResult.SqlColumn.CORRECT,
 			UserResults.SqlResult.SqlColumn.NUM,
-			UserResults.SqlResult.SqlColumn.RATE,
-			UserResults.SqlResult.SqlColumn.PERCENT
+			UserResults.SqlResult.SqlColumn.PERCENT,
+			UserResults.SqlResult.SqlColumn.RATE
 	};
 
 	@Override
@@ -34,7 +36,8 @@ public class StatsActivity extends AppCompatActivity {
 		Bundle b = intent.getExtras();
 		UserDataMap userDataMap = (UserDataMap) b.getSerializable(MainActivity.EXTRA_USERDATA);
 		if (userDataMap == null) throw new IllegalArgumentException("UserDataMap should never be null here");
-		Operation op = (Operation) b.getSerializable(MainActivity.EXTRA_OPERATION);
+		UserData userData = userDataMap.getUserData();
+		Set<Operation> ops = userData.ops.opNumbers.keySet();
 
 		TableLayout statsTable = (TableLayout) findViewById(R.id.statsTable);
 		TableRow statsRowHeader = (TableRow) findViewById(R.id.statsRowHeader);
@@ -49,7 +52,7 @@ public class StatsActivity extends AppCompatActivity {
 
 		PerformanceStatsHelper perfStatsHelper = new PerformanceStatsHelper(this);
 		SQLiteDatabase perfStatsDb = perfStatsHelper.getReadableDatabase();
-		Cursor cursor = UserResults.getStatsQueryCursor(perfStatsDb, op, userDataMap.getCurUser());
+		Cursor cursor = UserResults.getStatsQueryCursor(perfStatsDb, ops, userDataMap.getCurUser());
 		while (cursor.moveToNext()) {
 			UserResults.SqlResult result = new UserResults.SqlResult(cursor);
 			stats.add(result);
@@ -62,7 +65,7 @@ public class StatsActivity extends AppCompatActivity {
 		statsTable.addView(addRowStats(subheader));
 
 		// calculate averages on the fly
-		String[] averages = UserResults.getStatsAverages(stats);
+		String[] averages = UserResults.getStatsAverages(stats, RESULT_COLUMNS);
 		statsTable.addView(addRowStats(averages));
 	}
 

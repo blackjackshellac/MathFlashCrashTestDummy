@@ -48,7 +48,15 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="Date"
-                    android:textAlignment="center"/>
+                    android:textAlignment="viewStart"/>
+
+                <TextView
+                    android:id="@+id/statsRowHeaderOperation"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Op"
+                    android:textAlignment="textEnd"/>
 
                 <TextView
                     android:id="@+id/statsRowHeaderCorrect"
@@ -56,7 +64,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="Correct"
-                    android:textAlignment="center"/>
+                    android:textAlignment="textEnd"/>
 
                 <TextView
                     android:id="@+id/statsRowHeaderNum"
@@ -64,15 +72,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="Num"
-                    android:textAlignment="center"/>
-
-                <TextView
-                    android:id="@+id/statsRowHeaderSecs"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Rate"
-                    android:textAlignment="center"/>
+                    android:textAlignment="textEnd"/>
 
                 <TextView
                     android:id="@+id/statsRowHeaderPercent"
@@ -80,7 +80,15 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="Percent"
-                    android:textAlignment="center"/>
+                    android:textAlignment="textEnd"/>
+
+                <TextView
+                    android:id="@+id/statsRowHeaderRate"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Rate"
+                    android:textAlignment="textEnd"/>
             </TableRow>
 
         </TableLayout>

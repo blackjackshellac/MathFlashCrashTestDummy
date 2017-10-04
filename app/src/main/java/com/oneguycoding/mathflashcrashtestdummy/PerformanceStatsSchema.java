@@ -16,15 +16,15 @@ class PerformanceStatsSchema {
 
 	static class StatsSchema implements BaseColumns {
 		static final String TABLE_NAME = "perf_stats";
-		static final String COL_NAME_NAME = "name";
-		static final String COL_NAME_OPERATION = "op";
-		static final String COL_NAME_RUNTIME = "runtime";
-		static final String COL_NAME_DURATION = "duration";
-		static final String COL_NAME_NUM = "num";
-		static final String COL_NAME_CORRECT = "correct";
-		static final String COL_NAME_WRONG = "wrong";
-		static final String COL_NAME_ID = "id";
-		static final String CHECK_OP = String.format("CHECK(%s in (%s))", COL_NAME_OPERATION, Operation.CHARS_LIST);
+		static final String COL_NAME = "name";
+		static final String COL_OPERATION = "op";
+		static final String COL_RUNTIME = "runtime";
+		static final String COL_DURATION = "duration";
+		static final String COL_NUM = "num";
+		static final String COL_CORRECT = "correct";
+		static final String COL_WRONG = "wrong";
+		static final String COL_ID = "id";
+		static final String CHECK_OP = String.format("CHECK(%s in (%s))", COL_OPERATION, Operation.CHARS_LIST);
 	}
 
 	static final String SQL_CREATE_TABLE = String.format(
@@ -39,18 +39,18 @@ class PerformanceStatsSchema {
 			" `%s`\tINTEGER PRIMARY KEY AUTOINCREMENT UNIQUE\n" +   // id
 			" )",
 				StatsSchema.TABLE_NAME,
-				StatsSchema.COL_NAME_NAME,
-				StatsSchema.COL_NAME_OPERATION,	StatsSchema.CHECK_OP,
-				StatsSchema.COL_NAME_RUNTIME,
-				StatsSchema.COL_NAME_DURATION,
-				StatsSchema.COL_NAME_NUM,
-				StatsSchema.COL_NAME_CORRECT,
-				StatsSchema.COL_NAME_WRONG,
-				StatsSchema.COL_NAME_ID);
+				StatsSchema.COL_NAME,
+				StatsSchema.COL_OPERATION,	StatsSchema.CHECK_OP,
+				StatsSchema.COL_RUNTIME,
+				StatsSchema.COL_DURATION,
+				StatsSchema.COL_NUM,
+				StatsSchema.COL_CORRECT,
+				StatsSchema.COL_WRONG,
+				StatsSchema.COL_ID);
 
 	static final String SQL_DROP_TABLE = "DROP TABLE IF EXISTS " + StatsSchema.TABLE_NAME;
 	// DELETE FROM perf_stats WHERE name LIKE %s
-	private static final String SQL_DELETE_USER_RESULTS = "DELETE FROM "+StatsSchema.TABLE_NAME+" WHERE "+StatsSchema.COL_NAME_NAME+" LIKE '%s'";
+	private static final String SQL_DELETE_USER_RESULTS = "DELETE FROM "+StatsSchema.TABLE_NAME+" WHERE "+StatsSchema.COL_NAME +" LIKE '%s'";
 
 	static String getSqlDeleteUserResults(String name) {
 		return AndroidUtil.stringFormatter(SQL_DELETE_USER_RESULTS, name);

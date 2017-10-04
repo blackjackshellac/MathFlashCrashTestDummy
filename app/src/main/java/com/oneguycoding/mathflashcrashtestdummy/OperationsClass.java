@@ -16,7 +16,7 @@ import java.util.Set;
  */
 
 class OperationsClass implements Serializable {
-	private LinkedHashMap<Operation, NumberOperation> opNumbers;
+	public final LinkedHashMap<Operation, NumberOperation> opNumbers;
 	private boolean allowMultiple;
 	private int curIndex = 0;
 
@@ -91,24 +91,32 @@ class OperationsClass implements Serializable {
 		}
 	}
 
-	private Operation getNth(int n) {
-		Set<Operation> ops = getOps();
-		Iterator<Operation> it = ops.iterator();
-		int i = 0;
-		while (it.hasNext()) {
-			Operation op = it.next();
-			if (i == n) {
+	/**
+	 * Get the operation with the specified index from opNumbers LinkedHashMap
+	 *
+	 * @param idx - the index of the operation
+	 *
+	 * @return the operation with the given index, or opNumbers.get(0
+	 */
+	private Operation get_idx(int idx) {
+		if (idx < 0 || idx >= opNumbers.size()) {
+			idx = 0;
+		}
+		int i=0;
+		Set<Operation> keys = opNumbers.keySet();
+		for (Operation op : keys) {
+			if (i == idx) {
 				return op;
 			}
-			i += 1;
+			i++;
 		}
-		return null;
+		throw new RuntimeException("opNumbers is empty");
 	}
 
 	private int incCurIndex() {
 		int i = curIndex;
 		curIndex += 1;
-		if (curIndex > opNumbers.size()) {
+		if (curIndex >= opNumbers.size()) {
 			curIndex = 0;
 		}
 		return i;
@@ -131,7 +139,7 @@ class OperationsClass implements Serializable {
 		if (i > opNumbers.size()) {
 			throw new RuntimeException("Next op index out of bounds");
 		}
-		Operation op = getNth(i);
+		Operation op = get_idx(i);
 		return opNumbers.get(op);
 	}
 

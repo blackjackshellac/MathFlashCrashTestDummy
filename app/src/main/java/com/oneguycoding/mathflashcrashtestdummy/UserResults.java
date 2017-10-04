@@ -12,6 +12,7 @@ import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.Stack;
 
 /**
@@ -229,14 +230,16 @@ class UserResults implements Serializable {
 		final int correct;
 		final float percentage_correct;
 		final String name;
+		final String operation;
 
 		SqlResult(Cursor cursor) {
-			id =  cursor.getLong(cursor.getColumnIndexOrThrow(PerformanceStatsSchema.StatsSchema.COL_NAME_ID));
-			runtime = cursor.getLong(cursor.getColumnIndexOrThrow(PerformanceStatsSchema.StatsSchema.COL_NAME_RUNTIME));
-			duration = cursor.getLong(cursor.getColumnIndexOrThrow(PerformanceStatsSchema.StatsSchema.COL_NAME_DURATION));
-			num = cursor.getInt(cursor.getColumnIndexOrThrow(PerformanceStatsSchema.StatsSchema.COL_NAME_NUM));
-			correct = cursor.getInt(cursor.getColumnIndexOrThrow(PerformanceStatsSchema.StatsSchema.COL_NAME_CORRECT));
-			name = cursor.getString(cursor.getColumnIndexOrThrow(PerformanceStatsSchema.StatsSchema.COL_NAME_NAME));
+			id =  cursor.getLong(cursor.getColumnIndexOrThrow(PerformanceStatsSchema.StatsSchema.COL_ID));
+			runtime = cursor.getLong(cursor.getColumnIndexOrThrow(PerformanceStatsSchema.StatsSchema.COL_RUNTIME));
+			duration = cursor.getLong(cursor.getColumnIndexOrThrow(PerformanceStatsSchema.StatsSchema.COL_DURATION));
+			num = cursor.getInt(cursor.getColumnIndexOrThrow(PerformanceStatsSchema.StatsSchema.COL_NUM));
+			correct = cursor.getInt(cursor.getColumnIndexOrThrow(PerformanceStatsSchema.StatsSchema.COL_CORRECT));
+			name = cursor.getString(cursor.getColumnIndexOrThrow(PerformanceStatsSchema.StatsSchema.COL_NAME));
+			operation = cursor.getString(cursor.getColumnIndexOrThrow(PerformanceStatsSchema.StatsSchema.COL_OPERATION));
 
 			percentage_correct = UserResults.getPercentage(num, correct);
 
@@ -251,7 +254,8 @@ class UserResults implements Serializable {
 			ID,
 			NAME,
 			DURATION,
-			RATE
+			RATE,
+			OPERATION
 		}
 		/**
 		 * <br>0 - runtime</br>
@@ -283,6 +287,8 @@ class UserResults implements Serializable {
 					return getDuration();
 				case RATE: // num per second
 					return getRate();
+				case OPERATION:
+					return getOperation();
 				default:
 					Log.e("SQL", "Unknown column index in SqlResult.getCol()");
 			}
@@ -326,6 +332,10 @@ class UserResults implements Serializable {
 			return AndroidUtil.stringFormatter("%.1f", ((float)num/(d == 0 ? 1 : d)));
 		}
 
+		String getOperation() {
+			return operation;
+		}
+
 		static String getDate(long rt_secs) {
 			return DateFormat.getDateTimeInstance().format(rt_secs*1000L);
 		}
@@ -339,8 +349,9 @@ class UserResults implements Serializable {
 		}
 	}
 
-	static String[] getStatsAverages(ArrayList<SqlResult> stats) {
-		String[] averages = new String[5];
+	static String[] getStatsAverages(ArrayList<SqlResult> stats, SqlResult.SqlColumn[] resultColumns) {
+		String[] averages = new String[6];
+		String aveOp = ".";
 		long aveNum = 0;
 		long aveCorrect = 0;
 		long aveDuration = 0;
@@ -357,11 +368,39 @@ class UserResults implements Serializable {
 		avePercentCorrect /= stats.size();
 		aveDuration /= stats.size();
 
+		for (int i=0; i < resultColumns.length; i++) {
+			SqlResult.SqlColumn col = resultColumns[i];
+			String ave = "";
+			switch (col) {
+				case RUNTIME:
+					ave = SqlResult.getDate(System.currentTimeMillis()/1000L);
+					break;
+				case OPERATION:
+					ave = aveOp;
+					break;
+				case NUM:
+					ave = ""+aveNum;
+					break;
+				case CORRECT:
+					ave = ""+aveCorrect;
+					break;
+				case PERCENT:
+					ave = AndroidUtil.stringFormatter("%.2f", avePercentCorrect);
+					break;
+				case RATE:
+					ave = ""+aveDuration;
+					break;
+			}
+			averages[i] = ave;
+		}
+/*
 		averages[0]=SqlResult.getDate(System.currentTimeMillis()/1000L);
-		averages[1]=""+aveNum;
-		averages[2]=""+aveCorrect;
-		averages[3]=""+aveDuration;
+		averages[1]=""+aveOp;
+		averages[2]=""+aveNum;
+		averages[3]=""+aveCorrect;
 		averages[4]=AndroidUtil.stringFormatter("%.2f", avePercentCorrect);
+		averages[5]=""+aveDuration;
+*/
 
 		return averages;
 	}
@@ -369,31 +408,50 @@ class UserResults implements Serializable {
 	/**
 	 *
 	 * @param perfStatsDb - sqlite database handle
-	 * @param op - operation
+	 * @param ops - set of operations to query
 	 * @param name - name to filter
 	 *
 	 * @return cursor to get SqlResults, <b>be sure to close the cursor when done</b>
 	 */
-	static Cursor getStatsQueryCursor(SQLiteDatabase perfStatsDb, Operation op, String name) {
+	static Cursor getStatsQueryCursor(SQLiteDatabase perfStatsDb, Set<Operation> ops, String name) {
 		// Define a projection that specifies which columns from the database
 		// you will actually use after this query.
 		String[] projection = {
-				PerformanceStatsSchema.StatsSchema.COL_NAME_ID,
-				PerformanceStatsSchema.StatsSchema.COL_NAME_RUNTIME,
-				PerformanceStatsSchema.StatsSchema.COL_NAME_DURATION,
-				PerformanceStatsSchema.StatsSchema.COL_NAME_NAME,
-				PerformanceStatsSchema.StatsSchema.COL_NAME_NUM,
-				PerformanceStatsSchema.StatsSchema.COL_NAME_CORRECT
+				PerformanceStatsSchema.StatsSchema.COL_ID,
+				PerformanceStatsSchema.StatsSchema.COL_RUNTIME,
+				PerformanceStatsSchema.StatsSchema.COL_OPERATION,
+				PerformanceStatsSchema.StatsSchema.COL_DURATION,
+				PerformanceStatsSchema.StatsSchema.COL_NAME,
+				PerformanceStatsSchema.StatsSchema.COL_NUM,
+				PerformanceStatsSchema.StatsSchema.COL_CORRECT
 		};
 
 		// Filter results
-		// String selection = PerformanceStatsSchema.StatsSchema.COL_NAME_NAME + " = ?" + " AND " + PerformanceStatsSchema.StatsSchema.COL_NAME_OPERATION + " = ?";
-		String selection = AndroidUtil.stringFormatter("%s = ? AND %s = ?", PerformanceStatsSchema.StatsSchema.COL_NAME_NAME, PerformanceStatsSchema.StatsSchema.COL_NAME_OPERATION);
-		String[] selectionArgs = { name, op.toChar() };
+		// String selection = PerformanceStatsSchema.StatsSchema.COL_NAME + " = ?" + " AND " + PerformanceStatsSchema.StatsSchema.COL_OPERATION + " = ?";
+		//String selection = AndroidUtil.stringFormatter("%s = ? AND %s = ?", PerformanceStatsSchema.StatsSchema.COL_NAME, PerformanceStatsSchema.StatsSchema.COL_OPERATION);
+		StringBuffer sb = new StringBuffer();
+		sb.append(PerformanceStatsSchema.StatsSchema.COL_NAME).append(" = ? AND ( ");
+		String[] selectionArgs = new String[ops.size()+1];
+		selectionArgs[0] = name;
+		int i = 1;
+
+		// name = ? AND (op = ? OR op = ? )
+		for (Operation op : ops) {
+			selectionArgs[i] = op.toChar();
+			sb.append(PerformanceStatsSchema.StatsSchema.COL_OPERATION).append(" = ? ");
+			if (i < ops.size()) {
+				sb.append(" OR ");
+			} else {
+				sb.append(")");
+			}
+			i++;
+		}
+
+		String selection = sb.toString();
 
 		// How you want the results sorted in the resulting Cursor
 		String sortOrder =
-				PerformanceStatsSchema.StatsSchema.COL_NAME_RUNTIME + " ASC";
+				PerformanceStatsSchema.StatsSchema.COL_RUNTIME + " ASC";
 
 		return perfStatsDb.query(
 				PerformanceStatsSchema.StatsSchema.TABLE_NAME,                     // The table to query
@@ -427,13 +485,13 @@ class UserResults implements Serializable {
 		duration = AndroidUtil.now_secs();
 
 		ContentValues values = new ContentValues();
-		values.put(PerformanceStatsSchema.StatsSchema.COL_NAME_NAME, name);
-		values.put(PerformanceStatsSchema.StatsSchema.COL_NAME_OPERATION, op.toChar());
-		values.put(PerformanceStatsSchema.StatsSchema.COL_NAME_RUNTIME, runtime);
-		values.put(PerformanceStatsSchema.StatsSchema.COL_NAME_DURATION, duration);
-		values.put(PerformanceStatsSchema.StatsSchema.COL_NAME_NUM, this.getNum());
-		values.put(PerformanceStatsSchema.StatsSchema.COL_NAME_CORRECT, this.getnCorrect());
-		values.put(PerformanceStatsSchema.StatsSchema.COL_NAME_WRONG, this.getnWrong());
+		values.put(PerformanceStatsSchema.StatsSchema.COL_NAME, name);
+		values.put(PerformanceStatsSchema.StatsSchema.COL_OPERATION, op.toChar());
+		values.put(PerformanceStatsSchema.StatsSchema.COL_RUNTIME, runtime);
+		values.put(PerformanceStatsSchema.StatsSchema.COL_DURATION, duration);
+		values.put(PerformanceStatsSchema.StatsSchema.COL_NUM, this.getNum());
+		values.put(PerformanceStatsSchema.StatsSchema.COL_CORRECT, this.getnCorrect());
+		values.put(PerformanceStatsSchema.StatsSchema.COL_WRONG, this.getnWrong());
 		long newRowId = perfStatsDb.insert(PerformanceStatsSchema.StatsSchema.TABLE_NAME, null, values);
 		Log.d("SQL", "newRowId="+newRowId);
 	}

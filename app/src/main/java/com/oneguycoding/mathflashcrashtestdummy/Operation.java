@@ -3,6 +3,7 @@ package com.oneguycoding.mathflashcrashtestdummy;
 import android.util.Log;
 
 import java.util.HashMap;
+import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
@@ -24,6 +25,7 @@ enum Operation {
 
     private static final HashMap<Operation,Character> chars;
 	public static final String CHARS_LIST;
+	private static final Random random;
 
 	static {
         chars = new HashMap<>();
@@ -33,6 +35,8 @@ enum Operation {
         chars.put(DIVIDE, '/');
 
 	    CHARS_LIST = Operation.chars_list();
+
+		random = new Random(System.currentTimeMillis());
     }
 
 	private static String chars_list() {
@@ -80,7 +84,22 @@ enum Operation {
 	 */
 	public long rand_range(LongPair lp) {
 	    //return lp.l1 + (long)(Math.random() * lp.l2);
-        return ThreadLocalRandom.current().nextLong(lp.l1, lp.l2 + 1);
+		// can't seem to seed ThreadLocalRandom
+        //return ThreadLocalRandom.current().nextLong(lp.l1, lp.l2 + 1);
+		long lower_bound = lp.l1;
+		long upper_bound = lp.l2+1;
+		long number = lower_bound+((long)(random.nextDouble()*(upper_bound-lower_bound)));
+		if (BuildConfig.DEBUG) {
+			if ((number < lp.l1 || number > lp.l2)) {
+				Log.d("RANDOM", AndroidUtil.stringFormatter("Number is out of range: %s [%s,%s]", number, lp.l1, lp.l2));
+				if (number < lp.l1) {
+					number = lp.l1;
+				} else if (number > lp.l2) {
+					number = lp.l2;
+				}
+			}
+		}
+		return number;
     }
 
 	/**
