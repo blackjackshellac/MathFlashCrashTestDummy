@@ -3,6 +3,8 @@ package com.oneguycoding.mathflashcrashtestdummy;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.database.sqlite.SQLiteDatabase;
 import android.media.AudioManager;
 import android.media.ToneGenerator;
@@ -271,6 +273,9 @@ public class MainActivity extends AppCompatActivity /* implements
 					setupUser(name);
 				}
 				break;
+			case R.id.menu_about:
+				showAbout();
+				break;
 			case R.id.menu_popup_users:
 				View menuItemView = findViewById(R.id.menu_popup_users); // SAME ID AS MENU ID
 				PopupMenu popupMenu = new PopupMenu(this, menuItemView);
@@ -297,6 +302,51 @@ public class MainActivity extends AppCompatActivity /* implements
 		}
 
 		return true;
+	}
+
+	protected PackageInfo getPackageInfo() {
+		String pn = this.getPackageName();
+
+		try {
+			PackageManager pm = this.getPackageManager();
+			PackageInfo pInfo = pm.getPackageInfo(pn, 0);
+			return pInfo;
+		} catch (PackageManager.NameNotFoundException e) {
+			Log.e("MainActivity", "Failed to get PackageInfo for PackageName="+pn, e);
+		}
+		return null;
+	}
+
+	protected void showAbout() {
+		// Inflate the about message contents
+		View messageView = getLayoutInflater().inflate(R.layout.about, null, false);
+
+		// When linking text, force to always use default color. This works
+		// around a pressed color state bug.
+		TextView textView = (TextView) messageView.findViewById(R.id.about_credits);
+		int defaultColor = textView.getTextColors().getDefaultColor();
+		textView.setTextColor(defaultColor);
+
+		String versionName;
+		int versionCode;
+		PackageInfo pInfo = getPackageInfo();
+		if (pInfo != null) {
+			versionName = pInfo.versionName;
+			versionCode = pInfo.versionCode;
+		} else {
+			versionName = "<failed to get versionName>";
+			versionCode = -1;
+		}
+		String versionString = AndroidUtil.stringFormatter("%s (%d)", versionName, versionCode);
+		TextView aboutVersion = (TextView) messageView.findViewById(R.id.about_version);
+		aboutVersion.setText(versionString);
+
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		builder.setIcon(R.drawable.mathflash);
+		builder.setTitle(R.string.app_name);
+		builder.setView(messageView);
+		builder.create();
+		builder.show();
 	}
 
 	protected void setupOperation(Operation op) {

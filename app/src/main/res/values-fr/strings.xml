@@ -42,4 +42,7 @@
     <string name="title_clear_user">Efficer user stats</string>
     <string name="text_clear_user_prompt">Voulez-vous efficer les stats pour %1$s?</string>
     <string name="menu_users">Users ...</string>
+    <string name="menu_about_text">About ...</string>
+    <string name="about_app_descrip">Test de cartes flash arithmétiques</string>
+    <string name="about_app_credits">Auteur: Steeve McCauley</string>
 </resources>

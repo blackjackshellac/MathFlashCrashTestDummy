@@ -41,4 +41,7 @@
     <string name="title_clear_user">Clear user stats</string>
     <string name="text_clear_user_prompt">Do you want to clear user stats for %1$s?</string>
     <string name="menu_users">Users ...</string>
+    <string name="menu_about_text">About ...</string>
+    <string name="about_app_descrip">Arithmetic flash cards testing</string>
+    <string name="about_app_credits">Author: Steeve McCauley</string>
 </resources>
