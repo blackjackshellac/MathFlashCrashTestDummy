@@ -2,6 +2,7 @@ package com.oneguycoding.mathflashcrashtestdummy;
 
 import android.app.AlertDialog;
 import android.content.ActivityNotFoundException;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
@@ -11,6 +12,9 @@ import android.media.AudioManager;
 import android.media.ToneGenerator;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
+import android.os.storage.StorageManager;
+import android.os.storage.StorageVolume;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.PopupMenu;
 import android.util.Log;
@@ -215,6 +219,14 @@ public class MainActivity extends AppCompatActivity /* implements
 		PerformanceStatsHelper perfStatsHelper = new PerformanceStatsHelper(this);
 		perfStatsDb = perfStatsHelper.getWritableDatabase();
 
+/*
+		TODO see also http://www.androidauthority.com/how-to-store-data-locally-in-android-app-717190/
+
+		StorageManager sm = (StorageManager)getSystemService(Context.STORAGE_SERVICE);
+		StorageVolume volume = sm.getPrimaryStorageVolume();
+		Intent intent = volume.createAccessIntent(Environment.DIRECTORY_DOCUMENTS);
+		startActivityForResult(intent, request_code);
+*/
 	}
 
 	@Override
