@@ -34,10 +34,10 @@ class UserData implements Serializable {
 	}
 
 	String getEmail() {
-		return email;
+		return email.trim();
 	}
 
 	void setEmail(String email) {
-		this.email = email;
+		this.email = email.trim();
 	}
 }

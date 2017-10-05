@@ -1,6 +1,7 @@
 package com.oneguycoding.mathflashcrashtestdummy;
 
 import android.app.AlertDialog;
+import android.content.ActivityNotFoundException;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
@@ -8,6 +9,7 @@ import android.content.pm.PackageManager;
 import android.database.sqlite.SQLiteDatabase;
 import android.media.AudioManager;
 import android.media.ToneGenerator;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.PopupMenu;
@@ -20,6 +22,7 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 
 //import com.google.android.gms.common.ConnectionResult;
@@ -307,14 +310,14 @@ public class MainActivity extends AppCompatActivity /* implements
 	protected PackageInfo getPackageInfo() {
 		String pn = this.getPackageName();
 
+		PackageInfo pInfo = null;
 		try {
 			PackageManager pm = this.getPackageManager();
-			PackageInfo pInfo = pm.getPackageInfo(pn, 0);
-			return pInfo;
+			pInfo = pm.getPackageInfo(pn, 0);
 		} catch (PackageManager.NameNotFoundException e) {
 			Log.e("MainActivity", "Failed to get PackageInfo for PackageName="+pn, e);
 		}
-		return null;
+		return pInfo;
 	}
 
 	protected void showAbout() {
@@ -461,6 +464,50 @@ public class MainActivity extends AppCompatActivity /* implements
 
     }
 
+	/**
+	 * https://stackoverflow.com/questions/2197741/how-can-i-send-emails-from-my-android-application
+	 *
+	 * For sending attachments see here,
+	 *
+	 * https://developer.android.com/guide/components/intents-common.html#Email
+	 *
+	 */
+	private void sendEmail(Uri attachment) {
+
+	    UserData userData = userDataMap.getUserData();
+	    String userEmail = userData.getEmail();
+	    if (userEmail.isEmpty()) {
+		    return;
+	    }
+
+	    if (attachment == null) {
+		    File jsonFile = new File(getFilesDir(), jsonFilename);
+		    if (jsonFile.exists()) {
+			    Log.d("DEBUG", "json file exists: "+jsonFilename);
+			    attachment = Uri.fromFile(jsonFile);
+		    }
+	    }
+
+		String[] addresses = {userEmail};
+
+	    Intent intent = new Intent(Intent.ACTION_SEND);
+	    intent.setType("message/rfc822");
+	    intent.putExtra(Intent.EXTRA_EMAIL  , addresses);
+	    intent.putExtra(Intent.EXTRA_SUBJECT, jsonFilename);
+	    intent.putExtra(Intent.EXTRA_TEXT   , "See attached json file: "+jsonFilename);
+		intent.putExtra(Intent.EXTRA_STREAM, attachment);
+		intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+		try {
+			Intent chooser = Intent.createChooser(intent, "Send mail...");
+		    startActivity(chooser);
+	    } catch (ActivityNotFoundException ex) {
+		    Toast.makeText(this, "There are no email clients installed.", Toast.LENGTH_SHORT).show();
+	    } catch (Exception e) {
+			Log.e("email", "failed to attached "+jsonFilename, e);
+		}
+    }
+
 	private void deleteUser() {
 		// make final to allow OnClickListeners access
 		final String name = userDataMap.getCurUser();
@@ -597,6 +644,7 @@ public class MainActivity extends AppCompatActivity /* implements
 		}
 		if (saveJson) {
 			userDataMap.saveJson(this, jsonFilename);
+			// sendEmail(null);
 		}
 		//setupNumbers();
 		setupUser(userDataMap.getCurUser());
