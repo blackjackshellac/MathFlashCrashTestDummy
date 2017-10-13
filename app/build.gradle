@@ -5,9 +5,9 @@ android {
     buildToolsVersion "25.0.0"
     defaultConfig {
         applicationId "com.oneguycoding.mathflashcrashtestdummy"
-        minSdkVersion 24
+        minSdkVersion 21
         targetSdkVersion 25
-        versionCode 201710130
+        versionCode 201710131
         versionName '1.00.04'
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
