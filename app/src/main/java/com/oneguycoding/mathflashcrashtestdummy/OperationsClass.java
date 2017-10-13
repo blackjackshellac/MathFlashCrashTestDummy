@@ -23,9 +23,10 @@ class OperationsClass implements Serializable {
 	OperationsClass() {
 		allowMultiple = false;
 
-		Operation op = Operation.PLUS;
+		//Operation op = Operation.PLUS;
 		opNumbers = new LinkedHashMap<>();
-		opNumbers.put(op, new NumberOperation(op));
+		//NumberOperation nop = new NumberOperation(op);
+		//opNumbers.put(op, nop);
 	}
 
 	public void add(Operation op, NumberOperation nop) {

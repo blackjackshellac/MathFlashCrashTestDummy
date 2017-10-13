@@ -9,8 +9,13 @@ import java.io.Serializable;
  */
 
 class NumberOperation implements Serializable {
-    private static final LongPair TOP_RANGE = new LongPair(0, 12);
-    private static final LongPair BOTTOM_RANGE = new LongPair(0, 12);
+    private static final LongPair TOP_RANGE;
+    private static final LongPair BOTTOM_RANGE;
+
+	static {
+		TOP_RANGE = new LongPair(0, 12);
+		BOTTOM_RANGE = new LongPair(0, 12);
+	}
 
     final Operation op;
 
@@ -44,8 +49,20 @@ class NumberOperation implements Serializable {
         return numbers;
     }
 
-    LongPair nums() {
+    LongPair getNumbers() {
         return numbers;
+    }
+
+    LongPair setNumbers(Long n1, Long n2) {
+	    if (n1 == null) {
+		    n1 = numbers.l1;
+	    }
+	    if (n2 == null) {
+		    n2 = numbers.l2;
+	    }
+	    numbers = new LongPair(n1, n2);
+	    answer = op.doit(numbers);
+	    return numbers;
     }
 
     boolean isAnswer(long answer) {
@@ -87,4 +104,8 @@ class NumberOperation implements Serializable {
 		    bottomRange = new LongPair(min, max);
 	    }
     }
+
+	public LongPair sameTestNumbers() {
+		return setNumbers(5L, 9L);
+	}
 }

@@ -13,6 +13,8 @@ class UserData implements Serializable {
 	private String email;
 	final UserResults results;
 	final OperationsClass ops;
+	// gson: do not serialize
+	private transient LongPairRecorder longPairRecorder;
 
 	UserData() {
 		this("","");
@@ -23,6 +25,7 @@ class UserData implements Serializable {
 		this.email = email;
 		results = new UserResults(0);
 		ops = new OperationsClass();
+		longPairRecorder = new LongPairRecorder();
 	}
 
 	public String getName() {
@@ -39,5 +42,18 @@ class UserData implements Serializable {
 
 	void setEmail(String email) {
 		this.email = email.trim();
+	}
+
+	LongPairRecorder getLongPairRecorder() {
+		return longPairRecorder;
+	}
+
+	/**
+	 * Recreate the transient longPairRecorder
+	 */
+	void createRecorder() {
+		if (longPairRecorder == null) {
+			longPairRecorder = new LongPairRecorder();
+		}
 	}
 }

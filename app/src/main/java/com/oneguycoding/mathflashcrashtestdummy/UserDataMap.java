@@ -35,7 +35,7 @@ class UserDataMap implements Serializable {
 	private final String defaultUser;
 
 	UserDataMap(String name) {
-		Log.d("UserDataMap", VERSION_USERDATAMAP);
+		Log.d("VERSION", VERSION_USERDATAMAP);
 
 		userDataMap = new HashMap<>();
 		defaultUser = name;
@@ -165,5 +165,14 @@ class UserDataMap implements Serializable {
 			return getUserData();
 		}
 		throw new RuntimeException(String.format("userDataMap is missing name (%s) or defaultUser (%s)", name, defaultUser));
+	}
+
+	/**
+	 * if the UserDataMap was serialized the LongPairRecorders for each UserData are lost
+	 */
+	public void createRecorders() {
+		for (UserData userData : userDataMap.values()) {
+			userData.createRecorder();
+		}
 	}
 }

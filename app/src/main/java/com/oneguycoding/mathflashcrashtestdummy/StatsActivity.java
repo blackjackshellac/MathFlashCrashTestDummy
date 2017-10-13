@@ -6,6 +6,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Gravity;
+import android.view.MenuItem;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -36,6 +37,7 @@ public class StatsActivity extends AppCompatActivity {
 		Bundle b = intent.getExtras();
 		UserDataMap userDataMap = (UserDataMap) b.getSerializable(MainActivity.EXTRA_USERDATA);
 		if (userDataMap == null) throw new IllegalArgumentException("UserDataMap should never be null here");
+
 		UserData userData = userDataMap.getUserData();
 		Set<Operation> ops = userData.ops.opNumbers.keySet();
 
@@ -89,12 +91,27 @@ public class StatsActivity extends AppCompatActivity {
 	}
 
 	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+			// Respond to the action bar's Up/Home button
+			case android.R.id.home:
+				onBackPressed();
+				return true;
+			case R.id.action_cancel:
+				onBackPressed();
+				return true;
+		}
+		return super.onOptionsItemSelected(item);
+	}
+
+	@Override
 	public void onBackPressed() {
 		Intent intent = new Intent();
 
 /*
+		// don't need to return anything
 		Bundle b = new Bundle();
-		b.putSerializable(MainActivity.EXTRA_USERDATA, userDataMap);
+		b.putSerializable(MainActivity.EXTRA_USERDATA, null);
 		intent.putExtras(b);
 */
 

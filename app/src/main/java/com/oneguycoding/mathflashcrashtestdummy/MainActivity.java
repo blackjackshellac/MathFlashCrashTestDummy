@@ -2,7 +2,6 @@ package com.oneguycoding.mathflashcrashtestdummy;
 
 import android.app.AlertDialog;
 import android.content.ActivityNotFoundException;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
@@ -12,9 +11,6 @@ import android.media.AudioManager;
 import android.media.ToneGenerator;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
-import android.os.storage.StorageManager;
-import android.os.storage.StorageVolume;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.PopupMenu;
 import android.util.Log;
@@ -41,7 +37,6 @@ public class MainActivity extends AppCompatActivity /* implements
 		GoogleApiClient.OnConnectionFailedListener */ {
 	//public static final String EXTRA_OPS = "ops";
 	public static final String EXTRA_USERDATA = "userdata";
-	static final String EXTRA_OPERATION = "operation";
 	public static final int RESULT_OPS = 100;
 	public static final int RESULT_USERDATA = 101;
 	private static final int RESULT_STATS = 102;
@@ -64,7 +59,9 @@ public class MainActivity extends AppCompatActivity /* implements
 	private Menu menu;
 	private SQLiteDatabase perfStatsDb;
 
-	public MainActivity() {	}
+	public MainActivity() {
+	}
+
 	/*
 		private GoogleApiClient mGoogleApiClient;
 		final private ResultCallback<DriveApi.DriveContentsResult> driveContentsCallback =
@@ -151,6 +148,7 @@ public class MainActivity extends AppCompatActivity /* implements
 		File file = new File(getFilesDir(), jsonFilename);
 		if (file.exists()) {
 			Log.d("DEBUG", "json file exists: "+jsonFilename);
+			//file.delete();
 		}
 
 /*
@@ -409,6 +407,30 @@ public class MainActivity extends AppCompatActivity /* implements
 		}
 	}
 
+	/**
+	 * Check the given number pair for limiting (based on op and longPair value)
+	 *
+	 * @param op
+	 * @param longPair
+	 * @return return true if limited or duplicate, otherwise false
+	 */
+	private boolean checkNumbers(Operation op, LongPair longPair) {
+		UserData userData = userDataMap.getUserData();
+
+		boolean dupe = userData.getLongPairRecorder().isRecorded(op, longPair);
+		if (dupe) {
+			Log.d("CHECK", "found duplicate numberPair "+longPair.toString());
+			return true;
+		}
+
+		boolean limited = userDataMap.getUserData().results.limitOperationNumbers(op, longPair);
+		if (limited) {
+			Log.d("CHECK", "found limited numberPair "+longPair.toString());
+			return true;
+		}
+		return false;
+	}
+
 	protected void setupNumbers() {
 		UserData userData = userDataMap.getUserData();
 		// TODO need a better way to handle multiple ops
@@ -418,9 +440,13 @@ public class MainActivity extends AppCompatActivity /* implements
 
 		int loops = 0;
 		int maxLoops = 10;
-		LongPair numberPair = numberOperation.randomize();
-		while (userData.results.limitOperationNumbers(numberOperation.op, numberPair)) {
+		LongPair numberPair;
+		while (true) {
+			//numberPair = numberOperation.sameTestNumbers();
 			numberPair = numberOperation.randomize();
+			if (!checkNumbers(numberOperation.op, numberPair)) {
+				break;
+			}
 			loops += 1;
 			if (loops >= maxLoops) {
 				break;
@@ -437,24 +463,33 @@ public class MainActivity extends AppCompatActivity /* implements
 
     public void resetUser() {
 	    progressBar.setProgress(0);
-	    final UserResults userResults = userDataMap.getUserData().results;
-	    userResults.reset(userResults.getNum());
+	    //final UserData userData = userDataMap.getUserData();
+	    //final UserResults userResults = userData.results;
+	    //final String name = userDataMap.getCurUser();
 
-	    final String name = userDataMap.getCurUser();
+	    /*
 	    if (name.equals(getText(R.string.user_default))) {
 		    return;
 	    }
+	    */
+
 	    final MainActivity activity = this;
 
 	    AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
 	    builder.setTitle(getText(R.string.title_clear_user));
-	    builder.setMessage(getString(R.string.text_clear_user_prompt, name));
+	    builder.setMessage(getString(R.string.text_clear_user_prompt, userDataMap.getCurUser()));
 
 	    builder.setPositiveButton(getText(R.string.yes), new DialogInterface.OnClickListener() {
 
 		    public void onClick(DialogInterface dialog, int which) {
+			    UserData userData = activity.userDataMap.getUserData();
+			    UserResults userResults = userData.results;
+			    String name = activity.userDataMap.getCurUser();
+
+			    userResults.reset(0);
 			    userResults.clearStats(perfStatsDb, name);
+			    userData.getLongPairRecorder().clear();
 
 			    setupUser(activity.userDataMap.getCurUser());
 			    userDataMap.saveJson(activity, MainActivity.jsonFilename);
@@ -605,7 +640,6 @@ public class MainActivity extends AppCompatActivity /* implements
 		*/
 		Bundle b = new Bundle();
 		b.putSerializable(EXTRA_USERDATA, userDataMap);
-		b.putSerializable(EXTRA_OPERATION, numberOperation.op);
 		intent.putExtras(b);
 		startActivityForResult(intent, RESULT_STATS);
 	}
@@ -630,6 +664,7 @@ public class MainActivity extends AppCompatActivity /* implements
 					//userDataMap = (UserDataMap) b.getSerializable(EXTRA_USERDATA);
 					UserResults userResults = userDataMap.getUserData().results;
 					userResults.reset(0);
+					userDataMap.getUserData().getLongPairRecorder().clear();
 				}
 				break;
 			case RESULT_OPS:
@@ -654,6 +689,8 @@ public class MainActivity extends AppCompatActivity /* implements
 				// shouldn't happen
 				throw new RuntimeException("Unexpected activity result");
 		}
+		// if the UserDataMap was serialized the LongPairRecorders for each UserData are lost
+		userDataMap.createRecorders();
 		if (saveJson) {
 			userDataMap.saveJson(this, jsonFilename);
 			// sendEmail(null);
@@ -662,7 +699,27 @@ public class MainActivity extends AppCompatActivity /* implements
 		setupUser(userDataMap.getCurUser());
 	}
 
-    public void sendAnswer(View view) throws Exception {
+	private void validateNumbers() {
+		LongPair numbers = numberOperation.getNumbers();
+		Long n1=Long.parseLong(num1.getText().toString());
+		Long n2=Long.parseLong(num2.getText().toString());
+
+		if (n1 == numbers.l1) {
+			n1 = null;
+		} else {
+			Log.e("validateNumbers", AndroidUtil.stringFormatter("num1 is out of whack: %d != %d", n1, numbers.l1));
+		}
+		if (n2 == numbers.l2) {
+			n2 = null;
+		} else {
+			Log.e("validateNumbers", AndroidUtil.stringFormatter("num2 is out of whack: %d != %d", n2, numbers.l2));
+		}
+		if (n1 != null && n2 != null) {
+			numberOperation.setNumbers(n1, n2);
+		}
+	}
+
+	public void sendAnswer(View view) throws Exception {
         TextView tvans = (TextView) findViewById(R.id.number3);
 	    String txt = tvans.getText().toString().replaceAll("\\s+", "");
         long nanswer;
@@ -674,33 +731,29 @@ public class MainActivity extends AppCompatActivity /* implements
 	    try {
 		    nanswer = Long.parseLong(txt);
 	    } catch (NumberFormatException e) {
-		    Log.d("ERROR", "Failed to parse txt: "+txt);
+		    Log.e("sendAnswer", "Failed to parse txt: "+txt);
 		    setupFocus();
 		    return;
 	    }
 
-	    if (BuildConfig.DEBUG) {
-		    if (Long.parseLong(num1.getText().toString()) != numberOperation.nums().l1) {
-			    throw new Exception("num1 is out of whack!");
-		    }
-		    if (Long.parseLong(num2.getText().toString()) != numberOperation.nums().l2) {
-			    throw new Exception("num2 is out of whack!");
-		    }
-	    }
+	    validateNumbers();
 
-	    //UserData userData = userDataMap.getUserData();
-        boolean b = numberOperation.isAnswer(nanswer);
-	    UserResults userResults = userDataMap.getUserData().results;
-	    if (b) {
+	    UserData userData = userDataMap.getUserData();
+        boolean correct = numberOperation.isAnswer(nanswer);
+	    UserResults userResults = userData.results;
+	    if (correct) {
             response.setImageResource(R.drawable.mushroom_good);
-            setupNumbers();
+		    userData.getLongPairRecorder().record(numberOperation.op, numberOperation.getNumbers());
+
+		    // do this below but only if test is not complete
+		    // setupNumbers();
 	        message.setText(getResources().getString(R.string.msg_correct, nanswer));
 
 	        userResults.correct();
 	        progressBar.setProgress(userResults.getnCorrect());
         } else {
 	        try {
-		        userResults.wrong(numberOperation.op, numberOperation.nums());
+		        userResults.wrong(numberOperation.op, numberOperation.getNumbers());
 		        message.setText(getResources().getString(R.string.msg_incorrect, nanswer));
                 response.setImageResource(R.drawable.mushroom_wrong);
 		        setupFocus();
@@ -720,34 +773,9 @@ public class MainActivity extends AppCompatActivity /* implements
 
 		    userResults.saveStats(perfStatsDb, numberOperation.op, userDataMap.getCurUser());
 
-/*
-		    Cursor cursor = UserResults.getStatsQueryCursor(perfStatsDb, numberOperation.op, userDataMap.getCurUser());
-		    ArrayList<UserResults.SqlResult> stats = UserResults.loadStats(cursor);
-		    if (stats == null) {
-			    Log.d("SQL", "failed to load results for user "+userDataMap.getCurUser());
-		    }
-		    userResults.setStats(stats);
-*/
-
 		    progress = getString(R.string.text_progress_done, userDataMap.getCurUser(), userResults.getnCorrect(), userResults.getNumAnswered(), userResults.getPercentage());
-		    //textProgress.setText(progress);
-/*
 
-		    StringBuilder sb = new StringBuilder(progress);
-		    float total = 0.0f;
-		    Iterator<UserResults.SqlResult> it = stats.iterator();
-		    while (it.hasNext()) {
-			    UserResults.SqlResult entry = it.next();
-			    total += entry.percentage_correct;
-			    sb.append(AndroidUtil.stringFormatter("%s:[%d],%d,%d,%.2f\n", DateFormat.getDateTimeInstance().format(entry.runtime*1000L), entry.duration-entry.runtime, entry.correct, entry.num, entry.percentage_correct));
-		    }
-		    float ave = total / stats.size();
-		    sb.append("\n").append(AndroidUtil.stringFormatter("Ave=%.2f", ave)).append("\n");
-		    textProgress.setText(sb.toString());
-*/
 		    showStats();
-
-		    //userResults.reset(0);
 
 		    progressBar.setProgress(0);
 		    progressBar.setMax(userResults.getNum());
@@ -758,10 +786,13 @@ public class MainActivity extends AppCompatActivity /* implements
 	    } else {
 		    progress = getString(R.string.text_progress, userResults.getnCorrect(), userResults.getNumAnswered(), userResults.getPercentage(), userResults.getRemaining());
 		    textProgress.setText(progress);
+		    if (correct) {
+			    setupNumbers();
+		    }
 	    }
     }
 
-    @Override
+	@Override
     public void onDestroy() {
 	    perfStatsDb.close();
 	    super.onDestroy();
