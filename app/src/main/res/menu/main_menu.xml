@@ -19,6 +19,12 @@
         android:icon="@android:drawable/ic_menu_delete"
         android:title="@string/text_menu_delete_user"/>
     <item
+        android:id="@+id/menu_backup"
+        android:title="@string/menu_backup_text"/>
+    <item
+        android:id="@+id/menu_restore"
+        android:title="@string/menu_restore_text"/>
+    <item
         android:id="@+id/menu_about"
         android:title="@string/menu_about_text"/>
     <item

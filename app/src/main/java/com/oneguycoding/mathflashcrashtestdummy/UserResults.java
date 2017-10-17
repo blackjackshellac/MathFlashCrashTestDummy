@@ -429,7 +429,7 @@ class UserResults implements Serializable {
 		// Filter results
 		// String selection = PerformanceStatsSchema.StatsSchema.COL_NAME + " = ?" + " AND " + PerformanceStatsSchema.StatsSchema.COL_OPERATION + " = ?";
 		//String selection = AndroidUtil.stringFormatter("%s = ? AND %s = ?", PerformanceStatsSchema.StatsSchema.COL_NAME, PerformanceStatsSchema.StatsSchema.COL_OPERATION);
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		sb.append(PerformanceStatsSchema.StatsSchema.COL_NAME).append(" = ? AND ( ");
 		String[] selectionArgs = new String[ops.size()+1];
 		selectionArgs[0] = name;

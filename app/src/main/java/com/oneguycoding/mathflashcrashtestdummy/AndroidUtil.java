@@ -1,6 +1,7 @@
 package com.oneguycoding.mathflashcrashtestdummy;
 
 import android.app.Activity;
+import android.os.Environment;
 import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -28,6 +29,12 @@ class AndroidUtil {
 		editText.setText(text);
 	}
 
+	/**
+	 * Show toast popup for duration Toast.LENGTH_LONG
+	 *
+	 * @param activity - activity
+	 * @param s - message
+	 */
 	static void showToast(Activity activity, String s) {
 		showToast(activity, s, Toast.LENGTH_LONG);
 	}
@@ -59,5 +66,20 @@ class AndroidUtil {
 
 	static long now_secs() {
 		return System.currentTimeMillis()/1000L;
+	}
+
+	/** Checks if external storage is available for read and write */
+	@SuppressWarnings("unused")
+	static boolean isExternalStorageWritable() {
+		String state = Environment.getExternalStorageState();
+		return Environment.MEDIA_MOUNTED.equals(state);
+	}
+
+	/** Checks if external storage is available to at least read */
+	@SuppressWarnings("unused")
+	static boolean isExternalStorageReadable() {
+		String state = Environment.getExternalStorageState();
+		return (Environment.MEDIA_MOUNTED.equals(state) ||
+				Environment.MEDIA_MOUNTED_READ_ONLY.equals(state));
 	}
 }

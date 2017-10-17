@@ -10,6 +10,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParseException;
 import com.google.gson.reflect.TypeToken;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -84,17 +85,23 @@ class UserDataMap implements Serializable {
 		curUser = name;
 	}
 
-	/**
+ 	/**
 	 * Load the given json data file and parse to create a UserDataMap
 	 *
 	 * @param activity - activity
+	 * @param fileJson - java file pointing to location of json file
 	 * @param jsonFilename - json file name to load
-	 *
-	 * @return UserDataMap object if file is found, null otherwise
+	 *  @return UserDataMap object if file is found, null otherwise
 	 */
-	static UserDataMap loadJson(Activity activity, String jsonFilename) {
+	static UserDataMap loadJson(Activity activity, File fileJson, String jsonFilename) {
 		try {
-			FileInputStream inputStream = activity.openFileInput(jsonFilename);
+			FileInputStream inputStream;
+
+			if (fileJson == null) {
+				inputStream = activity.openFileInput(jsonFilename);
+			} else {
+				inputStream = new FileInputStream(fileJson);
+			}
 			byte[] data = new byte[inputStream.available()];
 			if (inputStream.read(data) == -1) {
 				Log.d("JSON", "No more data to read");
@@ -129,23 +136,29 @@ class UserDataMap implements Serializable {
 		return gson.toJson(this, UserDataMap.class);
 	}
 
-	void saveJson(Activity mainActivity, String jsonFilename) {
+	boolean saveJson(Activity mainActivity, File fileJson, String jsonFilename) {
+		boolean ret = false;
 		FileOutputStream outputStream;
 		try {
 			// don't save stats saved in userResults
 			getUserData().results.clearStats(null, getCurUser());
 
 			String json = toJson();
-			outputStream = mainActivity.openFileOutput(jsonFilename, Context.MODE_PRIVATE);
+			if (fileJson == null) {
+				outputStream = mainActivity.openFileOutput(jsonFilename, Context.MODE_PRIVATE);
+			} else {
+				outputStream = new FileOutputStream(fileJson);
+			}
 			outputStream.write(json.getBytes());
 			outputStream.close();
+			ret = true;
 		} catch (FileNotFoundException e) {
 			Log.e("JSON", "File not found: "+jsonFilename, e);
 		} catch (IOException e) {
 			Log.e("JSON", "IO exception reading file: "+jsonFilename, e);
 		}
+		return ret;
 	}
-
 
 	Set<String> users() {
 		return userDataMap.keySet();
@@ -170,7 +183,7 @@ class UserDataMap implements Serializable {
 	/**
 	 * if the UserDataMap was serialized the LongPairRecorders for each UserData are lost
 	 */
-	public void createRecorders() {
+	void createRecorders() {
 		for (UserData userData : userDataMap.values()) {
 			userData.createRecorder();
 		}

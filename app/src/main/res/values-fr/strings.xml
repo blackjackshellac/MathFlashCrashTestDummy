@@ -45,4 +45,6 @@
     <string name="menu_about_text">About ...</string>
     <string name="about_app_descrip">Test de cartes flash arithmétiques</string>
     <string name="about_app_credits">Auteur: Steeve McCauley</string>
+    <string name="menu_backup_text">Backup ...</string>
+    <string name="menu_restore_text">Restore ...</string>
 </resources>
