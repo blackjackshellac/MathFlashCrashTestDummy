@@ -1,5 +1,6 @@
 package com.oneguycoding.mathflashcrashtestdummy;
 
+import android.Manifest;
 import android.app.AlertDialog;
 import android.content.ActivityNotFoundException;
 import android.content.DialogInterface;
@@ -11,6 +12,9 @@ import android.media.AudioManager;
 import android.media.ToneGenerator;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.PopupMenu;
 import android.util.Log;
@@ -43,6 +47,7 @@ public class MainActivity extends AppCompatActivity /* implements
 	//public static final int RESOLVE_CONNECTION_REQUEST_CODE = 102;
 
 	private static final ToneGenerator tg = new ToneGenerator(AudioManager.STREAM_NOTIFICATION, 100);
+	private static final int WRITE_REQUEST_CODE = 1;
 
 	private NumberOperation numberOperation;
 	//private OperationsClass ops = new OperationsClass();
@@ -55,11 +60,32 @@ public class MainActivity extends AppCompatActivity /* implements
 	//private UserData userData;
 	//private String curUser;
 	//private UserResults results;
-	public static final String jsonFilename = "MathFlashCrashTestDummy.json";
+	public final String jsonFilename = "MathFlashCrashTestDummy.json";
+	public final File filePublicStoragePath;
+	public final File fileJson;
+	/**
+	 * Variables for requiesting permissions, API 25+
+	 */
+	private int requestCode;
+	private int grantResults[]=new int[1];
+
 	private Menu menu;
 	private SQLiteDatabase perfStatsDb;
 
 	public MainActivity() {
+		if (AndroidUtil.isExternalStorageWritable()) {
+			filePublicStoragePath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS);
+			fileJson = new File(filePublicStoragePath, jsonFilename);
+			if (!filePublicStoragePath.exists()) {
+				boolean foo = filePublicStoragePath.mkdirs();
+				if (foo) {
+					System.out.println("Created directory: "+filePublicStoragePath.getAbsolutePath());
+				}
+			}
+		} else {
+			filePublicStoragePath = null;
+			fileJson = null;
+		}
 	}
 
 	/*
@@ -137,6 +163,15 @@ public class MainActivity extends AppCompatActivity /* implements
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 
+		if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_DENIED) {
+			requestCode = WRITE_REQUEST_CODE;
+			String[] permissions = new String[] {
+					Manifest.permission.WRITE_EXTERNAL_STORAGE
+			};
+			ActivityCompat.requestPermissions(this, permissions, requestCode);
+			onRequestPermissionsResult(requestCode, permissions, grantResults);
+		}
+
 /*
 		mGoogleApiClient = new GoogleApiClient.Builder(this)
 				.addApi(Drive.API)
@@ -159,11 +194,11 @@ public class MainActivity extends AppCompatActivity /* implements
 			}
 		}
 */
-		UserDataMap udm = UserDataMap.loadJson(this, jsonFilename);
+		UserDataMap udm = UserDataMap.loadJson(this, fileJson, jsonFilename);
 		if (udm == null) {
 			// first time invocation
 			userDataMap = new UserDataMap((String) getText(R.string.user_default));
-			userDataMap.saveJson(this, jsonFilename);
+			userDataMap.saveJson(this, fileJson, jsonFilename);
 		} else {
 			userDataMap = udm;
 		}
@@ -225,6 +260,41 @@ public class MainActivity extends AppCompatActivity /* implements
 		Intent intent = volume.createAccessIntent(Environment.DIRECTORY_DOCUMENTS);
 		startActivityForResult(intent, request_code);
 */
+		if (AndroidUtil.isExternalStorageWritable()) {
+			File public_storage = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS);
+			File external_storage = Environment.getExternalStorageDirectory();
+
+			Log.i("STORAGE", "External storage is writable: "+external_storage.getAbsolutePath());
+			Log.i("STORAGE", "Public storage is writable: "+public_storage.getAbsolutePath());
+		}
+	}
+
+	@Override // android recommended class to handle permissions
+	public void onRequestPermissionsResult(int requestCode,
+	                                       String permissions[], int[] grantResults) {
+		switch (requestCode) {
+			case WRITE_REQUEST_CODE: {
+
+				// If request is cancelled, the result arrays are empty.
+				if (grantResults.length > 0
+						&& grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+					Log.d("permission", "granted");
+				} else {
+
+					// permission denied, boo! Disable the
+					// functionality that depends on this permission.uujm
+					Toast.makeText(MainActivity.this, "Permission denied to read your External storage", Toast.LENGTH_SHORT).show();
+
+					//app cannot function without this permission for now so close it...
+					onDestroy();
+				}
+				return;
+			}
+
+			// other 'case' line to check fosr other
+			// permissions this app might request
+		}
 	}
 
 	@Override
@@ -492,7 +562,7 @@ public class MainActivity extends AppCompatActivity /* implements
 			    userData.getLongPairRecorder().clear();
 
 			    setupUser(activity.userDataMap.getCurUser());
-			    userDataMap.saveJson(activity, MainActivity.jsonFilename);
+			    userDataMap.saveJson(activity, fileJson, jsonFilename);
 
 			    dialog.dismiss();
 		    }
@@ -576,7 +646,7 @@ public class MainActivity extends AppCompatActivity /* implements
 				menu.removeItem(mitem.getItemId());
 				activity.invalidateOptionsMenu();
 				setupUser(activity.userDataMap.getCurUser());
-				userDataMap.saveJson(activity, MainActivity.jsonFilename);
+				userDataMap.saveJson(activity, fileJson, jsonFilename);
 				dialog.dismiss();
 			}
 		});
@@ -692,7 +762,7 @@ public class MainActivity extends AppCompatActivity /* implements
 		// if the UserDataMap was serialized the LongPairRecorders for each UserData are lost
 		userDataMap.createRecorders();
 		if (saveJson) {
-			userDataMap.saveJson(this, jsonFilename);
+			userDataMap.saveJson(this, fileJson, jsonFilename);
 			// sendEmail(null);
 		}
 		//setupNumbers();

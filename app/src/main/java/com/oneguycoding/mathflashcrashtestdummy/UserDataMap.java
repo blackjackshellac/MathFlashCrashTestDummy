@@ -10,6 +10,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParseException;
 import com.google.gson.reflect.TypeToken;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -88,13 +89,19 @@ class UserDataMap implements Serializable {
 	 * Load the given json data file and parse to create a UserDataMap
 	 *
 	 * @param activity - activity
-	 * @param jsonFilename - json file name to load
-	 *
-	 * @return UserDataMap object if file is found, null otherwise
+	 * @param fileJson
+	 *@param jsonFilename - json file name to load
+	 *  @return UserDataMap object if file is found, null otherwise
 	 */
-	static UserDataMap loadJson(Activity activity, String jsonFilename) {
+	static UserDataMap loadJson(Activity activity, File fileJson, String jsonFilename) {
 		try {
-			FileInputStream inputStream = activity.openFileInput(jsonFilename);
+			FileInputStream inputStream;
+
+			if (fileJson == null) {
+				inputStream = activity.openFileInput(jsonFilename);
+			} else {
+				inputStream = new FileInputStream(fileJson);
+			}
 			byte[] data = new byte[inputStream.available()];
 			if (inputStream.read(data) == -1) {
 				Log.d("JSON", "No more data to read");
@@ -129,14 +136,18 @@ class UserDataMap implements Serializable {
 		return gson.toJson(this, UserDataMap.class);
 	}
 
-	void saveJson(Activity mainActivity, String jsonFilename) {
+	void saveJson(Activity mainActivity, File fileJson, String jsonFilename) {
 		FileOutputStream outputStream;
 		try {
 			// don't save stats saved in userResults
 			getUserData().results.clearStats(null, getCurUser());
 
 			String json = toJson();
-			outputStream = mainActivity.openFileOutput(jsonFilename, Context.MODE_PRIVATE);
+			if (fileJson == null) {
+				outputStream = mainActivity.openFileOutput(jsonFilename, Context.MODE_PRIVATE);
+			} else {
+				outputStream = new FileOutputStream(fileJson);
+			}
 			outputStream.write(json.getBytes());
 			outputStream.close();
 		} catch (FileNotFoundException e) {
