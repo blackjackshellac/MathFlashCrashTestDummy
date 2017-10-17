@@ -105,6 +105,7 @@ class NumberOperation implements Serializable {
 	    }
     }
 
+	@SuppressWarnings("unused")
 	public LongPair sameTestNumbers() {
 		return setNumbers(5L, 9L);
 	}

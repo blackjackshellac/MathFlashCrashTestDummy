@@ -16,7 +16,7 @@ import java.util.Set;
  */
 
 class OperationsClass implements Serializable {
-	public final LinkedHashMap<Operation, NumberOperation> opNumbers;
+	final LinkedHashMap<Operation, NumberOperation> opNumbers;
 	private boolean allowMultiple;
 	private int curIndex = 0;
 

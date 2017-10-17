@@ -85,12 +85,12 @@ class UserDataMap implements Serializable {
 		curUser = name;
 	}
 
-	/**
+ 	/**
 	 * Load the given json data file and parse to create a UserDataMap
 	 *
 	 * @param activity - activity
-	 * @param fileJson
-	 *@param jsonFilename - json file name to load
+	 * @param fileJson - java file pointing to location of json file
+	 * @param jsonFilename - json file name to load
 	 *  @return UserDataMap object if file is found, null otherwise
 	 */
 	static UserDataMap loadJson(Activity activity, File fileJson, String jsonFilename) {
@@ -136,7 +136,8 @@ class UserDataMap implements Serializable {
 		return gson.toJson(this, UserDataMap.class);
 	}
 
-	void saveJson(Activity mainActivity, File fileJson, String jsonFilename) {
+	boolean saveJson(Activity mainActivity, File fileJson, String jsonFilename) {
+		boolean ret = false;
 		FileOutputStream outputStream;
 		try {
 			// don't save stats saved in userResults
@@ -150,13 +151,14 @@ class UserDataMap implements Serializable {
 			}
 			outputStream.write(json.getBytes());
 			outputStream.close();
+			ret = true;
 		} catch (FileNotFoundException e) {
 			Log.e("JSON", "File not found: "+jsonFilename, e);
 		} catch (IOException e) {
 			Log.e("JSON", "IO exception reading file: "+jsonFilename, e);
 		}
+		return ret;
 	}
-
 
 	Set<String> users() {
 		return userDataMap.keySet();
@@ -181,7 +183,7 @@ class UserDataMap implements Serializable {
 	/**
 	 * if the UserDataMap was serialized the LongPairRecorders for each UserData are lost
 	 */
-	public void createRecorders() {
+	void createRecorders() {
 		for (UserData userData : userDataMap.values()) {
 			userData.createRecorder();
 		}

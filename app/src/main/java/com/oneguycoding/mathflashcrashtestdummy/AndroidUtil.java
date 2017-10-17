@@ -29,6 +29,12 @@ class AndroidUtil {
 		editText.setText(text);
 	}
 
+	/**
+	 * Show toast popup for duration Toast.LENGTH_LONG
+	 *
+	 * @param activity - activity
+	 * @param s - message
+	 */
 	static void showToast(Activity activity, String s) {
 		showToast(activity, s, Toast.LENGTH_LONG);
 	}
@@ -63,21 +69,17 @@ class AndroidUtil {
 	}
 
 	/** Checks if external storage is available for read and write */
-	public static boolean isExternalStorageWritable() {
+	@SuppressWarnings("unused")
+	static boolean isExternalStorageWritable() {
 		String state = Environment.getExternalStorageState();
-		if (Environment.MEDIA_MOUNTED.equals(state)) {
-			return true;
-		}
-		return false;
+		return Environment.MEDIA_MOUNTED.equals(state);
 	}
 
 	/** Checks if external storage is available to at least read */
-	public static boolean isExternalStorageReadable() {
+	@SuppressWarnings("unused")
+	static boolean isExternalStorageReadable() {
 		String state = Environment.getExternalStorageState();
-		if (Environment.MEDIA_MOUNTED.equals(state) ||
-				Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)) {
-			return true;
-		}
-		return false;
+		return (Environment.MEDIA_MOUNTED.equals(state) ||
+				Environment.MEDIA_MOUNTED_READ_ONLY.equals(state));
 	}
 }
