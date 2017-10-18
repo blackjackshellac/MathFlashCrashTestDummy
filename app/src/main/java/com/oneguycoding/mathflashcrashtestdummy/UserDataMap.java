@@ -49,6 +49,14 @@ class UserDataMap implements Serializable {
 	}
 
 	/**
+	 * Set default user as current user
+	 * @return UserData object for defaultUser
+	 */
+	UserData setCurUser() {
+		return setCurUser(defaultUser);
+	}
+
+	/**
 	 * Set the current user
 	 *
 	 * @param name user to set as current user
@@ -168,8 +176,16 @@ class UserDataMap implements Serializable {
 		return userDataMap.containsKey(name);
 	}
 
+	boolean isDefaultUser() {
+		return isDefaultUser(curUser);
+	}
+
+	private boolean isDefaultUser(String name) {
+		return (name.equals(defaultUser));
+	}
+
 	UserData deleteUser(String name) {
-		if (name.equals(defaultUser)) {
+		if (isDefaultUser(name)) {
 			throw new RuntimeException(String.format("Attempting to delete defaultUser: %s", defaultUser));
 		}
 		if (hasUser(name) && hasUser(defaultUser)) {

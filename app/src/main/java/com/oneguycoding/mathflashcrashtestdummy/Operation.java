@@ -81,31 +81,32 @@ enum Operation {
 	 * @return new range from lp1 and lp2 appropriate for the given operation
 	 */
 	public LongPair randomize(LongPair lp1, LongPair lp2) {
-        long n1 = LongPair.rand_range(lp1);
-        long n2 = LongPair.rand_range(lp2);
-        switch (this) {
-            default:
-                break;
-            case MINUS:
-                if (n1 < n2) {
-	                Log.d("Operation", String.format("swapping n1=%d and n2=%d", n1, n2));
-	                long n = n1;
-                    n1 = n2;
-                    n2 = n;
-                }
-                break;
-            case DIVIDE:
-                while (true) {
-                    if (n2 != 0) {
-                        break;
-                    }
-                    n2 = LongPair.rand_range(lp2);
-                }
-                // n1 = 7 and n2 = 4, then do n1 = n1*n2 = 28 so that the answer is 7;
-                n1 *= n2;
-                break;
-        }
-        return new LongPair(n1, n2);
+    long n1 = LongPair.rand_range(lp1);
+    long n2 = LongPair.rand_range(lp2);
+		switch (this) {
+			default:
+				break;
+			case MINUS:
+			/*
+			 * Replace n1 with n1+n2 for subtraction so that the answer is the original n1
+			 *
+			 * 12 7 ... 19-7 (n1+n2)-n2
+			 * 6  8 ... 14-8
+			*/
+				n1 += n2;
+				break;
+			case DIVIDE:
+				while (true) {
+					if (n2 != 0) {
+						break;
+					}
+					n2 = LongPair.rand_range(lp2);
+				}
+				// n1 = 7 and n2 = 4, then do n1 = n1*n2 = 28 so that the answer is 7;
+				n1 *= n2;
+				break;
+		}
+    return new LongPair(n1, n2);
     }
 
 	/**

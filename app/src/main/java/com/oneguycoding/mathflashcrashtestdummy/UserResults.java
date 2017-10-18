@@ -124,6 +124,13 @@ class UserResults implements Serializable {
 		}
 	}
 
+	/**
+	 * Reset results, keep current value of num
+	 */
+	void reset() {
+		reset(0);
+	}
+
 	int getNum() {
 		return num;
 	}
@@ -363,10 +370,13 @@ class UserResults implements Serializable {
 			aveDuration += stat.getSecs();
 			avePercentCorrect += stat.percentage_correct;
 		}
-		aveNum /= stats.size();
-		aveCorrect /= stats.size();
-		avePercentCorrect /= stats.size();
-		aveDuration /= stats.size();
+		// avoid divide by 0
+		if (stats.size() > 0) {
+			aveNum /= stats.size();
+			aveCorrect /= stats.size();
+			avePercentCorrect /= stats.size();
+			aveDuration /= stats.size();
+		}
 
 		for (int i=0; i < resultColumns.length; i++) {
 			SqlResult.SqlColumn col = resultColumns[i];

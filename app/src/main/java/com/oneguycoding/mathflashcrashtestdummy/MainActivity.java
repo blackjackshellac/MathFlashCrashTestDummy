@@ -19,6 +19,7 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -51,6 +52,7 @@ public class MainActivity extends AppCompatActivity /* implements
 	private TextView message;
     private ImageView response;
 	private ProgressBar progressBar;
+	private TextView progressText;
 
 	private UserDataMap userDataMap;
 	//private UserData userData;
@@ -161,14 +163,6 @@ public class MainActivity extends AppCompatActivity /* implements
 			//file.delete();
 		}
 
-/*
-		if (file.exists()) {
-			boolean r = true; // file.delete(); // false; //file.delete();
-			if (!r) {
-				AndroidUtil.showToast(this, String.format("File %s not deleted", jsonFilename));
-			}
-		}
-*/
 		UserDataMap udm = UserDataMap.loadJson(this, null, jsonFilename);
 		if (udm == null) {
 			// first time invocation
@@ -183,6 +177,7 @@ public class MainActivity extends AppCompatActivity /* implements
 		num3 = (TextView) findViewById(R.id.number3);
 		message = (TextView) findViewById(R.id.text_message);
 		response = (ImageView) findViewById(R.id.image_response);
+		progressText = (TextView) findViewById(R.id.text_progress);
 
 		num1.setEnabled(false);
 		num2.setEnabled(false);
@@ -228,7 +223,7 @@ public class MainActivity extends AppCompatActivity /* implements
 		perfStatsDb = perfStatsHelper.getWritableDatabase();
 
 /*
-		TODO see also http://www.androidauthority.com/how-to-store-data-locally-in-android-app-717190/
+		see also http://www.androidauthority.com/how-to-store-data-locally-in-android-app-717190/
 
 		StorageManager sm = (StorageManager)getSystemService(Context.STORAGE_SERVICE);
 		StorageVolume volume = sm.getPrimaryStorageVolume();
@@ -326,7 +321,8 @@ public class MainActivity extends AppCompatActivity /* implements
 				UserDataMap udm = PermissionsUtil.restore(this, jsonFilename);
 				if (udm != null) {
 					userDataMap = udm;
-					setupUser(userDataMap.getCurUser());
+					AndroidUtil.showToast(this, R.string.msg_successfully_restored_user, userDataMap.getCurUser());
+					selectOperation();
 				}
 				break;
 			case R.id.menu_delete_user:
@@ -334,21 +330,25 @@ public class MainActivity extends AppCompatActivity /* implements
 				break;
 			case R.id.menu_reset_user:
 				resetUser();
+				AndroidUtil.showToast(this, R.string.msg_user_progress_reset, userDataMap.getCurUser());
+				break;
+			case R.id.menu_clear_user:
+				clearUser();
 				break;
 			case R.id.menu_modify_user:
-				name = userDataMap.getCurUser();
-				if (!name.equals(getText(R.string.user_default))) {
-					modifyUser(name, false);
+				if (!userDataMap.isDefaultUser()) {
+					modifyUser(userDataMap.getCurUser());
 				}
 				break;
 			case R.id.menu_create_user:
-				name = userDataMap.getCurUser();
-				modifyUser(name, true);
+				modifyUser(null);
+				break;
+			case R.id.menu_show_user_stats:
+				showStats();
 				break;
 			case R.id.default_user:
-				name = (String) getText(R.string.user_default);
-				if (!name.equals(userDataMap.getCurUser())) {
-					setupUser(name);
+				if (!userDataMap.isDefaultUser()) {
+					setupUser(userDataMap.getCurUser());
 				}
 				break;
 			case R.id.menu_about:
@@ -365,6 +365,7 @@ public class MainActivity extends AppCompatActivity /* implements
 						String name = item.getTitle().toString();
 						if (!name.equals(userDataMap.getCurUser())) {
 							userDataMap.setCurUser(name);
+							resetUser();
 							selectOperation();
 						}
 						return true;
@@ -397,7 +398,8 @@ public class MainActivity extends AppCompatActivity /* implements
 
 	protected void showAbout() {
 		// Inflate the about message contents
-		View messageView = getLayoutInflater().inflate(R.layout.about, null, false);
+		final ViewGroup nullParent = null; // <-- stupid hack to get rid of warning about null ViewGroup
+		View messageView = getLayoutInflater().inflate(R.layout.about, nullParent, false);
 
 		// When linking text, force to always use default color. This works
 		// around a pressed color state bug.
@@ -523,20 +525,32 @@ public class MainActivity extends AppCompatActivity /* implements
 
 	    setupFocus();
 
-	    message.setText("");
+		// this wipes out the correct/incorrect message in sendAnswer
+	    //message.setText("");
     }
 
-    public void resetUser() {
-	    progressBar.setProgress(0);
-	    //final UserData userData = userDataMap.getUserData();
-	    //final UserResults userResults = userData.results;
-	    //final String name = userDataMap.getCurUser();
+	/**
+	 * Reset user progress
+	 */
+	private void resetUser() {
+	    UserData userData = userDataMap.getUserData();
+		userData.getLongPairRecorder().clear();
 
-	    /*
-	    if (name.equals(getText(R.string.user_default))) {
-		    return;
-	    }
-	    */
+	    UserResults userResults = userData.results;
+	    userResults.reset();
+	    progressBar.setProgress(0);
+	    progressBar.setMax(userResults.getNum());
+		progressText.setText("");
+    }
+
+	/**
+	 * Clear all user data completely
+	 */
+	private void clearUser() {
+		if (userDataMap.isDefaultUser()) {
+			AndroidUtil.showToast(this, getText(R.string.msg_refusing_to_delete_default_user).toString());
+			return;
+		}
 
 	    final MainActivity activity = this;
 
@@ -552,11 +566,12 @@ public class MainActivity extends AppCompatActivity /* implements
 			    UserResults userResults = userData.results;
 			    String name = activity.userDataMap.getCurUser();
 
-			    userResults.reset(0);
-			    userResults.clearStats(perfStatsDb, name);
-			    userData.getLongPairRecorder().clear();
+			    resetUser();
 
-			    setupUser(activity.userDataMap.getCurUser());
+			    userResults.clearStats(perfStatsDb, name);
+
+			    setupUser(name);
+
 			    userDataMap.saveJson(activity, null, jsonFilename);
 
 			    dialog.dismiss();
@@ -615,7 +630,7 @@ public class MainActivity extends AppCompatActivity /* implements
 			Intent chooser = Intent.createChooser(intent, "Send mail...");
 		    startActivity(chooser);
 	    } catch (ActivityNotFoundException ex) {
-		    Toast.makeText(this, "There are no email clients installed.", Toast.LENGTH_SHORT).show();
+			AndroidUtil.showToast(this, R.string.err_no_email_clients_installed);
 	    } catch (Exception e) {
 			Log.e("email", "failed to attached "+jsonFilename, e);
 		}
@@ -623,21 +638,28 @@ public class MainActivity extends AppCompatActivity /* implements
 
 	private void deleteUser() {
 		// make final to allow OnClickListeners access
-		final String name = userDataMap.getCurUser();
-		if (name.equals(getText(R.string.user_default))) {
+		if (userDataMap.isDefaultUser()) {
+			AndroidUtil.showToast(this, getString(R.string.msg_refusing_to_delete_default_user));
 			return;
 		}
+
+		// pass this activity to the onClickListener
 		final MainActivity activity = this;
 
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
 		builder.setTitle(getText(R.string.title_delete_user));
-		builder.setMessage(getString(R.string.text_delete_user_prompt, name));
+		builder.setMessage(getString(R.string.text_delete_user_prompt, userDataMap.getCurUser()));
 
 		builder.setPositiveButton(getText(R.string.yes), new DialogInterface.OnClickListener() {
 
 			public void onClick(DialogInterface dialog, int which) {
-				userDataMap.deleteUser(name);
+				String name = activity.userDataMap.getCurUser();
+				UserData ud = userDataMap.deleteUser(name);
+				if (ud == null) {
+					AndroidUtil.showToast(activity, getString(R.string.msg_failed_to_delete_current_user, name));
+					activity.userDataMap.setCurUser();
+				}
 				MenuItem mitem = activity.findMenuItemByName(menu, name);
 				menu.removeItem(mitem.getItemId());
 				activity.invalidateOptionsMenu();
@@ -660,18 +682,23 @@ public class MainActivity extends AppCompatActivity /* implements
 
 	}
 
-	public void modifyUser(String user, boolean create) {
+	/**
+	 * modify or create user
+	 *
+	 * @param user - user to modify, or create if null
+	 */
+	public void modifyUser(String user) {
 	    Intent intent = new Intent(this, ModifyUserActivity.class);
 
 	    UserData userData;
-		if (create) {
+		if (user == null) {
 			userData = new UserData();
 		} else {
 			if (userDataMap.hasUser(user)) {
 				userDataMap.setCurUser(user);
 				userData = userDataMap.getUserData();
 			} else {
-				AndroidUtil.showToast(this, "User doesn't exist: "+user);
+				AndroidUtil.showToast(this, R.string.err_user_not_found, user);
 				return;
 			}
 		}
@@ -728,9 +755,7 @@ public class MainActivity extends AppCompatActivity /* implements
 					 */
 					//Bundle b = intent.getExtras();
 					//userDataMap = (UserDataMap) b.getSerializable(EXTRA_USERDATA);
-					UserResults userResults = userDataMap.getUserData().results;
-					userResults.reset(0);
-					userDataMap.getUserData().getLongPairRecorder().clear();
+					resetUser();
 				}
 				break;
 			case RESULT_OPS:
@@ -830,7 +855,6 @@ public class MainActivity extends AppCompatActivity /* implements
 		        // ignore
 	        }
         }
-	    TextView textProgress = (TextView) findViewById(R.id.text_progress);
 		String progress;
 
 	    if (userResults.testDone()) {
@@ -843,15 +867,15 @@ public class MainActivity extends AppCompatActivity /* implements
 
 		    showStats();
 
-		    progressBar.setProgress(0);
-		    progressBar.setMax(userResults.getNum());
+		    resetUser();
+
 		    message.setText(getString(R.string.text_bravo, userDataMap.getCurUser()));
 
 		    AndroidUtil.showToast(this, progress, 5);
 
 	    } else {
 		    progress = getString(R.string.text_progress, userResults.getnCorrect(), userResults.getNumAnswered(), userResults.getPercentage(), userResults.getRemaining());
-		    textProgress.setText(progress);
+		    progressText.setText(progress);
 		    if (correct) {
 			    setupNumbers();
 		    }

@@ -35,14 +35,14 @@ class PermissionsUtil {
 	static void do_backup(MainActivity mainActivity, String jsonFilename) {
 		if (!filePublicStoragePath.exists()) {
 			if (!filePublicStoragePath.mkdirs()) {
-				AndroidUtil.showToast(mainActivity, "Failed to create backup directory: "+filePublicStoragePath.getAbsolutePath());
+				AndroidUtil.showToast(mainActivity, R.string.err_create_backup_directory, filePublicStoragePath.getAbsolutePath());
 				return;
 			}
-			AndroidUtil.showToast(mainActivity, "Created backup directory: "+filePublicStoragePath.getAbsolutePath());
+			AndroidUtil.showToast(mainActivity, R.string.msg_created_backup_directory, filePublicStoragePath.getAbsolutePath());
 		}
 		File fileJson = new File(filePublicStoragePath, jsonFilename);
 		if (mainActivity.getUserDataMap().saveJson(mainActivity, fileJson, jsonFilename)) {
-			AndroidUtil.showToast(mainActivity, "Successfullly backed up json: "+fileJson.getAbsolutePath());
+			AndroidUtil.showToast(mainActivity, R.string.msg_successfully_backed_up_json, fileJson.getAbsolutePath());
 		}
 	}
 
@@ -64,7 +64,7 @@ class PermissionsUtil {
 
 	static UserDataMap do_restore(MainActivity mainActivity, String jsonFilename) {
 		if (!filePublicStoragePath.exists()) {
-			AndroidUtil.showToast(mainActivity, "Backup directory not found: "+filePublicStoragePath.getAbsolutePath());
+			AndroidUtil.showToast(mainActivity, R.string.err_backup_directory_not_found, filePublicStoragePath.getAbsolutePath());
 		}
 		File fileJson = new File(filePublicStoragePath, jsonFilename);
 		return UserDataMap.loadJson(mainActivity, fileJson, jsonFilename);

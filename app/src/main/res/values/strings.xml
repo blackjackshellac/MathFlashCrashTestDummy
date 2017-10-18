@@ -17,10 +17,10 @@
     <string name="action_cancel">Cancel</string>
     <string name="user_default">Default</string>
     <string name="hello_name">Hello, %1$s!</string>
-    <string name="msg_correct">%1$d is correct!</string>
-    <string name="msg_incorrect">%1$d is incorrect!</string>
+    <string name="msg_correct">Answer %1$d is correct!</string>
+    <string name="msg_incorrect">Answer %1$d is wrong!</string>
     <string name="msg_number_long">%1$d</string>
-    <string name="menu_reset_user">Reset user</string>
+    <string name="menu_reset_user">Reset user progress</string>
     <string name="descrip_smiling_star">Smiling star</string>
     <string name="hint_top_max">Top max (%1$d)</string>
     <string name="hint_bot_max">Bottom max (%1$d)</string>
@@ -46,4 +46,23 @@
     <string name="about_app_credits">Author: Steeve McCauley</string>
     <string name="menu_backup_text">Backup ...</string>
     <string name="menu_restore_text">Restore ...</string>
+    <string name="menu_user_actions_text">User actions</string>
+    <string name="menu_show_user_stats_text">Show stats ...</string>
+    <string name="menu_clear_user">Clear user stats ...</string>
+    <string name="msg_refusing_to_delete_default_user">Refusing to delete default user</string>
+    <string name="msg_failed_to_delete_current_user">Failed to delete current user %1$s</string>
+    <string name="msg_successfully_restored_user">Successfully restored settings from %1$s</string>
+    <string name="err_create_backup_directory">Failed to create backup directory %1$s</string>
+    <string name="msg_created_backup_directory">Created backup directory %1$s</string>
+    <string name="msg_successfully_backed_up_json">Successfullly backed up user data %1$s</string>
+    <string name="err_backup_directory_not_found">Backup directory not found %1$s</string>
+    <string name="err_no_email_clients_installed">Email application not found</string>
+    <string name="err_user_not_found">User not found %1$s</string>
+    <string name="activity_stats_date">Date</string>
+    <string name="activity_stats_op">Op</string>
+    <string name="activity_stats_correct">Correct</string>
+    <string name="activity_stats_num">Num</string>
+    <string name="activity_stats_percent">Percent</string>
+    <string name="activity_stats_rate">Rate</string>
+    <string name="msg_user_progress_reset">User progress reset %1$s</string>
 </resources>

@@ -24,7 +24,7 @@
         <TableLayout
             android:id="@+id/statsTable"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:layout_marginBottom="8dp"
             android:layout_marginLeft="8dp"
             android:layout_marginRight="8dp"
@@ -47,7 +47,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Date"
+                    android:text="@string/activity_stats_date"
                     android:textAlignment="viewStart"/>
 
                 <TextView
@@ -55,7 +55,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Op"
+                    android:text="@string/activity_stats_op"
                     android:textAlignment="textEnd"/>
 
                 <TextView
@@ -63,7 +63,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Correct"
+                    android:text="@string/activity_stats_correct"
                     android:textAlignment="textEnd"/>
 
                 <TextView
@@ -71,7 +71,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Num"
+                    android:text="@string/activity_stats_num"
                     android:textAlignment="textEnd"/>
 
                 <TextView
@@ -79,7 +79,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Percent"
+                    android:text="@string/activity_stats_percent"
                     android:textAlignment="textEnd"/>
 
                 <TextView
@@ -87,7 +87,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Rate"
+                    android:text="@string/activity_stats_rate"
                     android:textAlignment="textEnd"/>
             </TableRow>
 

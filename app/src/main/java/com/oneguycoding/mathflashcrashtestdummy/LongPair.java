@@ -65,6 +65,7 @@ class LongPair implements Serializable {
 	 */
 	@Override
 	public int hashCode() {
+		//noinspection UnnecessaryLocalVariable
 		int code = (int)((l1 << MAX_SHIFT) + l2);
 		return code;
 	}
