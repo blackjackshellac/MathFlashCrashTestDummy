@@ -13,6 +13,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.PopupMenu;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -21,6 +22,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
+import android.widget.Button;
+import android.widget.GridLayout;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -200,6 +203,18 @@ public class MainActivity extends AppCompatActivity /* implements
 
 		});
 
+		final GridLayout keyboard = (GridLayout) findViewById(R.id.keyboard_grid_layout);
+		for (int i=0; i < keyboard.getChildCount(); i++) {
+			Button keyboard_button = (Button) keyboard.getChildAt(i);
+			keyboard_button.setOnClickListener(new View.OnClickListener() {
+
+				@Override
+				public void onClick(View view) {
+					keyboardClick(view);
+				}
+			});
+		}
+
 		// OnClickListener for the operation image (+, -, x, /)
 		findViewById(R.id.imageOperation).setOnClickListener(
 			new View.OnClickListener() {
@@ -239,6 +254,12 @@ public class MainActivity extends AppCompatActivity /* implements
 			Log.i("STORAGE", "Public storage is writable: "+public_storage.getAbsolutePath());
 		}
 */
+	}
+
+	public void keyboardClick(View view) {
+		Button b = (Button)view;
+		String txt = b.getText().toString();
+		AndroidUtil.showToast(this, "Someone clicked id="+txt, Toast.LENGTH_SHORT);
 	}
 
 	@Override // android recommended class to handle permissions

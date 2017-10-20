@@ -66,4 +66,15 @@
     <string name="activity_stats_percent">Pour cent</string>
     <string name="activity_stats_rate">Fréquence</string>
     <string name="msg_user_progress_reset">Progression de l\'utilisateur réinitialisée %1$s</string>
+    <string name="_9">9</string>
+    <string name="_8">8</string>
+    <string name="_1">1</string>
+    <string name="_2">2</string>
+    <string name="_3">3</string>
+    <string name="_4">4</string>
+    <string name="_5">5</string>
+    <string name="_6">6</string>
+    <string name="_7">7</string>
+    <string name="_backspace"><![CDATA[<<]]></string>
+    <string name="_0">0</string>
 </resources>
