@@ -1,10 +1,13 @@
 package com.oneguycoding.mathflashcrashtestdummy;
 
 import android.app.Activity;
+import android.graphics.PorterDuff;
 import android.os.Environment;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -85,5 +88,34 @@ class AndroidUtil {
 		String state = Environment.getExternalStorageState();
 		return (Environment.MEDIA_MOUNTED.equals(state) ||
 				Environment.MEDIA_MOUNTED_READ_ONLY.equals(state));
+	}
+
+	public static void buttonPress(View button) {
+		button.getBackground().setColorFilter(0xe0f47521, PorterDuff.Mode.SRC_ATOP);
+		button.invalidate();
+	}
+
+	public static void buttonRelease(View button) {
+		button.getBackground().clearColorFilter();
+		button.invalidate();
+	}
+
+	public static void buttonEffect(View button){
+		button.setOnTouchListener(new View.OnTouchListener() {
+
+			public boolean onTouch(View v, MotionEvent event) {
+				switch (event.getAction()) {
+					case MotionEvent.ACTION_DOWN: {
+						buttonPress(v);
+						break;
+					}
+					case MotionEvent.ACTION_UP: {
+						buttonRelease(v);
+						break;
+					}
+				}
+				return false;
+			}
+		});
 	}
 }

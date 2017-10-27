@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <GridLayout xmlns:android="http://schemas.android.com/apk/res/android"
             android:id="@+id/keyboard_grid_layout"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:columnCount="3"
             android:rowCount="4"
             android:padding="8sp"
+            android:background="@android:color/holo_orange_light"
     >
 
     <Button
@@ -13,15 +14,20 @@
         android:text="@string/_1"
         android:background="@android:color/holo_orange_dark"
         android:textColor="@android:color/black"
+        android:fontFamily="monospace"
         android:textSize="24sp"
+        android:textStyle="bold"
         android:typeface="monospace"
+        android:padding="4sp"
         />
     <Button
         android:id="@+id/number2"
         android:text="@string/_2"
         android:background="@android:color/holo_orange_dark"
         android:textColor="@android:color/black"
+        android:fontFamily="monospace"
         android:textSize="24sp"
+        android:textStyle="bold"
         android:typeface="monospace"
         />
     <Button
@@ -29,7 +35,9 @@
         android:text="@string/_3"
         android:background="@android:color/holo_orange_dark"
         android:textColor="@android:color/black"
+        android:fontFamily="monospace"
         android:textSize="24sp"
+        android:textStyle="bold"
         android:typeface="monospace"
         />
 
@@ -38,7 +46,9 @@
         android:text="@string/_4"
         android:background="@android:color/holo_orange_dark"
         android:textColor="@android:color/black"
+        android:fontFamily="monospace"
         android:textSize="24sp"
+        android:textStyle="bold"
         android:typeface="monospace"
         />
     <Button
@@ -46,7 +56,9 @@
         android:text="@string/_5"
         android:background="@android:color/holo_orange_dark"
         android:textColor="@android:color/black"
+        android:fontFamily="monospace"
         android:textSize="24sp"
+        android:textStyle="bold"
         android:typeface="monospace"
         />
     <Button
@@ -54,7 +66,9 @@
         android:text="@string/_6"
         android:background="@android:color/holo_orange_dark"
         android:textColor="@android:color/black"
+        android:fontFamily="monospace"
         android:textSize="24sp"
+        android:textStyle="bold"
         android:typeface="monospace"
         />
 
@@ -63,7 +77,9 @@
         android:text="@string/_7"
         android:background="@android:color/holo_orange_dark"
         android:textColor="@android:color/black"
+        android:fontFamily="monospace"
         android:textSize="24sp"
+        android:textStyle="bold"
         android:typeface="monospace"
         />
     <Button
@@ -71,7 +87,9 @@
         android:text="@string/_8"
         android:background="@android:color/holo_orange_dark"
         android:textColor="@android:color/black"
+        android:fontFamily="monospace"
         android:textSize="24sp"
+        android:textStyle="bold"
         android:typeface="monospace"
         />
     <Button
@@ -79,7 +97,9 @@
         android:text="@string/_9"
         android:background="@android:color/holo_orange_dark"
         android:textColor="@android:color/black"
+        android:fontFamily="monospace"
         android:textSize="24sp"
+        android:textStyle="bold"
         android:typeface="monospace"
         />
     <Button
@@ -87,7 +107,9 @@
         android:text=""
         android:background="@android:color/holo_orange_dark"
         android:textColor="@android:color/black"
+        android:fontFamily="monospace"
         android:textSize="24sp"
+        android:textStyle="bold"
         android:typeface="monospace"
         />
     <Button
@@ -95,7 +117,9 @@
         android:text="@string/_0"
         android:background="@android:color/holo_orange_dark"
         android:textColor="@android:color/black"
+        android:fontFamily="monospace"
         android:textSize="24sp"
+        android:textStyle="bold"
         android:typeface="monospace"
         />
     <Button
@@ -103,7 +127,9 @@
         android:text="@string/_backspace"
         android:background="@android:color/holo_orange_dark"
         android:textColor="@android:color/black"
+        android:fontFamily="monospace"
         android:textSize="24sp"
+        android:textStyle="bold"
         android:typeface="monospace"
         />
 

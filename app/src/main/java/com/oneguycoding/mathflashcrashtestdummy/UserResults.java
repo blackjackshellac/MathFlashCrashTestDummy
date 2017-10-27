@@ -174,6 +174,10 @@ class UserResults implements Serializable {
 		return getNumAnswered() >= num;
 	}
 
+	public boolean noneAnswered() {
+		return getNumAnswered() == 0;
+	}
+
 	private float limitPercent(int cnt) {
 		if (cnt > num) {
 			Log.e("Limit", "count greater than num!");

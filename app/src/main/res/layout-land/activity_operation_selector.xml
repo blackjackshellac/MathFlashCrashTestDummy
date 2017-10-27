@@ -7,72 +7,75 @@
     android:layout_height="match_parent"
     tools:context="com.oneguycoding.mathflashcrashtestdummy.OperationSelector">
 
-    <TextView
-        android:id="@+id/textView4"
+    <GridLayout
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="@string/text_arithmetic_operations"
-        android:textAppearance="@android:style/TextAppearance.Material.Large"
+        android:layout_height="0dp"
+        android:layout_gravity="center"
+        android:layout_marginBottom="8dp"
         android:layout_marginLeft="8dp"
-        app:layout_constraintLeft_toLeftOf="@+id/guideline_v95"
-        app:layout_constraintRight_toLeftOf="@+id/guideline14"
         android:layout_marginRight="8dp"
-        app:layout_constraintTop_toTopOf="parent"
-        android:layout_marginTop="32dp"
-        app:layout_constraintHorizontal_bias="0.0"/>
-
-    <TextView
-        android:id="@+id/textViewTopMax"
-        android:layout_width="0dp"
-        android:layout_height="41dp"
-        android:text="@string/text_top_max"
-        android:textAlignment="textEnd"
-        android:textAppearance="@android:style/TextAppearance.Material.Small"
-        android:layout_marginTop="24dp"
-        app:layout_constraintTop_toBottomOf="@+id/textView4"
-        android:layout_marginLeft="8dp"
-        app:layout_constraintLeft_toLeftOf="@+id/guideline_v95"
-        app:layout_constraintRight_toLeftOf="@+id/numTopMax"
-        android:layout_marginRight="8dp"
-        app:layout_constraintHorizontal_bias="0.0"/>
-
-    <EditText
-        android:id="@+id/numTopMax"
-        android:layout_width="0dp"
-        android:layout_height="45dp"
-        android:ems="10"
-        android:hint="@string/hint_top_max"
-        android:inputType="number"
-        app:layout_constraintRight_toLeftOf="@+id/guideline14"
-        android:layout_marginRight="8dp"
-        app:layout_constraintBaseline_toBaselineOf="@+id/textViewTopMax"/>
-
-    <TextView
-        android:id="@+id/textViewBotMax"
-        android:layout_width="0dp"
-        android:layout_height="34dp"
-        android:text="@string/text_bot_max"
-        android:textAlignment="textEnd"
-        android:textAppearance="@android:style/TextAppearance.Material.Small"
-        android:layout_marginLeft="8dp"
-        app:layout_constraintLeft_toLeftOf="@+id/guideline_v95"
-        app:layout_constraintRight_toLeftOf="@+id/numBotMax"
-        android:layout_marginRight="8dp"
+        android:layout_marginTop="8dp"
+        android:columnCount="4"
+        android:rowCount="4"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
-        android:layout_marginTop="16dp"
-        app:layout_constraintTop_toBottomOf="@+id/textViewTopMax"
-        />
+        app:layout_constraintLeft_toLeftOf="@+id/guideline_v35"
+        app:layout_constraintRight_toLeftOf="@+id/guideline_v90"
+        app:layout_constraintTop_toTopOf="@+id/guideline_h05"
+        app:layout_constraintVertical_bias="0.0">
 
-    <EditText
-        android:id="@+id/numBotMax"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:ems="10"
-        android:hint="@string/hint_bot_max"
-        android:inputType="number"
-        app:layout_constraintBaseline_toBaselineOf="@+id/textViewBotMax"
-        app:layout_constraintRight_toLeftOf="@+id/guideline14"
-        android:layout_marginRight="8dp"/>
+        <!--row 0 -->
+        <TextView
+            android:layout_columnSpan="4"
+            android:layout_gravity="start"
+            android:text="@string/text_arithmetic_operations"
+            android:textAppearance="@android:style/TextAppearance.Material.Large"
+            />
+
+        <!-- row 1 -->
+        <TextView
+            android:layout_columnSpan="3"
+            android:layout_gravity="end"
+            android:text="@string/text_top_max"
+            />
+
+        <EditText
+            android:id="@+id/numTopMax"
+            android:layout_columnSpan="1"
+            android:ems="10"
+            android:hint="@string/hint_top_max"
+            android:inputType="number"/>
+
+        <!-- row 2 -->
+        <TextView
+            android:layout_columnSpan="3"
+            android:layout_gravity="end"
+            android:text="@string/text_bot_max"
+            />
+
+        <EditText
+            android:id="@+id/numBotMax"
+            android:layout_columnSpan="1"
+            android:ems="10"
+            android:hint="@string/hint_bot_max"
+            android:inputType="number"/>
+
+        <!-- row 3 -->
+        <TextView
+            android:layout_columnSpan="3"
+            android:layout_gravity="end"
+            android:text="@string/test_max_num"
+            />
+
+        <EditText
+            android:id="@+id/numTestMax"
+            android:layout_columnSpan="1"
+            android:labelFor="@id/numTestMax"
+            android:ems="10"
+            android:inputType="number"/>
+
+    </GridLayout>
 
     <CheckBox
         android:id="@+id/checkMultiple"
@@ -83,7 +86,7 @@
         android:layout_marginTop="32dp"
         android:text="@string/stringMultiple"
         app:layout_constraintLeft_toLeftOf="@+id/guideline_v05"
-        app:layout_constraintRight_toLeftOf="@+id/guideline_v95"
+        app:layout_constraintRight_toLeftOf="@+id/guideline_v35"
         app:layout_constraintTop_toTopOf="parent"
         android:onClick="onCheckboxClicked"/>
 
@@ -94,7 +97,7 @@
         android:text="@string/stringPlus"
         android:layout_marginLeft="8dp"
         app:layout_constraintLeft_toLeftOf="@+id/guideline_v05"
-        app:layout_constraintRight_toLeftOf="@+id/guideline_v95"
+        app:layout_constraintRight_toLeftOf="@+id/guideline_v35"
         android:layout_marginRight="8dp"
         app:layout_constraintHorizontal_bias="0.0"
         android:layout_marginTop="24dp"
@@ -108,26 +111,11 @@
         android:text="@string/stringMinus"
         android:layout_marginLeft="8dp"
         app:layout_constraintLeft_toLeftOf="@+id/guideline_v05"
-        app:layout_constraintRight_toLeftOf="@+id/guideline_v95"
+        app:layout_constraintRight_toLeftOf="@+id/guideline_v35"
         android:layout_marginRight="8dp"
         android:layout_marginTop="8dp"
         app:layout_constraintTop_toBottomOf="@+id/checkPlus"
         android:onClick="onCheckboxClicked"/>
-
-    <android.support.constraint.Guideline
-        android:id="@+id/guideline_v95"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:visibility="visible"
-        app:layout_constraintGuide_percent="0.5"/>
-
-    <android.support.constraint.Guideline
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/guideline_v05"
-        android:orientation="vertical"
-        app:layout_constraintGuide_percent="0.05"/>
 
     <CheckBox
         android:id="@+id/checkMult"
@@ -138,7 +126,7 @@
         android:layout_marginTop="8dp"
         android:text="@string/stringMultiplication"
         app:layout_constraintLeft_toLeftOf="@+id/guideline_v05"
-        app:layout_constraintRight_toLeftOf="@+id/guideline_v95"
+        app:layout_constraintRight_toLeftOf="@+id/guideline_v35"
         app:layout_constraintTop_toBottomOf="@+id/checkMinus"
         android:onClick="onCheckboxClicked"/>
 
@@ -151,45 +139,37 @@
         android:layout_marginTop="8dp"
         android:text="@string/stringDivision"
         app:layout_constraintLeft_toLeftOf="@+id/guideline_v05"
-        app:layout_constraintRight_toLeftOf="@+id/guideline_v95"
+        app:layout_constraintRight_toLeftOf="@+id/guideline_v35"
         app:layout_constraintTop_toBottomOf="@+id/checkMult"
         android:onClick="onCheckboxClicked"/>
 
     <android.support.constraint.Guideline
+        android:id="@+id/guideline_v35"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/guideline_h02"
-        android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.45"/>
+        android:orientation="vertical"
+        android:visibility="visible"
+        app:layout_constraintGuide_percent="0.35"/>
 
     <android.support.constraint.Guideline
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/guideline14"
+        android:id="@+id/guideline_v05"
         android:orientation="vertical"
-        app:layout_constraintGuide_percent="0.95"/>
+        app:layout_constraintGuide_percent="0.05"/>
 
-    <TextView
-        android:id="@+id/textView5"
-        android:layout_width="76dp"
-        android:layout_height="46dp"
-        android:layout_marginRight="9dp"
-        android:layout_marginTop="16dp"
-        android:text="@string/test_max_num"
-        app:layout_constraintRight_toLeftOf="@+id/numTestMax"
-        app:layout_constraintTop_toBottomOf="@+id/textViewBotMax"
-        android:layout_marginLeft="8dp"
-        app:layout_constraintLeft_toLeftOf="@+id/guideline_v95"
-        app:layout_constraintHorizontal_bias="0.0"/>
-
-    <EditText
-        android:id="@+id/numTestMax"
+    <android.support.constraint.Guideline
+        android:id="@+id/guideline_h05"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:ems="10"
-        android:inputType="number"
-        app:layout_constraintBaseline_toBaselineOf="@+id/textView5"
-        app:layout_constraintRight_toLeftOf="@+id/guideline14"
-        android:layout_marginRight="8dp"/>
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.05"/>
+
+    <android.support.constraint.Guideline
+        android:id="@+id/guideline_v90"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.90"/>
 
 </android.support.constraint.ConstraintLayout>

@@ -2,13 +2,13 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 25
-    buildToolsVersion "25.0.0"
+    buildToolsVersion '26.0.2'
     defaultConfig {
         applicationId "com.oneguycoding.mathflashcrashtestdummy"
         minSdkVersion 21
         targetSdkVersion 25
-        versionCode 201710180
-        versionName '1.00.06'
+        versionCode 201710260
+        versionName '1.00.07'
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {

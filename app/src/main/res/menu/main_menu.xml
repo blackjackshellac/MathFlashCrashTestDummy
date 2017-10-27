@@ -38,4 +38,7 @@
         android:icon="@drawable/yoshi_star"
         android:title="@string/menu_users"
         app:showAsAction="ifRoom"/>
+    <item
+        android:id="@+id/menu_quit"
+        android:title="@string/menu_quit"/>
 </menu>

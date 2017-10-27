@@ -13,7 +13,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.PopupMenu;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -23,6 +22,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.GridLayout;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -51,7 +51,8 @@ public class MainActivity extends AppCompatActivity /* implements
 
 	private NumberOperation numberOperation;
 	//private OperationsClass ops = new OperationsClass();
-	private TextView num1, num2, num3;
+	private TextView num1, num2;
+	private EditText num3;
 	private TextView message;
     private ImageView response;
 	private ProgressBar progressBar;
@@ -67,6 +68,7 @@ public class MainActivity extends AppCompatActivity /* implements
 
 	private Menu menu;
 	private SQLiteDatabase perfStatsDb;
+	private MainActivity mainActivity;
 
 	public MainActivity() {
 
@@ -151,7 +153,7 @@ public class MainActivity extends AppCompatActivity /* implements
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 
-
+		mainActivity = this;
 /*
 		mGoogleApiClient = new GoogleApiClient.Builder(this)
 				.addApi(Drive.API)
@@ -177,7 +179,7 @@ public class MainActivity extends AppCompatActivity /* implements
 
 		num1 = (TextView) findViewById(R.id.number1);
 		num2 = (TextView) findViewById(R.id.number2);
-		num3 = (TextView) findViewById(R.id.number3);
+		num3 = (EditText) findViewById(R.id.number3);
 		message = (TextView) findViewById(R.id.text_message);
 		response = (ImageView) findViewById(R.id.image_response);
 		progressText = (TextView) findViewById(R.id.text_progress);
@@ -203,9 +205,9 @@ public class MainActivity extends AppCompatActivity /* implements
 
 		});
 
-		final GridLayout keyboard = (GridLayout) findViewById(R.id.keyboard_grid_layout);
-		for (int i=0; i < keyboard.getChildCount(); i++) {
-			Button keyboard_button = (Button) keyboard.getChildAt(i);
+		final GridLayout keyboard_layout = (GridLayout) findViewById(R.id.keyboard_grid_layout);
+		for (int i=0; i < keyboard_layout.getChildCount(); i++) {
+			Button keyboard_button = (Button) keyboard_layout.getChildAt(i);
 			keyboard_button.setOnClickListener(new View.OnClickListener() {
 
 				@Override
@@ -213,7 +215,109 @@ public class MainActivity extends AppCompatActivity /* implements
 					keyboardClick(view);
 				}
 			});
+/*			keyboard_button.setOnTouchListener(new View.OnTouchListener() {
+				@Override
+				public boolean onTouch(View view, MotionEvent motionEvent) {
+					if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
+						keyboardClick(view);
+						((Button)view).performClick();
+						return true;
+					}
+					return false;
+				}
+			});*/
+			AndroidUtil.buttonEffect(keyboard_button);
 		}
+		keyboard_layout.setOnKeyListener(new View.OnKeyListener() {
+
+			private int getButtonId(int keyCode) {
+				int id = -1;
+				switch (keyCode) {
+					case KeyEvent.KEYCODE_0:
+						id = R.id.number0;
+						break;
+					case KeyEvent.KEYCODE_1:
+						id = R.id.number1;
+						break;
+					case KeyEvent.KEYCODE_2:
+						id = R.id.number2;
+						break;
+					case KeyEvent.KEYCODE_3:
+						id = R.id.number3;
+						break;
+					case KeyEvent.KEYCODE_4:
+						id = R.id.number4;
+						break;
+					case KeyEvent.KEYCODE_5:
+						id = R.id.number5;
+						break;
+					case KeyEvent.KEYCODE_6:
+						id = R.id.number6;
+						break;
+					case KeyEvent.KEYCODE_7:
+						id = R.id.number7;
+						break;
+					case KeyEvent.KEYCODE_8:
+						id = R.id.number8;
+						break;
+					case KeyEvent.KEYCODE_9:
+						id = R.id.number9;
+						break;
+					case KeyEvent.KEYCODE_DEL:
+						id = R.id.backspace;
+						break;
+					default:
+						break;
+				}
+				return id;
+			}
+
+			@Override
+			public boolean onKey(View view, int keyCode, KeyEvent keyEvent) {
+				boolean retval = true;
+
+				if (keyEvent.getAction() == KeyEvent.ACTION_DOWN) {
+					int id = getButtonId(keyCode);
+					switch (keyCode) {
+						case KeyEvent.KEYCODE_DPAD_LEFT:
+						case KeyEvent.KEYCODE_DPAD_RIGHT:
+							Log.d("KeyEvent", "Caught key down for KeyEvent dpad left/right: "+keyCode);
+							break;
+						case KeyEvent.KEYCODE_ENTER:
+							Log.d("KeyEvent", "Caught key down for KeyEvent ENTER");
+							break;
+						default:
+							if (id == -1) {
+								Log.d("KeyEvent", AndroidUtil.stringFormatter("Caught key down for code/ch = %d/[%s]", keyCode, (char) keyEvent.getUnicodeChar()));
+								return false;
+							}
+							break;
+					}
+					if (id != -1) {
+						View b = mainActivity.findViewById(id);
+						if (b != null) {
+							AndroidUtil.buttonPress(b);
+						}
+					}
+					MainActivity.sendKeyEvent(num3, keyEvent);
+				} else if (keyEvent.getAction() == KeyEvent.ACTION_UP) {
+					int id = getButtonId(keyCode);
+					if (id != -1) {
+						View b = mainActivity.findViewById(id);
+						if (b != null) {
+							AndroidUtil.buttonRelease(b);
+						}
+					}
+				} else {
+					Log.d("KeyEvent", "Unhandled keyevent: "+keyEvent.toString());
+					retval = false;
+				}
+				return retval;
+			}
+		});
+		keyboard_layout.setFocusableInTouchMode(true);
+		keyboard_layout.requestFocus();
+		num3.setCursorVisible(true);
 
 		// OnClickListener for the operation image (+, -, x, /)
 		findViewById(R.id.imageOperation).setOnClickListener(
@@ -256,10 +360,64 @@ public class MainActivity extends AppCompatActivity /* implements
 */
 	}
 
+	public static void sendKeyEvent(EditText editText, KeyEvent keyEvent) {
+		editText.dispatchKeyEvent(keyEvent);
+		editText.setCursorVisible(true);
+		editText.setActivated(true);
+		editText.setPressed(true);
+	}
+
 	public void keyboardClick(View view) {
 		Button b = (Button)view;
-		String txt = b.getText().toString();
-		AndroidUtil.showToast(this, "Someone clicked id="+txt, Toast.LENGTH_SHORT);
+		String txt = b.getText().toString().trim();
+		if (txt.isEmpty()) {
+			// ignore button without txt
+			return;
+		}
+		// AndroidUtil.showToast(this, "Someone clicked id="+ch, Toast.LENGTH_SHORT);
+
+		int code;
+		char ch = txt.charAt(0);
+		switch(ch) {
+			case '0':
+				code=KeyEvent.KEYCODE_0;
+				break;
+			case '1':
+				code=KeyEvent.KEYCODE_1;
+				break;
+			case '2':
+				code=KeyEvent.KEYCODE_2;
+				break;
+			case '3':
+				code=KeyEvent.KEYCODE_3;
+				break;
+			case '4':
+				code=KeyEvent.KEYCODE_4;
+				break;
+			case '5':
+				code=KeyEvent.KEYCODE_5;
+				break;
+			case '6':
+				code=KeyEvent.KEYCODE_6;
+				break;
+			case '7':
+				code=KeyEvent.KEYCODE_7;
+				break;
+			case '8':
+				code=KeyEvent.KEYCODE_8;
+				break;
+			case '9':
+				code=KeyEvent.KEYCODE_9;
+				break;
+			case '<':
+				code=KeyEvent.KEYCODE_DEL;
+				break;
+			default:
+				Log.e("keyboardClick", "Unknown button txt: ["+ch+"]");
+				return;
+		}
+		KeyEvent keyEvent = new KeyEvent(0, 0, KeyEvent.ACTION_DOWN, code, 0);
+		sendKeyEvent(num3, keyEvent);
 	}
 
 	@Override // android recommended class to handle permissions
@@ -316,7 +474,7 @@ public class MainActivity extends AppCompatActivity /* implements
 		return null;
 	}
 
-	public boolean onPreparePopupMenu(PopupMenu popupMenu) {
+	public void onPreparePopupMenu(PopupMenu popupMenu) {
 		Menu menu = popupMenu.getMenu();
 		for (String name : userDataMap.users()) {
 			if (name.equals(getText(R.string.user_default))) {
@@ -327,13 +485,10 @@ public class MainActivity extends AppCompatActivity /* implements
 				menu.add(name);
 			}
 		}
-		return true;
 	}
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-
-		String name;
 		switch(item.getItemId()) {
 			case R.id.menu_backup:
 				PermissionsUtil.backup(this, jsonFilename);
@@ -374,6 +529,9 @@ public class MainActivity extends AppCompatActivity /* implements
 				break;
 			case R.id.menu_about:
 				showAbout();
+				break;
+			case R.id.menu_quit:
+				finishAndRemoveTask();
 				break;
 			case R.id.menu_popup_users:
 				View menuItemView = findViewById(R.id.menu_popup_users); // SAME ID AS MENU ID
@@ -473,8 +631,8 @@ public class MainActivity extends AppCompatActivity /* implements
 
     protected void setupFocus() {
 	    num3.setText("");
-	    num3.setFocusableInTouchMode(true);
-	    num3.requestFocus();
+	    //num3.setFocusableInTouchMode(true);
+	    //num3.requestFocus();
     }
 
 	protected void setupUser(String name) {
@@ -732,17 +890,46 @@ public class MainActivity extends AppCompatActivity /* implements
 	    }
     }
 
+    public void openSelectOperation() {
+	    Intent intent = new Intent(this, OperationSelector.class);
+
+	    Bundle b = new Bundle();
+	    b.putSerializable(EXTRA_USERDATA, userDataMap);
+	    intent.putExtras(b);
+	    startActivityForResult(intent, RESULT_OPS);
+    }
+
 	public void selectOperation() {
-		Intent intent = new Intent(this, OperationSelector.class);
-		/*
-		Bundle b = new Bundle();
-		b.putSerializable(EXTRA_OPS, ops);
-		intent.putExtras(b);
-		*/
-		Bundle b = new Bundle();
-		b.putSerializable(EXTRA_USERDATA, userDataMap);
-		intent.putExtras(b);
-		startActivityForResult(intent, RESULT_OPS);
+		UserData userData = userDataMap.getUserData();
+		if (userData.results.testDone() || userData.results.noneAnswered()) {
+			openSelectOperation();
+		} else {
+			// pass this activity to the onClickListener
+			AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+			builder.setTitle(getString(R.string.title_select_operation, userDataMap.getCurUser()));
+			builder.setMessage(getText(R.string.msg_select_operation));
+
+			builder.setPositiveButton(getText(R.string.yes), new DialogInterface.OnClickListener() {
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					dialog.dismiss();
+					resetUser();
+					openSelectOperation();
+				}
+			});
+
+			builder.setNegativeButton(getText(R.string.no), new DialogInterface.OnClickListener() {
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					dialog.dismiss();
+				}
+			});
+
+			AlertDialog alert = builder.create();
+			alert.show();
+
+		}
 	}
 
 	public void showStats() {
@@ -782,9 +969,12 @@ public class MainActivity extends AppCompatActivity /* implements
 			case RESULT_OPS:
 				if (resultCode == RESULT_OK) {
 					Bundle b = intent.getExtras();
-					userDataMap = (UserDataMap) b.getSerializable(EXTRA_USERDATA);
-					saveJson = true;
-					//setupNumbers();
+					if (b == null) {
+						Log.e("OnActivityResult", "Bundle is null in RESULT_OPS");
+					} else {
+						userDataMap = (UserDataMap) b.getSerializable(EXTRA_USERDATA);
+						saveJson = true;
+					}
 				}
 				break;
 			case RESULT_USERDATA:
@@ -799,7 +989,8 @@ public class MainActivity extends AppCompatActivity /* implements
 				break;
 			default:
 				// shouldn't happen
-				throw new RuntimeException("Unexpected activity result");
+				Log.e("OnActivityResult", "Unexpected activity result");
+				break;
 		}
 		// if the UserDataMap was serialized the LongPairRecorders for each UserData are lost
 		userDataMap.createRecorders();
