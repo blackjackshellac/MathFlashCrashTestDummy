@@ -8,6 +8,8 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.database.sqlite.SQLiteDatabase;
 import android.media.AudioManager;
+import android.media.MediaPlayer;
+import android.media.RingtoneManager;
 import android.media.ToneGenerator;
 import android.net.Uri;
 import android.os.Bundle;
@@ -47,7 +49,7 @@ public class MainActivity extends AppCompatActivity /* implements
 	private static final int RESULT_STATS = 102;
 	//public static final int RESOLVE_CONNECTION_REQUEST_CODE = 102;
 
-	private static final ToneGenerator tg = new ToneGenerator(AudioManager.STREAM_NOTIFICATION, 100);
+	// private static final ToneGenerator tg = new ToneGenerator(AudioManager.STREAM_NOTIFICATION, 100);
 
 	private NumberOperation numberOperation;
 	//private OperationsClass ops = new OperationsClass();
@@ -69,6 +71,10 @@ public class MainActivity extends AppCompatActivity /* implements
 	private Menu menu;
 	private SQLiteDatabase perfStatsDb;
 	private MainActivity mainActivity;
+	private NumericKeyboard numericKeyboard;
+	private Uri notification;
+	private MediaPlayer mp;
+
 
 	public MainActivity() {
 
@@ -154,6 +160,9 @@ public class MainActivity extends AppCompatActivity /* implements
 		setContentView(R.layout.activity_main);
 
 		mainActivity = this;
+		notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+		mp = MediaPlayer.create(getApplicationContext(), notification);
+
 /*
 		mGoogleApiClient = new GoogleApiClient.Builder(this)
 				.addApi(Drive.API)
@@ -206,118 +215,25 @@ public class MainActivity extends AppCompatActivity /* implements
 		});
 
 		final GridLayout keyboard_layout = (GridLayout) findViewById(R.id.keyboard_grid_layout);
+		numericKeyboard = new NumericKeyboard(mainActivity, num3);
+
 		for (int i=0; i < keyboard_layout.getChildCount(); i++) {
 			Button keyboard_button = (Button) keyboard_layout.getChildAt(i);
 			keyboard_button.setOnClickListener(new View.OnClickListener() {
 
 				@Override
 				public void onClick(View view) {
-					keyboardClick(view);
+					numericKeyboard.keyboardClick(view);
 				}
 			});
-/*			keyboard_button.setOnTouchListener(new View.OnTouchListener() {
-				@Override
-				public boolean onTouch(View view, MotionEvent motionEvent) {
-					if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
-						keyboardClick(view);
-						((Button)view).performClick();
-						return true;
-					}
-					return false;
-				}
-			});*/
 			AndroidUtil.buttonEffect(keyboard_button);
 		}
-		keyboard_layout.setOnKeyListener(new View.OnKeyListener() {
 
-			private int getButtonId(int keyCode) {
-				int id = -1;
-				switch (keyCode) {
-					case KeyEvent.KEYCODE_0:
-						id = R.id.number0;
-						break;
-					case KeyEvent.KEYCODE_1:
-						id = R.id.number1;
-						break;
-					case KeyEvent.KEYCODE_2:
-						id = R.id.number2;
-						break;
-					case KeyEvent.KEYCODE_3:
-						id = R.id.number3;
-						break;
-					case KeyEvent.KEYCODE_4:
-						id = R.id.number4;
-						break;
-					case KeyEvent.KEYCODE_5:
-						id = R.id.number5;
-						break;
-					case KeyEvent.KEYCODE_6:
-						id = R.id.number6;
-						break;
-					case KeyEvent.KEYCODE_7:
-						id = R.id.number7;
-						break;
-					case KeyEvent.KEYCODE_8:
-						id = R.id.number8;
-						break;
-					case KeyEvent.KEYCODE_9:
-						id = R.id.number9;
-						break;
-					case KeyEvent.KEYCODE_DEL:
-						id = R.id.backspace;
-						break;
-					default:
-						break;
-				}
-				return id;
-			}
-
-			@Override
-			public boolean onKey(View view, int keyCode, KeyEvent keyEvent) {
-				boolean retval = true;
-
-				if (keyEvent.getAction() == KeyEvent.ACTION_DOWN) {
-					int id = getButtonId(keyCode);
-					switch (keyCode) {
-						case KeyEvent.KEYCODE_DPAD_LEFT:
-						case KeyEvent.KEYCODE_DPAD_RIGHT:
-							Log.d("KeyEvent", "Caught key down for KeyEvent dpad left/right: "+keyCode);
-							break;
-						case KeyEvent.KEYCODE_ENTER:
-							Log.d("KeyEvent", "Caught key down for KeyEvent ENTER");
-							break;
-						default:
-							if (id == -1) {
-								Log.d("KeyEvent", AndroidUtil.stringFormatter("Caught key down for code/ch = %d/[%s]", keyCode, (char) keyEvent.getUnicodeChar()));
-								return false;
-							}
-							break;
-					}
-					if (id != -1) {
-						View b = mainActivity.findViewById(id);
-						if (b != null) {
-							AndroidUtil.buttonPress(b);
-						}
-					}
-					MainActivity.sendKeyEvent(num3, keyEvent);
-				} else if (keyEvent.getAction() == KeyEvent.ACTION_UP) {
-					int id = getButtonId(keyCode);
-					if (id != -1) {
-						View b = mainActivity.findViewById(id);
-						if (b != null) {
-							AndroidUtil.buttonRelease(b);
-						}
-					}
-				} else {
-					Log.d("KeyEvent", "Unhandled keyevent: "+keyEvent.toString());
-					retval = false;
-				}
-				return retval;
-			}
-		});
+		/* attach keyboard listener to numeric keyboard layout */
+		keyboard_layout.setOnKeyListener(numericKeyboard);
 		keyboard_layout.setFocusableInTouchMode(true);
 		keyboard_layout.requestFocus();
-		num3.setCursorVisible(true);
+		MainActivity.sendKeyEvent(num3, null);
 
 		// OnClickListener for the operation image (+, -, x, /)
 		findViewById(R.id.imageOperation).setOnClickListener(
@@ -361,63 +277,13 @@ public class MainActivity extends AppCompatActivity /* implements
 	}
 
 	public static void sendKeyEvent(EditText editText, KeyEvent keyEvent) {
-		editText.dispatchKeyEvent(keyEvent);
+		boolean bke = (keyEvent != null);
+		if (bke) {
+			editText.dispatchKeyEvent(keyEvent);
+		}
 		editText.setCursorVisible(true);
-		editText.setActivated(true);
-		editText.setPressed(true);
-	}
-
-	public void keyboardClick(View view) {
-		Button b = (Button)view;
-		String txt = b.getText().toString().trim();
-		if (txt.isEmpty()) {
-			// ignore button without txt
-			return;
-		}
-		// AndroidUtil.showToast(this, "Someone clicked id="+ch, Toast.LENGTH_SHORT);
-
-		int code;
-		char ch = txt.charAt(0);
-		switch(ch) {
-			case '0':
-				code=KeyEvent.KEYCODE_0;
-				break;
-			case '1':
-				code=KeyEvent.KEYCODE_1;
-				break;
-			case '2':
-				code=KeyEvent.KEYCODE_2;
-				break;
-			case '3':
-				code=KeyEvent.KEYCODE_3;
-				break;
-			case '4':
-				code=KeyEvent.KEYCODE_4;
-				break;
-			case '5':
-				code=KeyEvent.KEYCODE_5;
-				break;
-			case '6':
-				code=KeyEvent.KEYCODE_6;
-				break;
-			case '7':
-				code=KeyEvent.KEYCODE_7;
-				break;
-			case '8':
-				code=KeyEvent.KEYCODE_8;
-				break;
-			case '9':
-				code=KeyEvent.KEYCODE_9;
-				break;
-			case '<':
-				code=KeyEvent.KEYCODE_DEL;
-				break;
-			default:
-				Log.e("keyboardClick", "Unknown button txt: ["+ch+"]");
-				return;
-		}
-		KeyEvent keyEvent = new KeyEvent(0, 0, KeyEvent.ACTION_DOWN, code, 0);
-		sendKeyEvent(num3, keyEvent);
+		editText.setActivated(bke);
+		editText.setPressed(bke);
 	}
 
 	@Override // android recommended class to handle permissions
@@ -1060,9 +926,9 @@ public class MainActivity extends AppCompatActivity /* implements
 		        message.setText(getResources().getString(R.string.msg_incorrect, nanswer));
                 response.setImageResource(R.drawable.mushroom_wrong);
 		        setupFocus();
-		        tg.startTone(ToneGenerator.TONE_SUP_ERROR);
-		        Thread.sleep(1000);
-		        tg.stopTone();
+
+		        // play a notification
+		        mp.start();
 	        } catch (Exception e) {
 		        // ignore
 	        }
@@ -1097,6 +963,7 @@ public class MainActivity extends AppCompatActivity /* implements
 	@Override
     public void onDestroy() {
 	    perfStatsDb.close();
+	    mp.release();
 	    super.onDestroy();
     }
 }
