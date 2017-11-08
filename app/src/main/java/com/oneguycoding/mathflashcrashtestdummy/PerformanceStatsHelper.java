@@ -1,6 +1,7 @@
 package com.oneguycoding.mathflashcrashtestdummy;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
@@ -41,6 +42,38 @@ class PerformanceStatsHelper extends SQLiteOpenHelper {
 		} catch (Exception e) {
 			Log.d("SQL", "Failed to upgrade database ", e);
 		}
+	}
+
+	/**
+	 * Dump the given table for the given database
+	 *
+	 * @param db - database
+	 * @param table_name - table to dump
+	 * @return Cursor or null on failure
+	 */
+	public static Cursor dump(SQLiteDatabase db, String table_name) {
+		String sql="select * from "+table_name;
+		String[] selectionArgs={};
+		try {
+			return db.rawQuery(sql, selectionArgs);
+		} catch (SQLException e) {
+			Log.e("SQL", "Failed to dump table: "+table_name);
+			Log.d("SQL", e.toString());
+		}
+		return null;
+	}
+
+	public static Cursor query_runtime(SQLiteDatabase db, String table_name, Long runtime) {
+		String sql="select * from "+table_name+" WHERE runtime = ?";
+		String[] selectionArgs={runtime.toString()};
+
+		try {
+			return db.rawQuery(sql, selectionArgs);
+		} catch (SQLException e) {
+			Log.e("SQL", "Failed to query table: "+table_name+ "for runtime="+runtime);
+			Log.d("SQL", e.toString());
+		}
+		return null;
 	}
 
 }

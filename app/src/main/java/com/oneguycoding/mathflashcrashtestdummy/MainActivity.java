@@ -7,10 +7,8 @@ import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.database.sqlite.SQLiteDatabase;
-import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.RingtoneManager;
-import android.media.ToneGenerator;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -66,11 +64,12 @@ public class MainActivity extends AppCompatActivity /* implements
 	//private UserResults results;
 	public static final String appName = "MathFlashCrashTestDummy";
 	public final String jsonFilename = appName +".json";
+	public final String statsFilename = appName+"_stats.json";
+
 	//public final File filePublicStoragePath;
 
 	private Menu menu;
 	private SQLiteDatabase perfStatsDb;
-	private MainActivity mainActivity;
 	private NumericKeyboard numericKeyboard;
 	private Uri notification;
 	private MediaPlayer mp;
@@ -159,7 +158,7 @@ public class MainActivity extends AppCompatActivity /* implements
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 
-		mainActivity = this;
+		MainActivity mainActivity = this;
 		notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
 		mp = MediaPlayer.create(getApplicationContext(), notification);
 
@@ -181,7 +180,7 @@ public class MainActivity extends AppCompatActivity /* implements
 		if (udm == null) {
 			// first time invocation
 			userDataMap = new UserDataMap((String) getText(R.string.user_default));
-			userDataMap.saveJson(this, null, jsonFilename);
+			userDataMap.saveUserDataMapAsJson(this, null, jsonFilename);
 		} else {
 			userDataMap = udm;
 		}
@@ -295,7 +294,7 @@ public class MainActivity extends AppCompatActivity /* implements
 				// If request is cancelled, the result arrays are empty.
 				if (grantResults.length > 0	&& grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 					Log.d("permission", "granted");
-					UserDataMap udm = PermissionsUtil.do_restore(this, jsonFilename);
+					UserDataMap udm = PermissionsUtil.do_restore(this, jsonFilename, statsFilename, perfStatsDb);
 					if (udm != null) {
 						userDataMap = udm;
 					}
@@ -309,7 +308,8 @@ public class MainActivity extends AppCompatActivity /* implements
 				// If request is cancelled, the result arrays are empty.
 				if (grantResults.length > 0	&& grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 					Log.d("permission", "granted");
-					PermissionsUtil.do_backup(this, jsonFilename);
+					String jsonStats = userDataMap.dumpStatsAsJson(perfStatsDb, userDataMap);
+					PermissionsUtil.do_backup(this, jsonFilename, statsFilename, jsonStats);
 				} else {
 					// permission denied, boo! Disable the
 					// functionality that depends on this permission.uujm
@@ -357,10 +357,14 @@ public class MainActivity extends AppCompatActivity /* implements
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch(item.getItemId()) {
 			case R.id.menu_backup:
-				PermissionsUtil.backup(this, jsonFilename);
-				break;
+				String jsonStats = userDataMap.dumpStatsAsJson(perfStatsDb, userDataMap);
+				if (jsonStats == null) {
+					AndroidUtil.showToast(this, getString(R.string.msg_failed_backup_stats));
+				}
+				PermissionsUtil.try_backup(this, jsonFilename, statsFilename, jsonStats);
+ 				break;
 			case R.id.menu_restore:
-				UserDataMap udm = PermissionsUtil.restore(this, jsonFilename);
+				UserDataMap udm = PermissionsUtil.try_restore(this, jsonFilename, statsFilename, perfStatsDb);
 				if (udm != null) {
 					userDataMap = udm;
 					AndroidUtil.showToast(this, R.string.msg_successfully_restored_user, userDataMap.getCurUser());
@@ -617,7 +621,7 @@ public class MainActivity extends AppCompatActivity /* implements
 
 			    setupUser(name);
 
-			    userDataMap.saveJson(activity, null, jsonFilename);
+			    userDataMap.saveUserDataMapAsJson(activity, null, jsonFilename);
 
 			    dialog.dismiss();
 		    }
@@ -709,7 +713,7 @@ public class MainActivity extends AppCompatActivity /* implements
 				menu.removeItem(mitem.getItemId());
 				activity.invalidateOptionsMenu();
 				setupUser(activity.userDataMap.getCurUser());
-				userDataMap.saveJson(activity, null, jsonFilename);
+				userDataMap.saveUserDataMapAsJson(activity, null, jsonFilename);
 				dialog.dismiss();
 			}
 		});
@@ -861,7 +865,7 @@ public class MainActivity extends AppCompatActivity /* implements
 		// if the UserDataMap was serialized the LongPairRecorders for each UserData are lost
 		userDataMap.createRecorders();
 		if (saveJson) {
-			userDataMap.saveJson(this, null, jsonFilename);
+			userDataMap.saveUserDataMapAsJson(this, null, jsonFilename);
 			// sendEmail(null);
 		}
 		//setupNumbers();

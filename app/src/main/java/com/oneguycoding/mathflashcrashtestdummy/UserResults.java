@@ -10,10 +10,15 @@ import android.util.SparseIntArray;
 import java.io.Serializable;
 import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  *
@@ -174,7 +179,7 @@ class UserResults implements Serializable {
 		return getNumAnswered() >= num;
 	}
 
-	public boolean noneAnswered() {
+	boolean noneAnswered() {
 		return getNumAnswered() == 0;
 	}
 
@@ -257,17 +262,166 @@ class UserResults implements Serializable {
 			Log.d("SQL", AndroidUtil.stringFormatter("id,name,num,correct,percent=%d,%s,%d,%d,%.2f", id, name, num, correct, percentage_correct));
 		}
 
-		enum SqlColumn {
-			RUNTIME,
-			NUM,
-			CORRECT,
-			PERCENT,
-			ID,
-			NAME,
-			DURATION,
-			RATE,
-			OPERATION
+		SqlResult(Map<String,String> map) {
+			id = Long.parseLong(map.get(PerformanceStatsSchema.StatsSchema.COL_ID));
+			runtime = Long.parseLong(map.get(PerformanceStatsSchema.StatsSchema.COL_RUNTIME));
+			duration = Long.parseLong(map.get(PerformanceStatsSchema.StatsSchema.COL_DURATION));
+			num = Integer.parseInt(map.get(PerformanceStatsSchema.StatsSchema.COL_NUM));
+			correct = Integer.parseInt(map.get(PerformanceStatsSchema.StatsSchema.COL_CORRECT));
+			name = map.get(PerformanceStatsSchema.StatsSchema.COL_NAME);
+			operation = map.get(PerformanceStatsSchema.StatsSchema.COL_OPERATION);
+
+			percentage_correct = UserResults.getPercentage(num, correct);
 		}
+
+		static final String  COMMA_ESCAPE = "%%COMMA%%";
+		static final String  COMMA_REGEX   = "[,]";
+		static final Pattern COMMA_PATTERN = Pattern.compile(COMMA_REGEX);
+
+		String dump_csv() {
+			StringBuilder csv=new StringBuilder();
+			String[] columns = getRawCols();
+			for (String column : columns) {
+				Matcher m = COMMA_PATTERN.matcher(column);
+				column = m.replaceAll(COMMA_ESCAPE);
+				csv.append(column).append(",");
+			}
+			if (csv.length() > 0) {
+				csv.deleteCharAt(csv.length()-1);
+			}
+			return csv.toString();
+		}
+
+		/**
+		 * convert this SqlResult into a map, ignore values that are computed (percent, etc)
+		 *
+		 * @return map holding the result
+		 */
+		public Map<String, String> toMap() {
+			Map<String, String> map = new HashMap<>();
+
+			SqlColumn[] raw_columns = SqlColumn.raw_values();
+			for (SqlColumn column : raw_columns) {
+				String raw_name = column.raw_name();
+				map.put(raw_name, getRawCol(column));
+			}
+
+			return map;
+		}
+
+		public ContentValues getContentValues() {
+			ContentValues values = new ContentValues();
+
+			values.put(PerformanceStatsSchema.StatsSchema.COL_NAME, name);
+			values.put(PerformanceStatsSchema.StatsSchema.COL_OPERATION, operation);
+			values.put(PerformanceStatsSchema.StatsSchema.COL_RUNTIME, runtime);
+			values.put(PerformanceStatsSchema.StatsSchema.COL_DURATION, duration);
+			values.put(PerformanceStatsSchema.StatsSchema.COL_NUM, num);
+			values.put(PerformanceStatsSchema.StatsSchema.COL_CORRECT, correct);
+			values.put(PerformanceStatsSchema.StatsSchema.COL_WRONG, num-correct);
+
+			return values;
+		}
+
+		/*
+			id
+			runtime
+			duration
+			num
+			correct
+			name
+			operation
+		 */
+		enum SqlColumn {
+			RUNTIME     (true),
+			NUM         (true),
+			CORRECT     (true),
+			PERCENT     (false),
+			ID          (true),
+			NAME        (true),
+			DURATION    (true),
+			RATE        (false),
+			OPERATION   (true);
+
+			final boolean raw;
+
+			SqlColumn(boolean raw) {
+				this.raw = raw;
+			}
+
+			public static SqlColumn[] raw_values() {
+				List<SqlColumn> columns = new ArrayList<>();
+				for (SqlColumn column : values()) {
+					if (column.raw) {
+						columns.add(column);
+					}
+				}
+				SqlColumn[] array = new SqlColumn[columns.size()];
+				return columns.toArray(array); // fill the array
+			}
+
+			public String raw_name() {
+				if (raw) {
+					return this.name().toLowerCase();
+				}
+				return null;
+			}
+
+		}
+
+		/**
+		 *
+		 * @return
+		 */
+		String[] getRawCols() {
+			SqlColumn[] columns = SqlColumn.values();
+			String[] values = new String[columns.length];
+			for (int i=0; i < columns.length; i++) {
+				String value = getCol(columns[i]);
+				if (value == null) {
+					// ignore this column
+					continue;
+				}
+				values[i] = value;
+			}
+			return values;
+		}
+
+		/**
+		 * See PerformanceStatsSchema.StatsSchema for columns
+		 *
+		 * @param c - SqlColumn to get raw value
+		 *
+		 * @return value of raw column as string or null if not a valid raw column
+ 		 */
+		String getRawCol(SqlColumn c) {
+			switch(c) {
+				case RUNTIME: // runtime
+					return ""+runtime;
+				case NUM: // num
+					return ""+num;
+				case CORRECT: // correct
+					return ""+correct;
+				case PERCENT:
+					// this column is not raw
+					break;
+				case ID: // id
+					return ""+id;
+				case NAME: // name
+					return ""+name;
+				case DURATION: // duration in seconds
+					return ""+duration;
+				case RATE: // num per second
+					// this column is not raw
+					break;
+				case OPERATION:
+					return ""+operation;
+				default:
+					Log.e("SQL", "Unknown column index in SqlResult.getCol()");
+			}
+			throw new RuntimeException("Not a supported raw column: "+c.toString());
+		}
+
 		/**
 		 * <br>0 - runtime</br>
 		 * <br>1 - num</br>
@@ -351,7 +505,14 @@ class UserResults implements Serializable {
 			return DateFormat.getDateTimeInstance().format(rt_secs*1000L);
 		}
 
+		String[] getCols() {
+			return getCols(null);
+		}
+
 		String[] getCols(SqlColumn[] columns) {
+			if (columns==null) {
+				columns = SqlColumn.values();
+			}
 			String[] values = new String[columns.length];
 			for (int i=0; i < columns.length; i++) {
 				values[i] = getCol(columns[i]);
@@ -440,6 +601,11 @@ class UserResults implements Serializable {
 				PerformanceStatsSchema.StatsSchema.COL_CORRECT
 		};
 
+		/* if ops is empty, get stats for all operations */
+		if (ops.isEmpty()) {
+			ops = new HashSet<Operation>(Arrays.asList(Operation.values()));
+			Log.d("SQL", "dump all operations: "+ops.toString());
+		}
 		// Filter results
 		// String selection = PerformanceStatsSchema.StatsSchema.COL_NAME + " = ?" + " AND " + PerformanceStatsSchema.StatsSchema.COL_OPERATION + " = ?";
 		//String selection = AndroidUtil.stringFormatter("%s = ? AND %s = ?", PerformanceStatsSchema.StatsSchema.COL_NAME, PerformanceStatsSchema.StatsSchema.COL_OPERATION);
@@ -468,15 +634,26 @@ class UserResults implements Serializable {
 				PerformanceStatsSchema.StatsSchema.COL_RUNTIME + " ASC";
 
 		return perfStatsDb.query(
-				PerformanceStatsSchema.StatsSchema.TABLE_NAME,                     // The table to query
-				projection,                               // The columns to return
-				selection,                                // The columns for the WHERE clause
-				selectionArgs,                            // The values for the WHERE clause
-				null,                                     // don't group the rows
-				null,                                     // don't filter by row groups
-				sortOrder                                 // The sort order
+				PerformanceStatsSchema.StatsSchema.TABLE_NAME,  // The table to query
+				projection,         // The columns to return
+				selection,          // The columns for the WHERE clause
+				selectionArgs,      // The values for the WHERE clause
+				null,       // don't group the rows
+				null,        // don't filter by row groups
+				sortOrder           // The sort order
 		);
 	}
+
+	static Cursor getStatsQuery(SQLiteDatabase perfStatsDb, String table_name, String whereClause, String[] whereArgs) {
+		return perfStatsDb.query(
+				table_name,  // The table to query
+				null,       // The columns to return
+				whereClause,        // The columns for the WHERE clause
+				whereArgs,          // The values for the WHERE clause
+				null,       // don't group the rows
+				null,        // don't filter by row groups
+				null        // The sort order
+		);	}
 
 	@SuppressWarnings("unused")
 	static ArrayList<SqlResult> loadStats(Cursor cursor) {
@@ -510,6 +687,14 @@ class UserResults implements Serializable {
 		Log.d("SQL", "newRowId="+newRowId);
 	}
 
+	static void saveStats(SQLiteDatabase perfStatsDb, Map<String,String> map) {
+		SqlResult sqlResult = new SqlResult(map);
+		ContentValues values = sqlResult.getContentValues();
+
+		long newRowId = perfStatsDb.insert(PerformanceStatsSchema.StatsSchema.TABLE_NAME, null, values);
+		Log.d("SQL", "newRowId="+newRowId);
+	}
+
 	void clearStats(SQLiteDatabase perfStatsDb, String name) {
 		if (perfStatsDb != null) {
 			try {
@@ -520,4 +705,46 @@ class UserResults implements Serializable {
 			}
 		}
 	}
+
+	static void mergeStats(SQLiteDatabase perfStatsDb, ArrayList<Map<String,String>> arrayMap) {
+
+		for (Map<String,String> map : arrayMap) {
+			String runtime;
+			runtime = map.get(PerformanceStatsSchema.StatsSchema.COL_RUNTIME);
+			if (runtime == null) {
+				Log.e("SQL", "runtime entry not found in map");
+				continue;
+			}
+
+			String name = map.get(PerformanceStatsSchema.StatsSchema.COL_NAME);
+			if (name == null) {
+				Log.e("SQL", "Name not found in map");
+				continue;
+			}
+
+			// SELECT * FROM %s WHERE runtime = %s AND name = %s
+			String whereClause = AndroidUtil.stringFormatter(" %s = ? AND %s = ? ",
+					PerformanceStatsSchema.StatsSchema.COL_RUNTIME,
+					PerformanceStatsSchema.StatsSchema.COL_NAME);
+
+			String[] whereArgs = { runtime, name };
+
+			// select * from TABLE where runtime = +runtime.toString() and map.get(
+			boolean found=false;
+			Cursor cursor = UserResults.getStatsQuery(perfStatsDb, PerformanceStatsSchema.StatsSchema.TABLE_NAME, whereClause, whereArgs);
+			while (cursor.moveToNext()) {
+				Log.d("SQL", "Found entry for runtime="+runtime+" name="+name);
+				found=true;
+				break;
+			}
+			cursor.close();
+
+			if (!found) {
+				Log.d("SQL", "Merge stats from map to sqlite database");
+				UserResults.saveStats(perfStatsDb, map);
+			}
+
+		}
+	}
+
 }

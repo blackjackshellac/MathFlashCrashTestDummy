@@ -126,6 +126,15 @@
             app:srcCompat="@drawable/yoshi_star"/>
 
         <android.support.constraint.Guideline
+            android:id="@+id/guideline_v10"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.1"
+            tools:layout_editor_absoluteX="82dp"
+            tools:layout_editor_absoluteY="81dp"/>
+
+        <android.support.constraint.Guideline
             android:id="@+id/guideline_v20"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -180,11 +189,13 @@
 
         <include
             layout="@layout/keyboard_layout"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginBottom="32dp"
+            android:layout_marginTop="32dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="@+id/guideline_v90"
+            app:layout_constraintStart_toStartOf="@+id/guideline_v10"
             app:layout_constraintTop_toBottomOf="@+id/text_progress"/>
 
         <!--

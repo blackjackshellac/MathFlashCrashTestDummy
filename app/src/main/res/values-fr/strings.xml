@@ -80,4 +80,6 @@
     <string name="title_select_operation">Test non effectué pour l\'utilisateur %1$s</string>
     <string name="msg_select_operation">Voulez-vous effacer le résultat actuel et continuer?</string>
     <string name="menu_quit">Quitter</string>
+    <string name="msg_failed_backup_stats">Impossible de sauvegarder les statistiques de l\'utilisateurs</string>
+    <string name="msg_failed_restore_stats">Impossible de restaurer les statistiques des utilisateurs</string>
 </resources>

@@ -2,7 +2,7 @@
 <GridLayout xmlns:android="http://schemas.android.com/apk/res/android"
             android:id="@+id/keyboard_grid_layout"
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:columnCount="3"
             android:rowCount="4"
             android:padding="8sp"
@@ -19,6 +19,8 @@
         android:textStyle="bold"
         android:typeface="monospace"
         android:padding="4sp"
+        android:layout_columnWeight="1"
+        android:layout_rowWeight="1"
         />
     <Button
         android:id="@+id/number2"
@@ -29,6 +31,8 @@
         android:textSize="24sp"
         android:textStyle="bold"
         android:typeface="monospace"
+        android:layout_columnWeight="1"
+        android:layout_rowWeight="1"
         />
     <Button
         android:id="@+id/number3"
@@ -39,6 +43,8 @@
         android:textSize="24sp"
         android:textStyle="bold"
         android:typeface="monospace"
+        android:layout_columnWeight="1"
+        android:layout_rowWeight="1"
         />
 
     <Button
@@ -50,6 +56,8 @@
         android:textSize="24sp"
         android:textStyle="bold"
         android:typeface="monospace"
+        android:layout_columnWeight="1"
+        android:layout_rowWeight="1"
         />
     <Button
         android:id="@+id/number5"
@@ -60,6 +68,8 @@
         android:textSize="24sp"
         android:textStyle="bold"
         android:typeface="monospace"
+        android:layout_columnWeight="1"
+        android:layout_rowWeight="1"
         />
     <Button
         android:id="@+id/number6"
@@ -70,6 +80,8 @@
         android:textSize="24sp"
         android:textStyle="bold"
         android:typeface="monospace"
+        android:layout_columnWeight="1"
+        android:layout_rowWeight="1"
         />
 
     <Button
@@ -81,6 +93,8 @@
         android:textSize="24sp"
         android:textStyle="bold"
         android:typeface="monospace"
+        android:layout_columnWeight="1"
+        android:layout_rowWeight="1"
         />
     <Button
         android:id="@+id/number8"
@@ -91,6 +105,8 @@
         android:textSize="24sp"
         android:textStyle="bold"
         android:typeface="monospace"
+        android:layout_columnWeight="1"
+        android:layout_rowWeight="1"
         />
     <Button
         android:id="@+id/number9"
@@ -101,6 +117,8 @@
         android:textSize="24sp"
         android:textStyle="bold"
         android:typeface="monospace"
+        android:layout_columnWeight="1"
+        android:layout_rowWeight="1"
         />
     <Button
         android:id="@+id/space"
@@ -111,6 +129,8 @@
         android:textSize="24sp"
         android:textStyle="bold"
         android:typeface="monospace"
+        android:layout_columnWeight="1"
+        android:layout_rowWeight="1"
         />
     <Button
         android:id="@+id/number0"
@@ -121,6 +141,8 @@
         android:textSize="24sp"
         android:textStyle="bold"
         android:typeface="monospace"
+        android:layout_columnWeight="1"
+        android:layout_rowWeight="1"
         />
     <Button
         android:id="@+id/backspace"
@@ -131,6 +153,8 @@
         android:textSize="24sp"
         android:textStyle="bold"
         android:typeface="monospace"
+        android:layout_columnWeight="1"
+        android:layout_rowWeight="1"
         />
 
 
