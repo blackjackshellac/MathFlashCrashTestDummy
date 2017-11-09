@@ -52,6 +52,8 @@ class PerformanceStatsSchema {
 	// DELETE FROM perf_stats WHERE name LIKE %s
 	private static final String SQL_DELETE_USER_RESULTS = "DELETE FROM "+StatsSchema.TABLE_NAME+" WHERE "+StatsSchema.COL_NAME +" LIKE '%s'";
 
+	static final String SQL_WHERE_RUNTIME_NAME = String.format(" %s = ? AND %s = ? ", StatsSchema.COL_RUNTIME, StatsSchema.COL_NAME);
+
 	static String getSqlDeleteUserResults(String name) {
 		return AndroidUtil.stringFormatter(SQL_DELETE_USER_RESULTS, name);
 	}

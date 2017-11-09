@@ -160,6 +160,7 @@ class UserDataMap implements Serializable {
 		GsonBuilder gbuilder = new GsonBuilder();
 		gbuilder.serializeNulls();
 		gbuilder.setFieldNamingPolicy(FieldNamingPolicy.IDENTITY);
+		gbuilder.setPrettyPrinting();
 		Gson gson = gbuilder.create();
 		//Type type = new TypeToken<UserDataMap>(){}.getType();
 		return gson.toJson(this, UserDataMap.class);
@@ -230,10 +231,12 @@ class UserDataMap implements Serializable {
 
 	public boolean restoreStats(MainActivity activity, SQLiteDatabase perfStatsDb, File fileJson) {
 		if (!fileJson.exists()) {
+			Log.d("JSON", "json stats file not found "+fileJson.getAbsolutePath());
 			return false;
 		}
 		String jsonStats = UserDataMap.loadJsonData(activity, fileJson, null);
 		if (jsonStats == null) {
+			Log.d("JSON", "failed to load json stats file "+fileJson.getAbsolutePath());
 			return false;
 		}
 

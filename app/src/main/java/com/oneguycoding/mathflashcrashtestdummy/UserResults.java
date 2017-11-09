@@ -709,8 +709,7 @@ class UserResults implements Serializable {
 	static void mergeStats(SQLiteDatabase perfStatsDb, ArrayList<Map<String,String>> arrayMap) {
 
 		for (Map<String,String> map : arrayMap) {
-			String runtime;
-			runtime = map.get(PerformanceStatsSchema.StatsSchema.COL_RUNTIME);
+			String runtime = map.get(PerformanceStatsSchema.StatsSchema.COL_RUNTIME);
 			if (runtime == null) {
 				Log.e("SQL", "runtime entry not found in map");
 				continue;
@@ -723,15 +722,15 @@ class UserResults implements Serializable {
 			}
 
 			// SELECT * FROM %s WHERE runtime = %s AND name = %s
-			String whereClause = AndroidUtil.stringFormatter(" %s = ? AND %s = ? ",
-					PerformanceStatsSchema.StatsSchema.COL_RUNTIME,
-					PerformanceStatsSchema.StatsSchema.COL_NAME);
 
 			String[] whereArgs = { runtime, name };
 
 			// select * from TABLE where runtime = +runtime.toString() and map.get(
 			boolean found=false;
-			Cursor cursor = UserResults.getStatsQuery(perfStatsDb, PerformanceStatsSchema.StatsSchema.TABLE_NAME, whereClause, whereArgs);
+			Cursor cursor = UserResults.getStatsQuery(perfStatsDb,
+					PerformanceStatsSchema.StatsSchema.TABLE_NAME,
+					PerformanceStatsSchema.SQL_WHERE_RUNTIME_NAME,
+					whereArgs);
 			while (cursor.moveToNext()) {
 				Log.d("SQL", "Found entry for runtime="+runtime+" name="+name);
 				found=true;
