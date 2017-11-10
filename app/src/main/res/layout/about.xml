@@ -36,4 +36,12 @@
         android:textColor="@android:color/darker_gray"
         android:textSize="14sp"/>
 
+    <TextView
+        android:id="@+id/about_build_date"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textAlignment="center"
+        android:textColor="@android:color/darker_gray"
+        android:textSize="14sp"/>
+
 </LinearLayout>

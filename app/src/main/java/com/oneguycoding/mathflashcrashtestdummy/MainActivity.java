@@ -18,8 +18,10 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
@@ -36,6 +38,8 @@ import android.widget.Toast;
 //import com.google.android.gms.drive.Drive;
 
 import java.io.File;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class MainActivity extends AppCompatActivity /* implements
 		GoogleApiClient.ConnectionCallbacks,
@@ -213,6 +217,15 @@ public class MainActivity extends AppCompatActivity /* implements
 
 		});
 
+		// prevent this edit from responding to touch events
+		num3.setOnTouchListener(new View.OnTouchListener() {
+			@Override
+			public boolean onTouch(View view, MotionEvent motionEvent) {
+				// pretend that we did something
+				return true;
+			}
+		});
+
 		final GridLayout keyboard_layout = (GridLayout) findViewById(R.id.keyboard_grid_layout);
 		numericKeyboard = new NumericKeyboard(mainActivity, num3);
 
@@ -343,12 +356,17 @@ public class MainActivity extends AppCompatActivity /* implements
 	public void onPreparePopupMenu(PopupMenu popupMenu) {
 		Menu menu = popupMenu.getMenu();
 		for (String name : userDataMap.users()) {
-			if (name.equals(getText(R.string.user_default))) {
-				continue;
-			}
+			boolean isCurUser = userDataMap.isCurrentUser(name);
+
 			MenuItem item = findMenuItemByName(menu, name);
 			if (item == null) {
-				menu.add(name);
+				if (!isCurUser) {
+					menu.add(name);
+				}
+			} else {
+				if (isCurUser) {
+					menu.removeItem(item.getItemId());
+				}
 			}
 		}
 	}
@@ -411,9 +429,11 @@ public class MainActivity extends AppCompatActivity /* implements
 				popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
 					public boolean onMenuItemClick(MenuItem item) {
 						//AndroidUtil.showToast(MainActivity.this, "You clicked: "+item.getTitle());
-						String name = item.getTitle().toString();
-						if (!name.equals(userDataMap.getCurUser())) {
-							userDataMap.setCurUser(name);
+						String new_name = item.getTitle().toString();
+						if (!userDataMap.getUserData().results.testDone()) {
+							selectOperation(new_name);
+						} else if (!new_name.equals(userDataMap.getCurUser())) {
+							userDataMap.setCurUser(new_name);
 							resetUser();
 							selectOperation();
 						}
@@ -469,6 +489,12 @@ public class MainActivity extends AppCompatActivity /* implements
 		String versionString = AndroidUtil.stringFormatter("%s (%d)", versionName, versionCode);
 		TextView aboutVersion = (TextView) messageView.findViewById(R.id.about_version);
 		aboutVersion.setText(versionString);
+
+		// display build date
+		Date buildDate = new Date(BuildConfig.TIMESTAMP);
+		SimpleDateFormat dt = new SimpleDateFormat("yyyy-mm-dd hh:mm:ss");
+		TextView aboutBuildDate = (TextView) messageView.findViewById(R.id.about_build_date);
+		aboutBuildDate.setText(dt.format(buildDate));
 
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		builder.setIcon(R.drawable.mathflash);
@@ -769,9 +795,15 @@ public class MainActivity extends AppCompatActivity /* implements
 	    startActivityForResult(intent, RESULT_OPS);
     }
 
-	public void selectOperation() {
+    public void selectOperation() {
+		selectOperation(null);
+    }
+
+	public void selectOperation(String new_name) {
+		final String _name = new_name;
+
 		UserData userData = userDataMap.getUserData();
-		if (userData.results.testDone() || userData.results.noneAnswered()) {
+		if (userData.results.testDone()) {
 			openSelectOperation();
 		} else {
 			// pass this activity to the onClickListener
@@ -784,6 +816,9 @@ public class MainActivity extends AppCompatActivity /* implements
 				@Override
 				public void onClick(DialogInterface dialog, int which) {
 					dialog.dismiss();
+					if (_name != null) {
+						userDataMap.setCurUser(_name);
+					}
 					resetUser();
 					openSelectOperation();
 				}

@@ -269,6 +269,10 @@ class UserDataMap implements Serializable {
 		return (name.equals(defaultUser));
 	}
 
+	public boolean isCurrentUser(String name) {
+		return name.equals(curUser);
+	}
+
 	UserData deleteUser(String name) {
 		if (isDefaultUser(name)) {
 			throw new RuntimeException(String.format("Attempting to delete defaultUser: %s", defaultUser));
@@ -289,4 +293,5 @@ class UserDataMap implements Serializable {
 			userData.createRecorder();
 		}
 	}
+
 }

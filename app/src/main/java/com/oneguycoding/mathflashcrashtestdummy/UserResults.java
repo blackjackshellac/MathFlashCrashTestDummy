@@ -176,7 +176,7 @@ class UserResults implements Serializable {
 	}
 
 	boolean testDone() {
-		return getNumAnswered() >= num;
+		return noneAnswered() || getNumAnswered() >= num;
 	}
 
 	boolean noneAnswered() {
